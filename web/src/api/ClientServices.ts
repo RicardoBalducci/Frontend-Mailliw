@@ -1,3 +1,6 @@
+// ClienteServices.ts (updated)
+import { ClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
+
 class ClienteServices {
   private baseUrl: string;
   private token: string | null;
@@ -7,7 +10,26 @@ class ClienteServices {
     this.token = localStorage.getItem("access_token");
   }
 
-  async fetchClientes() {
+  private async handleResponse<T>(
+    response: Response
+  ): Promise<{ success: boolean; data?: T; message?: string }> {
+    if (response.ok) {
+      const data = await response.json();
+      return { success: true, data, message: "Operación exitosa." };
+    } else {
+      const errorData = await response.json();
+      return {
+        success: false,
+        message: errorData.message || "Error en la operación.",
+      };
+    }
+  }
+
+  async fetchClientes(): Promise<{
+    success: boolean;
+    data?: ClienteDTO[]; // Use ClienteDTO for the data array
+    message?: string;
+  }> {
     try {
       const response = await fetch(this.baseUrl, {
         method: "GET",
@@ -16,21 +38,19 @@ class ClienteServices {
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) throw new Error("Error en la respuesta del servidor");
-      return await response.json();
+      return this.handleResponse(response);
     } catch (error) {
       console.error("Error fetching data:", error);
-      throw error;
+      return {
+        success: false,
+        message: "Error de conexión al obtener clientes.",
+      };
     }
   }
 
-  async createCliente(cliente: {
-    rif: string;
-    nombre: string;
-    apellido: string;
-    direccion: string;
-    telefono: string;
-  }) {
+  async createCliente(
+    cliente: ClienteDTO // Use the DTO here
+  ): Promise<{ success: boolean; data?: ClienteDTO; message?: string }> {
     try {
       const response = await fetch(this.baseUrl, {
         method: "POST",
@@ -40,36 +60,39 @@ class ClienteServices {
         },
         body: JSON.stringify(cliente),
       });
-      if (!response.ok) throw new Error("Error al crear el cliente");
-      return await response.json();
+      return this.handleResponse(response);
     } catch (error) {
       console.error("Error creating cliente:", error);
-      throw error;
+      return { success: false, message: "Error de conexión al crear cliente." };
     }
   }
 
   async updateCliente(
     id: number,
-    cliente: { nombre: string; email: string; telefono: string }
-  ) {
+    cliente: ClienteDTO // Use the DTO here
+  ): Promise<{ success: boolean; data?: ClienteDTO; message?: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${this.token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(cliente),
       });
-      if (!response.ok) throw new Error("Error al actualizar el cliente");
-      return await response.json();
+      return this.handleResponse(response);
     } catch (error) {
       console.error("Error updating cliente:", error);
-      throw error;
+      return {
+        success: false,
+        message: "Error de conexión al actualizar cliente.",
+      };
     }
   }
 
-  async deleteCliente(id: number) {
+  async deleteCliente(
+    id: number
+  ): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {
         method: "DELETE",
@@ -78,11 +101,13 @@ class ClienteServices {
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) throw new Error("Error al eliminar el cliente");
-      return await response.json();
+      return this.handleResponse(response);
     } catch (error) {
       console.error("Error deleting cliente:", error);
-      throw error;
+      return {
+        success: false,
+        message: "Error de conexión al eliminar cliente.",
+      };
     }
   }
 }

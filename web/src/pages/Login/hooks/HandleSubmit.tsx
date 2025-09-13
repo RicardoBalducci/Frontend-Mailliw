@@ -1,4 +1,4 @@
-import { loginUser } from "../../../api/UserSevices";
+import UserServices from "../../../api/UserSevices";
 
 export const handleSubmit = async (
   event: React.FormEvent<HTMLFormElement>,
@@ -19,7 +19,7 @@ export const handleSubmit = async (
   }
 
   try {
-    const response = await loginUser(username, password);
+    const response = await UserServices.loginUser(username, password);
 
     if (response.message === "Invalid credentials") {
       setError("Credenciales inválidas.");

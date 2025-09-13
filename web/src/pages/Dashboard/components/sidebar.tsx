@@ -60,7 +60,7 @@ export const ModernSidebar: React.FC<SidebarProps> = ({
     window.location.href = "/";
   };
 
-  const drawerWidth = 240;
+  const drawerWidth = 240; // This value must match DRAWER_WIDTH in Dashboard
 
   return (
     <Drawer

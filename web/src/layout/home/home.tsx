@@ -1,115 +1,214 @@
-import { useEffect, useState } from "react";
-import { Container, Paper, TextField, Button, Box } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import ClienteServices from "../../api/ClientServices"; // Adjust the path as needed
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Box, Container, Fade, Grid, Typography } from "@mui/material";
 
-export function Home() {
-  const [rows, setRows] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "rif", headerName: "RIF", width: 130 },
-    { field: "nombre", headerName: "Nombre", width: 130 },
-    { field: "apellido", headerName: "Apellido", width: 130 },
-    { field: "direccion", headerName: "Dirección", width: 200 },
-    { field: "telefono", headerName: "Teléfono", width: 130 },
-    {
-      field: "acciones",
-      headerName: "Acciones",
-      width: 150,
-      renderCell: (params) => (
-        <Box display="flex" justifyContent="space-between">
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => handleModify(params.row)}
-            sx={{ marginRight: 1 }}
-          >
-            Modificar
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => handleDelete(params.row.id)}
-          >
-            Eliminar
-          </Button>
-        </Box>
-      ),
-    },
-  ];
+import PersonIcon from "@mui/icons-material/Person";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { StyledPaper } from "../../theme/StyledComponents";
+import { DataCard } from "./components/card";
+import { ShortcutButton } from "./components/ShortcutButton";
+
+export function HomeContent() {
+  const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
-    const fetchClientes = async () => {
-      try {
-        const data = await ClienteServices.fetchClientes(); // Llamar al servicio
-        setRows(data);
-      } catch (error) {
-        console.error("Error fetching clientes:", error);
-      }
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+      setCurrentTime(now.toLocaleDateString("es-ES", options));
     };
 
-    fetchClientes();
+    updateTime();
+    const timerId = setInterval(updateTime, 1000);
+
+    return () => clearInterval(timerId);
   }, []);
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    setSearchTerm(event.target.value);
-  };
-
-  const filteredRows = rows.filter((row) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  interface ClienteRow {
-    id: number;
-    rif: string;
-    nombre: string;
-    apellido: string;
-    direccion: string;
-    telefono: string;
-  }
-
-  const handleModify = (row: ClienteRow): void => {
-    // Implementar lógica para modificar el cliente
-    console.log("Modificar cliente:", row);
-    // Aquí puedes abrir un modal o un formulario para editar el cliente
-  };
-
-  const handleDelete = async (id: number): Promise<void> => {
-    try {
-      console.log("Cliente eliminado ID:", id);
-    } catch (error) {
-      console.error("Error eliminando cliente:", error);
-    }
-  };
-
-  const paginationModel = { page: 0, pageSize: 5 };
+  // Simulación del precio del dólar
+  const dollarPrice = "36.50 Bs";
 
   return (
-    <Container>
-      <Paper sx={{ padding: 2, backgroundColor: "white" }}>
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <TextField
-            label="Buscar"
-            variant="outlined"
-            value={searchTerm}
-            onChange={handleSearch}
-            sx={{ width: "70%" }}
-          />
-          <Button variant="contained" color="primary" sx={{ marginLeft: 1 }}>
-            Añadir
-          </Button>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Fade in={true} timeout={800}>
+        <Box>
+          <StyledPaper sx={{ p: 4 }}>
+            {/* Título y descripción del Dashboard */}
+            <Typography
+              variant="h4"
+              component="h1"
+              fontWeight={700}
+              gutterBottom
+            >
+              Bienvenido al Dashboard
+            </Typography>
+            <Typography variant="body1" color="text.secondary" mb={4}>
+              Resumen rápido de la actividad del sistema.
+            </Typography>
+
+            {/* Sección de Tarjetas de Datos */}
+            <Grid container spacing={3} alignItems="stretch">
+              <Grid item xs={12} sm={6} md={3}>
+                <DataCard
+                  title="Clientes"
+                  value="150"
+                  icon={<PersonIcon fontSize="large" />}
+                  color="#2196f3"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DataCard
+                  title="Productos"
+                  value="250"
+                  icon={<ShoppingBasketIcon fontSize="large" />}
+                  color="#4caf50"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DataCard
+                  title="Servicios"
+                  value="30"
+                  icon={<HandymanIcon fontSize="large" />}
+                  color="#ff9800"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DataCard
+                  title="Materiales"
+                  value="800"
+                  icon={<InventoryIcon fontSize="large" />}
+                  color="#f44336"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DataCard
+                  title="Precio del Dólar"
+                  value={dollarPrice}
+                  icon={<AttachMoneyIcon fontSize="large" />}
+                  color="#3f51b5"
+                />
+              </Grid>
+            </Grid>
+
+            {/* --- Sección de Gráfica --- */}
+            <Box mt={6}>
+              <Typography
+                variant="h5"
+                component="h2"
+                fontWeight={700}
+                gutterBottom
+              >
+                Gráfica
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      height: 400,
+                      width: 1300,
+                      backgroundColor: "#e0e0e0", // Color de fondo para simular un área de gráfico
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "text.secondary",
+                    }}
+                  >
+                    {/* Aquí iría tu componente de gráfico (Ej: de Recharts, Nivo, etc.) */}
+                    <Typography>Área para un gráfico</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* --- Sección de Atajos --- */}
+            <Box mt={6}>
+              <Typography
+                variant="h5"
+                component="h2"
+                fontWeight={700}
+                gutterBottom
+              >
+                Atajos
+              </Typography>
+              <Grid container spacing={2}>
+                {/* Atajo: Gestionar Clientes */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Clientes"
+                    icon={<PersonIcon />}
+                    color="#2196f3" // Blue
+                    onClick={() =>
+                      console.log("Navegar a la página de Clientes")
+                    }
+                  />
+                </Grid>
+                {/* Atajo: Gestionar Servicios */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Servicios"
+                    icon={<HandymanIcon />}
+                    color="#ff9800" // Orange
+                    onClick={() =>
+                      console.log("Navegar a la página de Servicios")
+                    }
+                  />
+                </Grid>
+                {/* Atajo: Gestionar Materiales */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Materiales"
+                    icon={<InventoryIcon />}
+                    color="#f44336" // Red
+                    onClick={() =>
+                      console.log("Navegar a la página de Materiales")
+                    }
+                  />
+                </Grid>
+                {/* Atajo: Gestionar Productos */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Productos"
+                    icon={<ShoppingBasketIcon />}
+                    color="#4caf50" // Green
+                    onClick={() =>
+                      console.log("Navegar a la página de Productos")
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Proveedores"
+                    icon={<ShoppingBasketIcon />}
+                    color="#4caf50" // Green
+                    onClick={() =>
+                      console.log("Navegar a la página de Productos")
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <ShortcutButton
+                    title="Gestionar Tecnicos"
+                    icon={<ShoppingBasketIcon />}
+                    color="#4caf50" // Green
+                    onClick={() =>
+                      console.log("Navegar a la página de Productos")
+                    }
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </StyledPaper>
         </Box>
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          initialState={{ pagination: { paginationModel } }}
-          pageSizeOptions={[5, 10]}
-          sx={{ border: 0 }}
-        />
-      </Paper>
+      </Fade>
     </Container>
   );
 }

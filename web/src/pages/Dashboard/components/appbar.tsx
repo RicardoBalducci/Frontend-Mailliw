@@ -23,11 +23,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/Settings";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 interface AppBarProps {
   toggleSidebar: () => void;
   isOpen: boolean;
+  onHelpClick?: () => void; // New prop for help icon click
 }
 
 const Search = styled("div")(({ theme }) => ({
@@ -70,10 +70,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const ModernAppBar: React.FC<AppBarProps> = ({
-  toggleSidebar,
-  isOpen,
-}) => {
+export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
   const [nombre, setNombre] = useState("");
   const [role, setRole] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -154,11 +151,6 @@ export const ModernAppBar: React.FC<AppBarProps> = ({
           </Search>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Tooltip title="Ayuda">
-              <IconButton color="inherit" sx={{ ml: 0.5 }}>
-                <HelpOutlineIcon />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Configuración">
               <IconButton color="inherit" sx={{ ml: 0.5 }}>
                 <SettingsIcon />

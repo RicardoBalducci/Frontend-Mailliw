@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -13,6 +15,7 @@ import {
   IconButton,
   Chip,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -92,19 +95,19 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-interface Client {
+export interface ClientData {
+  id?: number;
   rif: string;
   nombre: string;
   apellido?: string;
   direccion: string;
   telefono: string;
-  email: string;
 }
 
 interface ClientModalProps {
   open: boolean;
   onClose: () => void;
-  currentClient?: Client | null;
+  currentClient?: ClientData | null;
   onRefresh: () => void;
 }
 
@@ -116,60 +119,67 @@ const ClientModal: React.FC<ClientModalProps> = ({
 }) => {
   const theme = useTheme();
   const [rifType, setRifType] = useState("V");
-  const [rif, setRif] = useState("");
+  const [rifNumber, setRifNumber] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState(""); // Estado para el mensaje de alerta
   const [alertOpen, setAlertOpen] = useState(false);
-  // Removed unused alertMessage state
-
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  );
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (currentClient) {
       const rifParts = currentClient.rif.split("-");
-      setRifType(rifParts[0]);
-      setRif(rifParts[1] || "");
+      setRifType(rifParts[0] || "V");
+      setRifNumber(rifParts[1] || "");
       setNombre(currentClient.nombre);
       setApellido(currentClient.apellido || "");
       setDireccion(currentClient.direccion);
       setTelefono(currentClient.telefono);
     } else {
-      // Reset fields if no client is selected
       setRifType("V");
-      setRif("");
+      setRifNumber("");
       setNombre("");
       setApellido("");
       setDireccion("");
       setTelefono("");
     }
-    // Reset errors and alerts when modal opens/closes
     setShowErrors(false);
-    setAlertVisible(false);
+    setAlertOpen(false);
   }, [currentClient, open]);
 
   const isCompany = rifType === "E" || rifType === "R";
 
+  const validateForm = () => {
+    let isValid = true;
+    if (!rifNumber || !nombre || !direccion || !telefono) {
+      isValid = false;
+    }
+    if (rifType === "R" && !apellido) {
+      isValid = false;
+    }
+    return isValid;
+  };
+
   const handleSave = async () => {
     setShowErrors(true);
-    setSaving(true);
-    if (
-      !rif ||
-      !nombre ||
-      !direccion ||
-      !telefono ||
-      (rifType === "R" && !apellido)
-    ) {
-      setSaving(false);
+    if (!validateForm()) {
+      setAlertMessage("Por favor, complete todos los campos requeridos.");
+      setAlertSeverity("error");
+      setAlertOpen(true);
       return;
     }
 
-    const cliente = {
-      rif: `${rifType}-${rif}`,
+    setSaving(true);
+    setAlertOpen(false);
+
+    const clientDataToSave: ClientData = {
+      rif: `${rifType}-${rifNumber}`,
       nombre,
       apellido: apellido || "",
       direccion,
@@ -177,30 +187,42 @@ const ClientModal: React.FC<ClientModalProps> = ({
     };
 
     try {
-      if (currentClient) {
-        const response = await ClientServices.updateCliente(
+      let response;
+      if (currentClient?.id) {
+        response = await ClientServices.updateCliente(
           currentClient.id,
-          cliente
+          clientDataToSave
         );
         if (response.success) {
+          setAlertMessage("Cliente actualizado correctamente.");
+          setAlertSeverity("success");
           onRefresh();
-          onClose();
-          setAlertMessage("Cliente eliminado correctamente."); // Mensaje de éxito
-          setAlertOpen(true);
-          setSaving(false);
+          setTimeout(() => onClose(), 1500);
+        } else {
+          setAlertMessage(
+            response.message || "Error al actualizar el cliente."
+          );
+          setAlertSeverity("error");
         }
       } else {
-        const response = await ClientServices.createCliente(cliente);
+        response = await ClientServices.createCliente(clientDataToSave);
         if (response.success) {
+          setAlertMessage("Cliente añadido correctamente.");
+          setAlertSeverity("success");
           onRefresh();
-          onClose();
-          setAlertMessage("Cliente eliminado correctamente."); // Mensaje de éxito
-          setAlertOpen(true);
-          setSaving(false);
+          setTimeout(() => onClose(), 1500);
+        } else {
+          setAlertMessage(response.message || "Error al añadir el cliente.");
+          setAlertSeverity("error");
         }
       }
     } catch (error) {
       console.error("Error al guardar el cliente:", error);
+      setAlertMessage("Ocurrió un error inesperado al guardar el cliente.");
+      setAlertSeverity("error");
+    } finally {
+      setAlertOpen(true);
+      setSaving(false);
     }
   };
 
@@ -257,22 +279,13 @@ const ClientModal: React.FC<ClientModalProps> = ({
               />
             </ModalHeader>
             <ModalBody>
-              {alertVisible && (
-                <Alert
-                  severity={alertSeverity}
-                  onClose={() => setAlertVisible(false)}
-                  sx={{ mb: 3 }}
-                >
-                  {/* Removed unused alertMessage */}
-                </Alert>
-              )}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Select
                     labelId="rif-type-label"
                     value={rifType}
                     onChange={(e) => {
-                      setRifType(e.target.value);
+                      setRifType(e.target.value as string);
                     }}
                     label="Tipo de RIF"
                     startAdornment={
@@ -281,7 +294,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
                       </InputAdornment>
                     }
                     sx={{
-                      minWidth: 250,
+                      minWidth: 150,
                       bgcolor: "background.paper",
                       borderRadius: 1,
                       boxShadow: 1,
@@ -319,10 +332,14 @@ const ClientModal: React.FC<ClientModalProps> = ({
                     label="Número de RIF"
                     variant="outlined"
                     fullWidth
-                    value={rif}
-                    onChange={(e) => setRif(e.target.value.replace(/\D/g, ""))}
-                    error={showErrors && !rif}
-                    helperText={showErrors && !rif ? "Campo requerido" : ""}
+                    value={rifNumber}
+                    onChange={(e) =>
+                      setRifNumber(e.target.value.replace(/\D/g, ""))
+                    }
+                    error={showErrors && !rifNumber}
+                    helperText={
+                      showErrors && !rifNumber ? "Campo requerido" : ""
+                    }
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -415,7 +432,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
                 color="error"
                 startIcon={<CancelIcon />}
                 disabled={saving}
-                sx={{ flexGrow: 1, marginRight: 1 }} // Espacio flexible
+                sx={{ flexGrow: 1, marginRight: 1 }}
               >
                 Cancelar
               </StyledButton>
@@ -423,9 +440,15 @@ const ClientModal: React.FC<ClientModalProps> = ({
                 onClick={handleSave}
                 variant="contained"
                 color="primary"
-                startIcon={<SaveIcon />}
+                startIcon={
+                  saving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SaveIcon />
+                  )
+                }
                 disabled={saving}
-                sx={{ flexGrow: 1 }} // Espacio flexible
+                sx={{ flexGrow: 1 }}
               >
                 {saving
                   ? "Guardando..."
@@ -436,7 +459,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
             </ModalFooter>
             {alertOpen && (
               <Alert
-                severity={alertMessage.includes("Error") ? "error" : "success"}
+                severity={alertSeverity}
                 onClose={() => setAlertOpen(false)}
                 style={{
                   position: "absolute",

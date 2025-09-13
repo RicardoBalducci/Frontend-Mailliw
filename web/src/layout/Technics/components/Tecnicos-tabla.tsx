@@ -1,0 +1,290 @@
+import type React from "react";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Box,
+  Button,
+  Tooltip,
+  Typography,
+  Paper,
+  useTheme,
+  alpha,
+  Chip,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { UserDto } from "../interface/user.dto";
+
+interface TechnicianTableProps {
+  rows: UserDto[];
+  searchTerm: string;
+  onModify: (user: UserDto) => void;
+  onDelete: (user: UserDto) => void; // Using username as the unique identifier for deletion
+}
+
+// Styled components for enhanced visual design
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+  border: "none",
+  backgroundColor: "#ffffff",
+  borderRadius: 12,
+  boxShadow: "0 6px 30px rgba(0, 0, 0, 0.1)", // Sutilmente más pronunciado para un look premium
+  transition: "all 0.3s ease",
+
+  "& .MuiDataGrid-columnHeaders": {
+    backgroundColor: theme.palette.primary.main,
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    "& .MuiDataGrid-columnSeparator": {
+      color: "rgba(255, 255, 255, 0.2)",
+    },
+    "& .MuiDataGrid-columnHeaderTitle": {
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: "0.05em", // Añade un poco de espaciado entre letras
+    },
+  },
+
+  "& .MuiDataGrid-cell": {
+    borderBottom: "1px solid rgba(224, 224, 224, 0.4)",
+    fontSize: "0.9rem",
+    padding: "12px 16px", // Más padding para un diseño más espacioso
+    display: "flex", // Asegura que el contenido se alinee correctamente
+    alignItems: "center", // Centra verticalmente el contenido de la celda
+    "&:focus": {
+      outline: "none",
+    },
+    "&:focus-within": {
+      outline: "none",
+    },
+  },
+
+  "& .MuiDataGrid-row": {
+    "&:nth-of-type(even)": {
+      backgroundColor: alpha(theme.palette.primary.light, 0.04),
+    },
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.light, 0.1), // Ligeramente más opaco al hover
+      transition: "background-color 0.2s ease",
+    },
+    "&.Mui-selected": {
+      backgroundColor: alpha(theme.palette.primary.light, 0.15), // Ligeramente más opaco al seleccionar
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.light, 0.2),
+      },
+    },
+  },
+
+  "& .MuiDataGrid-footerContainer": {
+    borderTop: "none",
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    padding: theme.spacing(1.5, 2), // Más padding
+    display: "flex", // Asegura la alineación del paginador
+    justifyContent: "flex-end", // Alinea el paginador a la derecha
+  },
+
+  "& .MuiTablePagination-root": {
+    color: theme.palette.text.secondary,
+  },
+
+  "& .MuiDataGrid-virtualScroller": {
+    backgroundColor: "#ffffff",
+  },
+
+  "& .MuiCheckbox-root": {
+    color: theme.palette.primary.main,
+  },
+
+  "& .MuiDataGrid-columnHeaderTitleContainer": {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  minWidth: 0,
+  padding: "7px 10px", // Ajustado padding para iconos más grandes
+  borderRadius: 8,
+  transition: "all 0.2s ease",
+  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+  },
+  color: theme.palette.common.white,
+  "& .MuiSvgIcon-root": {
+    fontSize: "1.2rem", // Iconos ligeramente más grandes
+  },
+}));
+
+const TechnicianTable: React.FC<TechnicianTableProps> = ({
+  rows,
+  searchTerm,
+  onModify,
+  onDelete,
+}) => {
+  const theme = useTheme();
+
+  const filteredRows = rows.filter((row) =>
+    Object.values(row).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const columns: GridColDef[] = [
+    {
+      field: "nombre",
+      headerName: "Nombre",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500}>
+          {params.value}
+        </Typography>
+      ),
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "apellido",
+      headerName: "Apellido",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500}>
+          {params.value}
+        </Typography>
+      ),
+      headerAlign: "left",
+      align: "left",
+    },
+
+    {
+      field: "email",
+      headerName: "Email",
+      flex: 1.5,
+      minWidth: 180,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500}>
+          {params.value}
+        </Typography>
+      ),
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "phone",
+      headerName: "Teléfono",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500}>
+          {params.value}
+        </Typography>
+      ),
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "role",
+      headerName: "Rol",
+      flex: 0.8,
+      minWidth: 90,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <Chip
+            label={params.value}
+            color={params.value === "admin" ? "secondary" : "primary"} // Example: different color for admin
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        </Box>
+      ),
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "acciones",
+      headerName: "Acciones",
+      flex: 0.8, // Adjusted flex for fewer buttons
+      minWidth: 150, // Adjusted minWidth
+      headerAlign: "center",
+      align: "center",
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Box display="flex" gap={1} justifyContent="center" alignItems="center">
+          <Tooltip title="Editar técnico">
+            <ActionButton
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => onModify(params.row)}
+              sx={{
+                bgcolor: alpha(theme.palette.primary.main, 0.9),
+                "&:hover": {
+                  bgcolor: theme.palette.primary.main,
+                },
+              }}
+            >
+              <EditIcon />
+            </ActionButton>
+          </Tooltip>
+
+          <Tooltip title="Eliminar técnico">
+            <ActionButton
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={() => onDelete(params.row)} // Pass username for deletion
+              sx={{
+                bgcolor: alpha(theme.palette.error.main, 0.9),
+                "&:hover": {
+                  bgcolor: theme.palette.error.main,
+                },
+              }}
+            >
+              <DeleteIcon />
+            </ActionButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        height: 500,
+        width: "100%",
+        borderRadius: 3,
+        overflow: "hidden",
+        boxShadow: "0 6px 30px rgba(0, 0, 0, 0.1)",
+        border: "1px solid rgba(0, 0, 0, 0.05)",
+      }}
+    >
+      <StyledDataGrid
+        rows={filteredRows}
+        columns={columns}
+        getRowId={(row) => row.username} // Use username as the unique id for DataGrid
+        initialState={{
+          pagination: {
+            paginationModel: { page: 0, pageSize: 10 },
+          },
+        }}
+        pageSizeOptions={[5, 10, 25]}
+        disableRowSelectionOnClick
+        density="comfortable"
+        autoHeight={false}
+        sx={{ height: "100%" }}
+      />
+    </Paper>
+  );
+};
+
+export default TechnicianTable;

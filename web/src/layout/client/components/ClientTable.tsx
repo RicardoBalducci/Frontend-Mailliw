@@ -39,12 +39,12 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   border: "none",
   backgroundColor: "#ffffff",
   borderRadius: 12,
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+  boxShadow: "0 6px 30px rgba(0, 0, 0, 0.1)", // Subtle but more pronounced shadow
   transition: "all 0.3s ease",
 
   "& .MuiDataGrid-columnHeaders": {
     backgroundColor: theme.palette.primary.main,
-    fontSize: "0.875rem",
+    fontSize: "0.95rem", // Larger font size for headers
     fontWeight: 600,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
@@ -53,13 +53,22 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     },
     "& .MuiDataGrid-columnHeaderTitle": {
       fontWeight: 700,
+      textTransform: "uppercase", // Uppercase text
+      letterSpacing: "0.05em", // Letter spacing
+    },
+    "& .MuiDataGrid-columnHeaderTitleContainer": {
+      display: "flex",
+      justifyContent: "flex-start", // Align header text to start
+      alignItems: "center",
     },
   },
 
   "& .MuiDataGrid-cell": {
     borderBottom: "1px solid rgba(224, 224, 224, 0.4)",
-    fontSize: "0.875rem",
-    padding: "8px 10px", // Reducir el padding
+    fontSize: "0.9rem", // Larger font size for cells
+    padding: "12px 16px", // More padding for spacious design
+    display: "flex", // Ensure content aligns correctly
+    alignItems: "center", // Vertically center cell content
     "&:focus": {
       outline: "none",
     },
@@ -70,16 +79,16 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 
   "& .MuiDataGrid-row": {
     "&:nth-of-type(even)": {
-      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+      backgroundColor: alpha(theme.palette.primary.light, 0.04), // Lighter alpha for even rows
     },
     "&:hover": {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      backgroundColor: alpha(theme.palette.primary.light, 0.1), // Slightly more opaque on hover
       transition: "background-color 0.2s ease",
     },
     "&.Mui-selected": {
-      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+      backgroundColor: alpha(theme.palette.primary.light, 0.15), // Slightly more opaque when selected
       "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.16),
+        backgroundColor: alpha(theme.palette.primary.light, 0.2),
       },
     },
   },
@@ -89,6 +98,9 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.04),
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+    padding: theme.spacing(1.5, 2), // More padding
+    display: "flex",
+    justifyContent: "flex-end", // Align paginator to the right
   },
 
   "& .MuiTablePagination-root": {
@@ -104,15 +116,19 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   },
 }));
 
-const ActionButton = styled(Button)(() => ({
+const ActionButton = styled(Button)(({ theme }) => ({
   minWidth: 0,
-  padding: "4px 6px", // Reducir el padding
+  padding: "7px 10px", // Adjusted padding for slightly larger icons
   borderRadius: 8,
   transition: "all 0.2s ease",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   "&:hover": {
     transform: "translateY(-2px)",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+  },
+  color: theme.palette.common.white, // Ensure icon color is white
+  "& .MuiSvgIcon-root": {
+    fontSize: "1.2rem", // Slightly larger icons
   },
 }));
 
@@ -134,35 +150,45 @@ const ClientTable: React.FC<ClientTableProps> = ({
     {
       field: "rif",
       headerName: "RIF",
-      width: 100, // Ajustar el ancho
+      flex: 0.8,
+      minWidth: 100,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={500}>
           {params.value}
         </Typography>
       ),
+      headerAlign: "left",
+      align: "left",
     },
     {
       field: "nombre",
       headerName: "Nombre",
-      width: 120, // Ajustar el ancho
+      flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={500}>
           {params.value}
         </Typography>
       ),
+      headerAlign: "left",
+      align: "left",
     },
     {
       field: "apellido",
       headerName: "Apellido",
-      width: 120, // Ajustar el ancho
+      flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <Typography variant="body2">{params.value || "—"}</Typography>
       ),
+      headerAlign: "left",
+      align: "left",
     },
     {
       field: "direccion",
       headerName: "Dirección",
-      width: 200, // Ajustar el ancho
+      flex: 1.5,
+      minWidth: 200,
       renderCell: (params) => (
         <Tooltip title={params.value} placement="top-start">
           <Typography
@@ -178,25 +204,39 @@ const ClientTable: React.FC<ClientTableProps> = ({
           </Typography>
         </Tooltip>
       ),
+      headerAlign: "left",
+      align: "left",
     },
     {
       field: "telefono",
       headerName: "Teléfono",
-      width: 120, // Ajustar el ancho
+      flex: 0.8,
+      minWidth: 120,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={500}>
           {params.value}
         </Typography>
       ),
+      headerAlign: "left",
+      align: "left",
     },
     {
       field: "acciones",
       headerName: "Acciones",
-      width: 150, // Ajustar el ancho
+      flex: 0.7,
+      minWidth: 110,
       headerAlign: "center",
       align: "center",
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
-        <Box display="flex" gap={1} justifyContent="center">
+        <Box
+          display="flex"
+          gap={1}
+          justifyContent="center" // Ensures horizontal centering
+          alignItems="center" // Ensures vertical centering
+          sx={{ width: "100%", height: "100%" }} // Make the Box fill the cell
+        >
           <Tooltip title="Editar cliente">
             <ActionButton
               variant="contained"
@@ -210,7 +250,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
                 },
               }}
             >
-              <EditIcon fontSize="small" />
+              <EditIcon />
             </ActionButton>
           </Tooltip>
 
@@ -227,7 +267,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
                 },
               }}
             >
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon />
             </ActionButton>
           </Tooltip>
         </Box>
@@ -257,7 +297,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
         }}
         pageSizeOptions={[5, 10, 25]}
         disableRowSelectionOnClick
-        density="standard"
+        density="comfortable"
         autoHeight={false}
         sx={{ height: "100%" }}
       />

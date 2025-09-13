@@ -19,7 +19,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Asegúrate de importar useNavigate desde react-router-dom
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -43,22 +43,22 @@ export const LoginPage = () => {
       component="form"
       noValidate
       autoComplete="off"
-      onSubmit={onSubmit} // Manejar el envío del formulario
+      onSubmit={onSubmit}
       sx={{
         width: "400px",
-        backgroundColor: "rgba(255, 255, 255, 0.9)", // Fondo blanco semi-transparente
+        backgroundColor: "rgba(255, 255, 255, 0.9)", // Semi-transparent white background
         borderRadius: "8px",
         padding: 3,
-        position: "absolute", // Posicionamiento absoluto para centrar
-        top: "50%", // Centrado vertical
-        left: "50%", // Centrado horizontal
-        transform: "translate(-50%, -50%)", // Ajuste para centrar completamente
+        position: "absolute", // Absolute positioning for centering
+        top: "50%", // Vertical centering
+        left: "50%", // Horizontal centering
+        transform: "translate(-50%, -50%)", // Adjust to center completely
       }}
     >
       <img
         src="/Logo.png"
         alt=""
-        style={{ width: "20%", display: "block", margin: "0 auto" }} // Tamaño en % y centrado
+        style={{ width: "20%", display: "block", margin: "0 auto" }} // Size in % and centered
       />
       <h1
         style={{
@@ -75,9 +75,9 @@ export const LoginPage = () => {
         variant="outlined"
         fullWidth
         margin="normal"
-        value={username} // Vincular el valor del campo
-        onChange={(e) => setUsername(e.target.value)} // Actualizar el estado
-        error={!!error} // Establecer el campo en rojo si hay un error
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        error={!!error}
       />
       <TextField
         id="outlined-password-input"
@@ -86,8 +86,8 @@ export const LoginPage = () => {
         autoComplete="current-password"
         fullWidth
         margin="normal"
-        value={password} // Vincular el valor del campo
-        onChange={(e) => setPassword(e.target.value)} // Actualizar el estado
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -97,7 +97,7 @@ export const LoginPage = () => {
             </InputAdornment>
           ),
         }}
-        error={!!error} // Establecer el campo en rojo si hay un error
+        error={!!error}
       />
       <Button
         variant="contained"
@@ -105,14 +105,14 @@ export const LoginPage = () => {
         style={{
           marginTop: "16px",
           height: "50px",
-          backgroundColor: "#FFBB3C", // Color dorado
-          color: "black",
+          backgroundColor: "#5569ff", // Changed to your specified color
+          color: "white", // Changed text color to white for better contrast
           fontWeight: "400",
           fontSize: "16px",
           fontFamily: "Montserrat, sans-serif",
-        }} // Color dorado
-        type="submit" // Establecer el tipo de botón como "submit"
-        disabled={loading} // Deshabilitar el botón si está cargando
+        }}
+        type="submit"
+        disabled={loading}
       >
         {loading ? <CircularProgress size={24} color="inherit" /> : "Continuar"}
       </Button>

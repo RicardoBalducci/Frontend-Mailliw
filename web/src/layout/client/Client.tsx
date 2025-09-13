@@ -30,6 +30,9 @@ import ClientModal from "./components/ClientModal";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
 import { styled } from "@mui/material/styles";
 
+// Import the ClienteDTO
+import { ClienteDTO } from "../../Dto/Cliente.dto"; // ADJUST THIS PATH if your DTO is located elsewhere!
+
 // Styled components for enhanced UI
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -74,14 +77,9 @@ const ActionButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-export interface ClientRow {
-  id: number;
-  rif: string;
-  nombre: string;
-  apellido?: string;
-  direccion: string;
-  telefono: string;
-  email?: string; // Added email property
+// We can extend ClienteDTO for ClientRow if there's an ID
+export interface ClientRow extends ClienteDTO {
+  id: number; // ID is usually added by the backend
 }
 
 export function Client() {
@@ -89,15 +87,18 @@ export function Client() {
   const [rows, setRows] = useState<ClientRow[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [currentClient, setCurrentClient] = useState<ClientRow | null>(null);
+  const [currentClient, setCurrentClient] = useState<ClientRow | null>(null); // Type it as ClientRow
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<ClientRow | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0); // Used to force refresh the table
+  const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  // Stats for dashboard cards
+  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
+    "success"
+  ); // Added alert severity
+
   const [stats, setStats] = useState({
     total: 0,
     personal: 0,
@@ -110,26 +111,35 @@ export function Client() {
 
   const fetchClientes = async () => {
     try {
-      setLoading(true); // Inicia la carga
+      setLoading(true);
+      const response = await ClienteServices.fetchClientes(); // Service returns { success, data, message }
 
-      const data = await ClienteServices.fetchClientes();
-      setRows(data);
-
-      // Calculate stats
-      setStats({
-        total: data.length,
-        personal: data.filter((client: ClientRow) =>
-          client.rif.startsWith("V-")
-        ).length,
-        business: data.filter(
-          (client: ClientRow) =>
-            client.rif.startsWith("E-") || client.rif.startsWith("R-")
-        ).length,
-      });
+      if (response.success && response.data) {
+        setRows(response.data as ClientRow[]); // Cast to ClientRow[]
+        setStats({
+          total: response.data.length,
+          personal: response.data.filter((client: ClienteDTO) =>
+            client.rif.startsWith("V-")
+          ).length,
+          business: response.data.filter(
+            (client: ClienteDTO) =>
+              client.rif.startsWith("E-") || client.rif.startsWith("R-")
+          ).length,
+        });
+      } else {
+        setAlertMessage(response.message || "Error al cargar los clientes.");
+        setAlertSeverity("error");
+        setAlertOpen(true);
+        setRows([]); // Clear rows on error
+      }
     } catch (error) {
       console.error("Error fetching clientes:", error);
+      setAlertMessage("Error de conexión al cargar los clientes.");
+      setAlertSeverity("error");
+      setAlertOpen(true);
+      setRows([]);
     } finally {
-      setLoading(false); // Finaliza la carga
+      setLoading(false);
     }
   };
 
@@ -154,32 +164,33 @@ export function Client() {
     try {
       const response = await ClienteServices.deleteCliente(clientToDelete.id);
       if (response.success) {
-        // Supongamos que la respuesta tiene una propiedad 'success'
-        handleRefresh(); // Actualiza la tabla
+        setAlertMessage("Cliente eliminado correctamente.");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+        handleRefresh();
         setDeleteModalOpen(false);
         setClientToDelete(null);
-        setAlertMessage("Cliente eliminado correctamente."); // Mensaje de éxito
-        setAlertOpen(true); // Muestra la alerta
       } else {
-        // Maneja el caso en que la eliminación no fue exitosa
-        setAlertMessage(response.message || "Error al eliminar el cliente."); // Mensaje de error
+        setAlertMessage(response.message || "Error al eliminar el cliente.");
+        setAlertSeverity("error");
         setAlertOpen(true);
       }
     } catch (error) {
       console.error("Error eliminando cliente:", error);
-      setAlertMessage("Ocurrió un error inesperado."); // Mensaje de error general
+      setAlertMessage("Ocurrió un error inesperado al eliminar el cliente.");
+      setAlertSeverity("error");
       setAlertOpen(true);
     }
   };
 
   const handleOpenModal = () => {
-    setCurrentClient(null);
+    setCurrentClient(null); // No client for "Add Client" mode
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setCurrentClient(null);
+    setCurrentClient(null); // Clear current client state
   };
 
   const handleRefresh = () => {
@@ -221,7 +232,7 @@ export function Client() {
             />
           </Box>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - You might want to implement these based on your design */}
 
           <StyledPaper>
             <Box
@@ -280,6 +291,7 @@ export function Client() {
                 justifyContent="center"
                 alignItems="center"
                 height="100%"
+                minHeight={200} // Added minHeight for better loading spinner visibility
               >
                 <CircularProgress />
               </Box>
@@ -288,7 +300,11 @@ export function Client() {
                 key={refreshKey}
                 rows={rows.map((row) => ({
                   ...row,
-                  apellido: row.apellido || "",
+                  apellido: row.apellido ?? "",
+                  nombre: row.nombre ?? "",
+                  direccion: row.direccion ?? "",
+                  telefono: row.telefono ?? "",
+                  rif: row.rif ?? "",
                 }))}
                 searchTerm={searchTerm}
                 onModify={handleModify}
@@ -300,11 +316,7 @@ export function Client() {
           <ClientModal
             open={openModal}
             onClose={handleCloseModal}
-            currentClient={
-              currentClient
-                ? { ...currentClient, email: currentClient.email || "" }
-                : null
-            }
+            currentClient={currentClient} // currentClient is already ClientRow | null
             onRefresh={fetchClientes}
           />
 
@@ -322,7 +334,7 @@ export function Client() {
           >
             <Alert
               onClose={() => setAlertOpen(false)}
-              severity="success"
+              severity={alertSeverity} // Use the alertSeverity state
               sx={{ width: "100%" }}
             >
               {alertMessage}
@@ -333,106 +345,3 @@ export function Client() {
     </Container>
   );
 }
-/*
-<Box sx={{ mb: 4 }}>
-            <Grid container spacing={3}>
-              <Grid item={true} xs={12} md={4}>
-                <StatsCard>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: "50%",
-                          bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          mr: 2,
-                        }}
-                      >
-                        <PeopleAltIcon color="primary" />
-                      </Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Total Clientes
-                      </Typography>
-                    </Box>
-                    <Typography variant="h3" fontWeight={700} color="primary">
-                      {stats.total}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 1 }}
-                    >
-                      Clientes registrados en el sistema
-                    </Typography>
-                  </CardContent>
-                </StatsCard>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <StatsCard>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: "50%",
-                          bgcolor: alpha(theme.palette.info.main, 0.1),
-                          mr: 2,
-                        }}
-                      >
-                        <PersonAddAlt1Icon color="info" />
-                      </Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Clientes Personales
-                      </Typography>
-                    </Box>
-                    <Typography variant="h3" fontWeight={700} color="info.main">
-                      {stats.personal}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 1 }}
-                    >
-                      Clientes con RIF tipo V
-                    </Typography>
-                  </CardContent>
-                </StatsCard>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <StatsCard>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: "50%",
-                          bgcolor: alpha(theme.palette.success.main, 0.1),
-                          mr: 2,
-                        }}
-                      >
-                        <BusinessIcon color="success" />
-                      </Box>
-                      <Typography variant="h6" fontWeight={600}>
-                        Clientes Empresariales
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="h3"
-                      fontWeight={700}
-                      color="success.main"
-                    >
-                      {stats.business}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 1 }}
-                    >
-                      Clientes con RIF tipo E o R
-                    </Typography>
-                  </CardContent>
-                </StatsCard>
-              </Grid>
-            </Grid>
-          </Box>
-*/
