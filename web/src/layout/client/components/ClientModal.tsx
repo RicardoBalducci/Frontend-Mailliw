@@ -41,7 +41,7 @@ const ModalContent = styled(Box)(({ theme }) => ({
   maxHeight: "90vh",
   overflowY: "auto",
   backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
   boxShadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
   padding: 0,
   "&:focus": {
@@ -53,8 +53,8 @@ const ModalHeader = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
   color: theme.palette.primary.contrastText,
-  borderTopLeftRadius: theme.shape.borderRadius * 2,
-  borderTopRightRadius: theme.shape.borderRadius * 2,
+  borderTopLeftRadius: (theme.shape.borderRadius as number) * 2,
+  borderTopRightRadius: (theme.shape.borderRadius as number) * 2,
   position: "relative",
 }));
 
@@ -71,7 +71,7 @@ const ModalFooter = styled(Box)(({ theme }) => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: (theme.shape.borderRadius as number) * 3,
   padding: "10px 24px",
   fontWeight: 600,
   boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
@@ -84,7 +84,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadius as number,
     transition: "all 0.3s",
     "&:hover": {
       boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",

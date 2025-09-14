@@ -2,10 +2,11 @@
 
 import React from "react";
 import { Box, Typography, Card, ButtonBase, styled } from "@mui/material";
+import { LucideIcon } from "lucide-react"; // Asegúrate de importar LucideIcon
 
 interface ShortcutButtonProps {
   title: string;
-  icon: React.ReactNode;
+  icon: LucideIcon; // Tipado como LucideIcon para aceptar size y color
   color: string;
   onClick: () => void;
 }
@@ -15,8 +16,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
   transition: "transform 0.3s, box-shadow 0.3s",
   overflow: "hidden",
   "&:hover": {
-    transform: "translateY(-6px)", // Slightly more pronounced lift
-    boxShadow: theme.shadows[10], // Stronger shadow on hover
+    transform: "translateY(-6px)",
+    boxShadow: theme.shadows[10],
   },
 }));
 
@@ -45,14 +46,14 @@ export function ShortcutButton({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          borderBottom: `5px solid ${color}`, // Retain the color accent
+          borderBottom: `5px solid ${color}`,
         }}
       >
         <Box
           sx={{
             color: color,
             mb: 1.5,
-            bgcolor: `${color}1A`, // Light background for the icon
+            bgcolor: `${color}1A`,
             borderRadius: "50%",
             width: 60,
             height: 60,
@@ -61,10 +62,7 @@ export function ShortcutButton({
             justifyContent: "center",
           }}
         >
-          {React.cloneElement(icon as React.ReactElement, {
-            size: 36, // Use Lucide's size prop for consistency
-            sx: { color: color }, // Ensure icon color is applied
-          })}
+          {React.createElement(icon, { size: 36, color })}
         </Box>
         <Typography
           variant="body1"

@@ -72,7 +72,7 @@ export function MaterialUpdate({
       setNombre(materialToEdit.nombre);
       setDescripcion(materialToEdit.descripcion);
       setStock(materialToEdit.stock);
-      setPrecioUnitario(materialToEdit.precio_unitario);
+      setPrecioUnitario(materialToEdit.precio_unitario_usd);
       // Clear any previous errors or success messages when opening
       setError(null);
       setSuccess(null);
@@ -154,7 +154,8 @@ export function MaterialUpdate({
       nombre,
       descripcion,
       stock: Number(stock),
-      precio_unitario: Number(precioUnitario),
+      precio_unitario_bs: Number(precioUnitario),
+      precio_unitario_usd: Number(precioUnitario),
     };
 
     try {

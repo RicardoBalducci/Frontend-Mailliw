@@ -43,34 +43,29 @@ export function MaterialSelectModal({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
-
-  const fetchMaterials = async (
-    page: number,
-    perPage: number,
-    search: string = ""
-  ) => {
+  const fetchMaterials = async (page: number, perPage: number) => {
     setLoading(true);
     setError(null);
+
     try {
-      // Assuming your API handles searching on the backend with a 'search' parameter
-      // If not, you'd filter `response.data` client-side based on `search`
+      // Llamada a la API
       const response: PaginatedMaterialsResponse =
-        await MaterialesServices.findAll(page + 1, perPage, search);
+        await MaterialesServices.findAll(page + 1, perPage);
 
-      // If your backend doesn't filter, uncomment the following lines for client-side filtering:
-      /*
-      const filteredMaterials = response.data.filter(material =>
-        material.nombre.toLowerCase().includes(search.toLowerCase())
-      );
-      setMaterials(filteredMaterials);
-      */
-
-      // If your backend handles filtering directly:
+      // Si el backend maneja el filtrado, simplemente asignamos los datos:
       setMaterials(response.data);
-      setTotalItems(response.total); // Assuming total is provided by the API
-    } catch (err: any) {
-      setError(err.message || "Error al cargar materiales.");
-      console.error("Error fetching materials:", err);
+      setTotalItems(response.total); // Asegúrate de que la API devuelve `total`
+
+      // Si quieres filtrar en el cliente, descomenta esto:
+      /*
+    const filteredMaterials = response.data.filter(material =>
+      material.nombre.toLowerCase().includes(search.toLowerCase())
+    );
+    setMaterials(filteredMaterials);
+    */
+    } catch (e: unknown) {
+      console.error(e); // Opcional, para debug
+      setError("Error al cargar materiales.");
     } finally {
       setLoading(false);
     }
@@ -81,17 +76,16 @@ export function MaterialSelectModal({
       // When the modal opens, reset search term and page before fetching
       setSearchTerm("");
       setPage(0);
-      fetchMaterials(0, rowsPerPage, ""); // Fetch initial data when opened
+      fetchMaterials(0, rowsPerPage); // Fetch initial data when opened
     }
   }, [open]); // Only run when 'open' changes
 
   // Use a separate useEffect for fetching data based on pagination and search term
   useEffect(() => {
     if (open) {
-      // Only fetch if modal is open
       const delayDebounceFn = setTimeout(() => {
-        fetchMaterials(page, rowsPerPage, searchTerm);
-      }, 300); // Debounce search input
+        fetchMaterials(page, rowsPerPage);
+      }, 300);
 
       return () => clearTimeout(delayDebounceFn);
     }
@@ -102,7 +96,7 @@ export function MaterialSelectModal({
     setPage(0); // Reset to first page on new search
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

@@ -30,22 +30,22 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   border: "none",
   backgroundColor: "#ffffff",
   borderRadius: 12,
-  boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)", // Sombra más grande
+  boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
   transition: "all 0.3s ease",
   "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: theme.palette.primary.dark, // Color más oscuro y audaz
-    color: theme.palette.primary.contrastText,
+    backgroundColor: "#ffffff", // Fondo blanco para contraste
+    color: "#000000", // Letras negras
     fontSize: "0.9rem",
     fontWeight: 700,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     "& .MuiDataGrid-columnSeparator": {
-      color: alpha(theme.palette.common.white, 0.3), // Separador más visible
+      color: alpha(theme.palette.common.black, 0.1), // separador sutil
     },
     "& .MuiDataGrid-columnHeaderTitle": {
       fontWeight: 800,
       textTransform: "uppercase",
-      letterSpacing: "0.08em", // Más espaciado
+      letterSpacing: "0.08em",
     },
   },
   "& .MuiDataGrid-cell": {
@@ -125,7 +125,7 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
 }): ReactElement => {
   const theme = useTheme();
 
-  const safeSearch = (value: any, searchTerm: string): boolean => {
+  const safeSearch = (value: unknown, searchTerm: string): boolean => {
     if (value === null || value === undefined) return false;
     return String(value).toLowerCase().includes(searchTerm.toLowerCase());
   };
@@ -170,6 +170,7 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
       headerName: "ID",
       width: 90,
       headerAlign: "left",
+      headerClassName: "header-black",
       align: "left",
     },
     {
@@ -397,7 +398,6 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
         localeText={{
           noRowsLabel: "No hay servicios disponibles",
           noResultsOverlayLabel: "No se encontraron resultados",
-          errorOverlayDefaultLabel: "Ocurrió un error",
         }}
       />
     </Paper>

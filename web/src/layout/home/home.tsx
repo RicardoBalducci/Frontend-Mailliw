@@ -1,6 +1,6 @@
-import type React from "react";
+/* import type React from "react"; */
 import { useState, useEffect } from "react";
-import { Box, Container, Fade, Grid, Typography } from "@mui/material";
+/* import { Box, Container, Fade, Grid, Typography } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -10,10 +10,10 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { StyledPaper } from "../../theme/StyledComponents";
 import { DataCard } from "./components/card";
-import { ShortcutButton } from "./components/ShortcutButton";
+import { ShortcutButton } from "./components/ShortcutButton"; */
 
 export function HomeContent() {
-  const [currentTime, setCurrentTime] = useState("");
+  const [, setCurrentTime] = useState("");
 
   useEffect(() => {
     const updateTime = () => {
@@ -34,14 +34,14 @@ export function HomeContent() {
   }, []);
 
   // Simulación del precio del dólar
-  const dollarPrice = "36.50 Bs";
+  /* const dollarPrice = "36.50 Bs"; */
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <h1>hola</h1>
+    /*  <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>
           <StyledPaper sx={{ p: 4 }}>
-            {/* Título y descripción del Dashboard */}
             <Typography
               variant="h4"
               component="h1"
@@ -54,7 +54,6 @@ export function HomeContent() {
               Resumen rápido de la actividad del sistema.
             </Typography>
 
-            {/* Sección de Tarjetas de Datos */}
             <Grid container spacing={3} alignItems="stretch">
               <Grid item xs={12} sm={6} md={3}>
                 <DataCard
@@ -98,7 +97,6 @@ export function HomeContent() {
               </Grid>
             </Grid>
 
-            {/* --- Sección de Gráfica --- */}
             <Box mt={6}>
               <Typography
                 variant="h5"
@@ -122,14 +120,12 @@ export function HomeContent() {
                       color: "text.secondary",
                     }}
                   >
-                    {/* Aquí iría tu componente de gráfico (Ej: de Recharts, Nivo, etc.) */}
                     <Typography>Área para un gráfico</Typography>
                   </Box>
                 </Grid>
               </Grid>
             </Box>
 
-            {/* --- Sección de Atajos --- */}
             <Box mt={6}>
               <Typography
                 variant="h5"
@@ -140,7 +136,6 @@ export function HomeContent() {
                 Atajos
               </Typography>
               <Grid container spacing={2}>
-                {/* Atajo: Gestionar Clientes */}
                 <Grid item xs={12} sm={6} md={3}>
                   <ShortcutButton
                     title="Gestionar Clientes"
@@ -151,7 +146,6 @@ export function HomeContent() {
                     }
                   />
                 </Grid>
-                {/* Atajo: Gestionar Servicios */}
                 <Grid item xs={12} sm={6} md={3}>
                   <ShortcutButton
                     title="Gestionar Servicios"
@@ -162,7 +156,6 @@ export function HomeContent() {
                     }
                   />
                 </Grid>
-                {/* Atajo: Gestionar Materiales */}
                 <Grid item xs={12} sm={6} md={3}>
                   <ShortcutButton
                     title="Gestionar Materiales"
@@ -173,7 +166,6 @@ export function HomeContent() {
                     }
                   />
                 </Grid>
-                {/* Atajo: Gestionar Productos */}
                 <Grid item xs={12} sm={6} md={3}>
                   <ShortcutButton
                     title="Gestionar Productos"
@@ -209,6 +201,7 @@ export function HomeContent() {
           </StyledPaper>
         </Box>
       </Fade>
-    </Container>
+    </Container> 
+    */
   );
 }

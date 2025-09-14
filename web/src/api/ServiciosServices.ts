@@ -15,22 +15,21 @@ class ServiciosServices {
         const errorData = await response.json();
         errorMessage = errorData.message || errorData.error || errorMessage;
       } catch (parseError) {
-        // Si no se puede parsear el JSON del error, usar el mensaje por defecto
         console.warn("Could not parse error response:", parseError);
       }
 
       throw new Error(errorMessage);
     }
-
-    // Manejar respuestas vacías (como 204 No Content)
     if (response.status === 204) {
       return {} as T;
     }
-
     try {
       return await response.json();
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof Error) {
+        throw e; // Re-lanza el mismo error
+      }
+      throw new Error(String(e));
     }
   }
 

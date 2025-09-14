@@ -267,6 +267,7 @@ export function MaterialAdd({
                 fullWidth
                 type="number"
                 value={precioUnitarioBolivar}
+                onChange={(e) => setPrecioUnitarioBolivar(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

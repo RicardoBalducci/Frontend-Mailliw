@@ -1,10 +1,11 @@
 import React from "react";
 import { Box, Typography, Card, styled } from "@mui/material";
+import { LucideIcon } from "lucide-react"; // Asegúrate de importar LucideIcon
 
 interface DataCardProps {
   title: string;
   value: string;
-  icon: React.ReactNode;
+  icon: LucideIcon; // Tipado como LucideIcon
   color: string;
 }
 
@@ -27,7 +28,7 @@ export function DataCard({ title, value, icon, color }: DataCardProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderLeft: `5px solid ${color}`, // Retain the color accent
+        borderLeft: `5px solid ${color}`,
       }}
     >
       <Box>
@@ -48,7 +49,7 @@ export function DataCard({ title, value, icon, color }: DataCardProps) {
           color: color,
           opacity: 0.8,
           ml: 2,
-          bgcolor: `${color}1A`, // Light background for the icon
+          bgcolor: `${color}1A`,
           borderRadius: "50%",
           width: 50,
           height: 50,
@@ -57,10 +58,8 @@ export function DataCard({ title, value, icon, color }: DataCardProps) {
           justifyContent: "center",
         }}
       >
-        {React.cloneElement(icon as React.ReactElement, {
-          size: 30, // Use Lucide's size prop for consistency
-          sx: { color: color }, // Ensure icon color is applied
-        })}
+        {React.createElement(icon, { size: 30, color })}{" "}
+        {/* ✅ Aquí usamos createElement */}
       </Box>
     </StyledCard>
   );

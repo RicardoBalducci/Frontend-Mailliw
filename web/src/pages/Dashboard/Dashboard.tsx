@@ -27,12 +27,14 @@ import {
   Building,
   ShoppingCart,
   Anvil,
+  Clock,
 } from "lucide-react";
 
 import { Proveedor } from "../../layout/Proveedor/Proveedor";
 import { Compra } from "../../layout/Compra/Compra";
 import { HomeContent } from "../../layout/home/home";
 import { Servicios } from "../../layout/servicios/Servicios";
+import { Historial } from "../../layout/historial/Historial";
 
 // Define the width of the sidebar here. This value MUST match the one in ModernSidebar.
 const DRAWER_WIDTH = 0; // Changed from 0 to 240
@@ -91,8 +93,15 @@ const sidebarItems: SidebarItem[] = [
     id: "compras",
     text: "Compras",
     icon: <ShoppingCart size={20} />,
-    content: <Compra />, // Asumiendo que tienes un componente Compras definido
+    content: <Compra />,
   },
+  {
+    id: "historial",
+    text: "Historial",
+    icon: <Clock size={20} />,
+    content: <Historial />,
+  },
+
   /*{
     id: "servicios",
     text: "Servicios",

@@ -24,7 +24,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email"; // Added Email Icon
 import ClientServices from "../../../api/ClientServices";
-import { styled, useTheme, alpha } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 
 // Styled components (reusing from your ClientModal for consistency)
 const StyledModal = styled(Modal)(() => ({
@@ -40,7 +40,7 @@ const ModalContent = styled(Box)(({ theme }) => ({
   maxHeight: "90vh",
   overflowY: "auto",
   backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
   boxShadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
   padding: 0,
   "&:focus": {
@@ -52,8 +52,8 @@ const ModalHeader = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
   color: theme.palette.primary.contrastText,
-  borderTopLeftRadius: theme.shape.borderRadius * 2,
-  borderTopRightRadius: theme.shape.borderRadius * 2,
+  borderTopLeftRadius: (theme.shape.borderRadius as number) * 2,
+  borderTopRightRadius: (theme.shape.borderRadius as number) * 2,
   position: "relative",
 }));
 
@@ -70,7 +70,7 @@ const ModalFooter = styled(Box)(({ theme }) => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: (theme.shape.borderRadius as number as number) * 3,
   padding: "10px 24px",
   fontWeight: 600,
   boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
@@ -83,7 +83,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadius as number,
     transition: "all 0.3s",
     "&:hover": {
       boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
@@ -118,8 +118,6 @@ const UpdateClientModal: React.FC<UpdateClientModalProps> = ({
   client,
   onRefresh,
 }) => {
-  const theme = useTheme();
-
   const [formData, setFormData] = useState<ClientData>({
     id: 0,
     rif: "",
@@ -172,8 +170,7 @@ const UpdateClientModal: React.FC<UpdateClientModalProps> = ({
     }));
   };
 
-  const handleRifTypeChange = (e: any) => {
-    // Use 'any' or more specific type if known for Select
+  const handleRifTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRifType(e.target.value);
   };
 

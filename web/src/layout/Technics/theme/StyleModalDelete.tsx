@@ -21,8 +21,8 @@ export const ModalHeader = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
   color: theme.palette.primary.contrastText,
-  borderTopLeftRadius: theme.shape.borderRadius * 2,
-  borderTopRightRadius: theme.shape.borderRadius * 2,
+  borderTopLeftRadius: (theme.shape.borderRadius as number) * 2,
+  borderTopRightRadius: (theme.shape.borderRadius as number) * 2,
   position: "relative",
 }));
 export const ModalBody = styled(Box)(({ theme }) => ({
@@ -46,7 +46,7 @@ export const ModalContent = styled(Box)(({ theme }) => ({
   width: "400px", // Specific width for this modal type
   maxWidth: "95vw",
   backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
   boxShadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
   padding: theme.spacing(3), // Added padding here as per original snippet
   "&:focus": {
@@ -59,7 +59,7 @@ export const ModalContent = styled(Box)(({ theme }) => ({
  * rounded design, prominent shadow, and subtle hover effects.
  */
 export const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: (theme.shape.borderRadius as number) * 3,
   padding: "10px 24px",
   fontWeight: 600,
   boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",

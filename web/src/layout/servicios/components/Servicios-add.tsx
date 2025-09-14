@@ -542,7 +542,7 @@ export function ServicioAdd({
                   )}
                 >
                   {availableMateriales.map((material) => (
-                    <MenuItem key={material.id} value={material.id}>
+                    <MenuItem key={material.id ?? ""} value={material.id ?? ""}>
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >

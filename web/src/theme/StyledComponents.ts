@@ -4,7 +4,7 @@ import { Paper, TextField, Button } from "@mui/material";
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   backgroundColor: "#ffffff",
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
   boxShadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
   overflow: "hidden",
   position: "relative",
@@ -21,7 +21,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 
 const SearchTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: theme.shape.borderRadius * 3,
+    borderRadius: (theme.shape.borderRadius as number) * 3,
     transition: "all 0.3s",
     "&:hover": {
       boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
@@ -33,7 +33,7 @@ const SearchTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const ActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: (theme.shape.borderRadius as number) * 3,
   padding: "10px 24px",
   boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
   transition: "all 0.3s",

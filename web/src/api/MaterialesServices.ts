@@ -33,10 +33,9 @@ class MaterialesServices {
     return response.data;
   }
 
-  // Obtener todos los materiales
   async findAll(
-    pagina: number = 1, // Default values for the frontend
-    perPage: number = 10 // Default values for the frontend
+    pagina: number = 1,
+    perPage: number = 10
   ): Promise<PaginatedMaterialsResponse> {
     const requestBody: PaginacionRequestBody = { pagina, perPage };
 

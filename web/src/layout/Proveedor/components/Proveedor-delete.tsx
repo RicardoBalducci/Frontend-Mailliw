@@ -73,9 +73,9 @@ export const ProveedorDelete: React.FC<ProveedorDeleteProps> = ({
       await ProveedorServices.remove(proveedorId);
       onDeleteSuccess(`Proveedor "${proveedorName}" eliminado exitosamente.`);
       onClose(); // Close modal
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err?.message || "Ocurrió un error inesperado al eliminar el proveedor.";
+        "Ocurrió un error inesperado al eliminar el proveedor.";
       setError(errorMessage);
       onDeleteError(errorMessage);
       console.error("Error deleting proveedor:", err);

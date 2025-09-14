@@ -30,7 +30,7 @@ const ModalContent = styled(Box)(({ theme }) => ({
   width: "400px",
   maxWidth: "95vw",
   backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: (theme.shape.borderRadius as number) * 2,
   boxShadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
   padding: theme.spacing(3),
   "&:focus": {
@@ -39,7 +39,7 @@ const ModalContent = styled(Box)(({ theme }) => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: (theme.shape.borderRadius as number) * 3,
   padding: "10px 24px",
   fontWeight: 600,
   boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",

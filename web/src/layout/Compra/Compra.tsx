@@ -77,15 +77,10 @@ export function Compra() {
   >("success");
 
   // Fetch initial data
-  useEffect(() => {
-    fetchProveedores();
-  });
-
   const fetchProveedores = async () => {
     setLoadingProveedores(true);
     setProveedoresError(null);
     try {
-      // Assuming ProveedorServices.findAll exists and returns a response with a data property
       const response = await ProveedorServices.findAll(1, 100);
       setProveedores(response.data);
     } catch (error: unknown) {
@@ -102,11 +97,14 @@ export function Compra() {
     }
   };
 
+  useEffect(() => {
+    fetchProveedores();
+  }, []);
+
   const fetchMaterials = async () => {
     setLoadingMaterials(true);
     setMaterialsError(null);
     try {
-      // Assuming MaterialServices.findAll exists
       await MaterialServices.findAll(1, 100);
     } catch (error: unknown) {
       setMaterialsError(
@@ -122,19 +120,17 @@ export function Compra() {
     }
   };
 
-  // Handlers for modals
   const handleOpenMaterialAddModal = () => setOpenMaterialAddModal(true);
   const handleCloseMaterialAddModal = () => setOpenMaterialAddModal(false);
   const handleOpenProveedorModal = () => setOpenProveedorModal(true);
   const handleCloseProveedorModal = () => setOpenProveedorModal(false);
   const handleOpenMaterialSelectModal = () => {
-    fetchMaterials(); // Fetch materials when opening the selection modal
+    fetchMaterials();
     setOpenMaterialSelectModal(true);
   };
   const handleCloseMaterialSelectModal = () =>
     setOpenMaterialSelectModal(false);
 
-  // Handlers for actions
   const handleMaterialAdded = () => {
     showSnackbar("Material añadido exitosamente!", "success");
   };
