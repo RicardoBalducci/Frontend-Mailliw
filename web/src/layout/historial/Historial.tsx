@@ -1,4 +1,9 @@
-import React, { useEffect, useState } from "react";
+
+{
+  
+  /* 
+  
+  import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -85,8 +90,7 @@ export const Historial = () => {
   );
 };
 
-{
-  /* <LocalizationProvider dateAdapter={AdapterDateFns}>
+  <LocalizationProvider dateAdapter={AdapterDateFns}>
               <Box display="flex" gap={1} mb={3} flexWrap="nowrap">
                 <DatePicker
                   label="Fecha Inicio"
