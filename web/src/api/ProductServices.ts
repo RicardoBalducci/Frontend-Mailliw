@@ -1,12 +1,13 @@
 // src/api/ProductServices.ts
 import { ProductoDTO } from "../Dto/Productos.dto";
+import { BASE_API } from "./Base";
 
 class ProductosServices {
   private baseUrl: string;
   private token: string | null;
 
   constructor() {
-    this.baseUrl = "http://localhost:3000/productos";
+    this.baseUrl = `${BASE_API}productos`;
     // In a real application, you'd want a more robust way to manage tokens (e.g., context, Redux)
     this.token = localStorage.getItem("access_token");
   }

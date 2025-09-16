@@ -6,8 +6,9 @@ import {
   ProveedorUpdateDto,
 } from "../Dto/Proveedor.dto";
 import { PaginatedResponse } from "./PaginatedResponse.dto";
+import { BASE_API } from "./Base";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"; // Adjust your base URL as necessary
+const BASE_URL = `${BASE_API}`; // Adjust your base URL as necessary
 
 class ProveedorServices {
   static async create(proveedor: ProveedorCreateDto): Promise<ProveedorDto> {
@@ -34,7 +35,7 @@ class ProveedorServices {
   ): Promise<PaginatedResponse<ProveedorDto>> {
     try {
       const response = await axios.get<PaginatedResponse<ProveedorDto>>(
-        `${BASE_URL}/proveedores`,
+        `${BASE_URL}proveedores`,
         {
           params: { page, perPage }, // Pass pagination parameters as query params
         }
@@ -55,7 +56,7 @@ class ProveedorServices {
   static async findOne(id: number): Promise<ProveedorDto> {
     try {
       const response = await axios.get<ProveedorDto>(
-        `${BASE_URL}/proveedores/${id}`
+        `${BASE_URL}proveedores/${id}`
       );
       return response.data;
     } catch (error: unknown) {
@@ -74,7 +75,7 @@ class ProveedorServices {
   ): Promise<ProveedorDto> {
     try {
       const response = await axios.patch<ProveedorDto>(
-        `${BASE_URL}/proveedores/${id}`,
+        `${BASE_URL}proveedores/${id}`,
         proveedor
       );
       return response.data;
@@ -90,7 +91,7 @@ class ProveedorServices {
 
   static async remove(id: number): Promise<void> {
     try {
-      await axios.delete(`${BASE_URL}/proveedores/${id}`);
+      await axios.delete(`${BASE_URL}proveedores/${id}`);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         throw new Error(

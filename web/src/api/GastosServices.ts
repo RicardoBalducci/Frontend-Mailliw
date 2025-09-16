@@ -1,4 +1,5 @@
 import axios from "axios";
+import { BASE_API } from "./Base";
 
 // Define the Gastos interface (can be shared with your component)
 export interface Gasto {
@@ -30,7 +31,7 @@ class GastosService {
   // private token: string | null;
 
   constructor() {
-    this.baseUrl = "http://localhost:3000/gastos";
+    this.baseUrl = `${BASE_API}gastos`;
     // this.token = localStorage.getItem("access_token"); // Example: if authentication is needed
   }
 

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { MaterialesDto } from "../Dto/Materiales.dto";
 import { Material } from "../interface/material.interace";
+import { BASE_API } from "./Base";
 export interface PaginatedMaterialsResponse {
   data: MaterialesDto[];
   total: number;
@@ -19,7 +20,7 @@ class MaterialesServices {
   private token: string | null;
 
   constructor() {
-    this.baseUrl = "http://localhost:3000/materiales";
+    this.baseUrl = `${BASE_API}materiales`;
     this.token = localStorage.getItem("access_token");
   }
 

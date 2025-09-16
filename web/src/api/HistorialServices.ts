@@ -2,6 +2,7 @@
 import { MaterialesDto } from "../Dto/Materiales.dto";
 import { ProveedorDto } from "../Dto/Proveedor.dto";
 import { UserDto } from "../Dto/UserDto";
+import { BASE_API } from "./Base";
 
 export interface HistorialMaterialDTO {
   id: number;
@@ -23,7 +24,7 @@ class HistorialServices {
   private token: string | null;
 
   constructor() {
-    this.baseUrl = "http://localhost:3000/historial";
+    this.baseUrl = `${BASE_API}historial`;
     this.token = localStorage.getItem("access_token");
   }
 

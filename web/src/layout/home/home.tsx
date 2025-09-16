@@ -37,7 +37,7 @@ export function HomeContent() {
   /* const dollarPrice = "36.50 Bs"; */
 
   return (
-    <h1>hola</h1>
+    <h1>En Desarrollo...</h1>
     /*  <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>

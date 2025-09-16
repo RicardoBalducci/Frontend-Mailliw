@@ -1,14 +1,14 @@
 // API/UserServices.ts
-
 import axios from "axios";
 import { UserDto } from "../layout/Technics/interface/user.dto";
+import { BASE_API } from "./Base";
 
 class UserServices {
   static async loginUser(username: string, password: string) {
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        password,
+      const response = await axios.post(`${BASE_API}auth/login`, {
         username,
+        password,
       });
       return response.data;
     } catch (error) {
@@ -23,7 +23,7 @@ class UserServices {
 
   static async getTechnicians() {
     try {
-      const response = await axios.get("http://localhost:3000/users/tecnicos");
+      const response = await axios.get(`${BASE_API}users/tecnicos`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -38,7 +38,7 @@ class UserServices {
   static async createTechnician(technicianData: UserDto) {
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/register",
+        `${BASE_API}auth/register`,
         technicianData
       );
       return response.data;
@@ -54,7 +54,7 @@ class UserServices {
 
   static async deleteUser(id: number) {
     try {
-      const response = await axios.delete(`http://localhost:3000/users/${id}`);
+      const response = await axios.delete(`${BASE_API}users/${id}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -65,12 +65,10 @@ class UserServices {
       throw new Error("Error de conexión");
     }
   }
+
   static async updateTechnician(id: number, updatedData: Partial<UserDto>) {
     try {
-      const response = await axios.put(
-        `http://localhost:3000/users/${id}`,
-        updatedData
-      );
+      const response = await axios.put(`${BASE_API}users/${id}`, updatedData);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

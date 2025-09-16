@@ -3,8 +3,9 @@ import type {
   CreateServicioDto,
   UpdateServicioDto,
 } from "../Dto/Servicio-request.dto";
+import { BASE_API } from "./Base";
 
-const API_BASE_URL = "http://localhost:3000/servicios";
+const API_BASE_URL = `${BASE_API}servicios`;
 
 class ServiciosServices {
   private async handleResponse<T>(response: Response): Promise<T> {

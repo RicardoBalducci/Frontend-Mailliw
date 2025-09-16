@@ -1,7 +1,8 @@
 import { CreateCompraDto } from "../Dto/Compra-request.dto";
 import { CompraDTO } from "../Dto/Compra.dto";
+import { BASE_API } from "./Base";
 
-const API_BASE_URL = "http://localhost:3000/compras";
+const API_BASE_URL = `${BASE_API}compras`;
 
 class ComprasServices {
   private async handleResponse<T>(response: Response): Promise<T> {

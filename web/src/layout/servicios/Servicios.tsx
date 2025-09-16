@@ -29,6 +29,7 @@ import {
 import ServiciosTable from "./components/Servicios-table";
 import { ServicioAdd } from "./components/Servicios-add";
 import ServicioDelete from "./components/Servicio-Delete";
+import Swal from "sweetalert2";
 
 export function Servicios() {
   const theme = useTheme();
@@ -81,6 +82,8 @@ export function Servicios() {
 
   const handleModify = (servicio: ServicioDTO) => {
     setServicioToModify(servicio);
+    Swal.fire("En proceso de desarrollo", "", "info");
+
     // Open a new modal for modification, e.g., setOpenUpdateModal(true)
   };
 

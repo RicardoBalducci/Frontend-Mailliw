@@ -3,7 +3,6 @@ import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import LinkIcon from "@mui/icons-material/Link"; // Import LinkIcon
 
 import {
   Box,
@@ -14,7 +13,6 @@ import {
   alpha,
   Typography,
   TablePagination,
-  Chip, // Import Chip
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ProveedorDto } from "../../../Dto/Proveedor.dto"; // Ensure correct path
@@ -184,42 +182,6 @@ const ProveedorTable: React.FC<ProveedorTableProps> = ({
       ),
       headerAlign: "left",
       align: "left",
-    },
-    {
-      field: "catalogo",
-      headerName: "Catálogo",
-      flex: 1,
-      minWidth: 150, // Increase minWidth to accommodate the chip
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => {
-        const catalogUrl = params.value as string | null;
-        if (catalogUrl) {
-          return (
-            <Tooltip title={`Ver catálogo: ${catalogUrl}`}>
-              <Chip
-                label="Ver Catálogo"
-                icon={<LinkIcon />}
-                onClick={() => window.open(catalogUrl, "_blank")} // Open in new tab
-                clickable
-                color="primary"
-                size="small"
-                sx={{
-                  cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: theme.palette.primary.light,
-                  },
-                }}
-              />
-            </Tooltip>
-          );
-        }
-        return (
-          <Typography variant="body2" color="text.secondary">
-            No disponible
-          </Typography>
-        );
-      },
     },
     {
       field: "acciones",

@@ -31,6 +31,7 @@ import {
   SearchTextField,
   ActionButton,
 } from "../../theme/StyledComponents";
+import Swal from "sweetalert2";
 
 // Extend ProductoDTO for table rows, ensuring all required fields are present
 export interface ProductRow extends ProductoDTO {
@@ -122,7 +123,7 @@ export function Product() {
 
   const handleModify = (product: ProductRow): void => {
     setCurrentProduct(product);
-    setOpenAddEditModal(true);
+    Swal.fire("En proceso de desarrollo", "", "info");
   };
 
   // The handleDelete in Product component will now open the DeleteProduct modal
@@ -258,7 +259,7 @@ export function Product() {
                 )}
                 searchTerm={searchTerm}
                 onModify={handleModify}
-                onDelete={handleDelete} // This now opens the DeleteProduct modal
+                onDelete={handleDelete}
                 onModifyStock={handleModifyStock}
                 onModifyPrice={handleModifyPrice}
               />

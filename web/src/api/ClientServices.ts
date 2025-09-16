@@ -1,12 +1,13 @@
 // ClienteServices.ts (updated)
 import { ClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
+import { BASE_API } from "./Base";
 
 class ClienteServices {
   private baseUrl: string;
   private token: string | null;
 
   constructor() {
-    this.baseUrl = "http://localhost:3000/clientes";
+    this.baseUrl = `${BASE_API}clientes`;
     this.token = localStorage.getItem("access_token");
   }
 
