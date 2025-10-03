@@ -34,6 +34,7 @@ import { Proveedor } from "../../layout/Proveedor/Proveedor";
 import { Compra } from "../../layout/Compra/Compra";
 import { HomeContent } from "../../layout/home/home";
 import { Servicios } from "../../layout/servicios/Servicios";
+//import { Ventas } from "../../layout/ventas";
 //import { Historial } from "../../layout/historial/Historial";
 
 // Define the width of the sidebar here. This value MUST match the one in ModernSidebar.
@@ -94,14 +95,21 @@ const sidebarItems: SidebarItem[] = [
     text: "Compras",
     icon: <ShoppingCart size={20} />,
     content: <Compra />,
-  } /* 
+  },
+  {
+    id: "ventas",
+    text: "Ventas",
+    icon: <DollarSign size={20} />, // ícono representativo de ventas
+    content: <h1>En desarrollo...</h1>, // componente que mostrarás para la sección ventas <Ventas />,
+  },
+  /* 
   {
     id: "historial",
     text: "Historial",
     icon: <Clock size={20} />,
     content: <Historial />,
   },
- */,
+ */
   /*{
     id: "servicios",
     text: "Servicios",

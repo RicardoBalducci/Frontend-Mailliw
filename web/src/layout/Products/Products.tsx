@@ -33,7 +33,6 @@ import {
 } from "../../theme/StyledComponents";
 import Swal from "sweetalert2";
 
-// Extend ProductoDTO for table rows, ensuring all required fields are present
 export interface ProductRow extends ProductoDTO {
   id: number;
 }
@@ -89,7 +88,7 @@ export function Product() {
   };
 
   const handleOpenAddEditModal = () => {
-    setCurrentProduct(null); // Clear current product for "add" mode
+    setCurrentProduct(null);
     setOpenAddEditModal(true);
   };
 

@@ -76,6 +76,14 @@ export function Compra() {
     "success" | "error" | "info"
   >("success");
 
+  const [dollarOficial, setDollarOficial] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedDollar = localStorage.getItem("dollar_oficial");
+
+    if (storedDollar) setDollarOficial(Number(storedDollar));
+  }, []);
+
   // Fetch initial data
   const fetchProveedores = async () => {
     setLoadingProveedores(true);
@@ -205,32 +213,27 @@ export function Compra() {
 
     const materiales: CreateCompraMaterialDto[] = purchaseItems.map((item) => {
       const { material, cantidad } = item;
-      const { id, precio_unitario_bs, precio_unitario_usd } = material;
+      const { id, precio_unitario_usd } = material;
 
-      // Realiza validaciones estrictas al inicio
       if (id === null || id === undefined) {
         throw new Error("El ID del material no puede ser nulo o indefinido.");
       }
 
       const numericCantidad = Number(cantidad);
-      const numericPrecioBs = Number(precio_unitario_bs);
       const numericPrecioUsd =
-        precio_unitario_usd !== undefined
-          ? Number(precio_unitario_usd)
-          : undefined;
+        precio_unitario_usd !== undefined ? Number(precio_unitario_usd) : 0;
 
-      // Validar si la conversión resultó en un número válido
-      if (
-        isNaN(numericCantidad) ||
-        isNaN(numericPrecioBs) ||
-        (numericPrecioUsd !== undefined && isNaN(numericPrecioUsd))
-      ) {
+      if (isNaN(numericCantidad) || isNaN(numericPrecioUsd)) {
         throw new Error(
           `Error en la conversión para el material '${material.nombre}'. Asegúrate de que los valores sean numéricos.`
         );
       }
 
-      // Se retorna un objeto que garantiza que material_id es un número
+      // Calcula el precio en Bs usando dollarOficial
+      const numericPrecioBs = Number(
+        (numericPrecioUsd * (dollarOficial || 0)).toFixed(3)
+      );
+
       return {
         material_id: id,
         cantidad: numericCantidad,
@@ -247,17 +250,13 @@ export function Compra() {
     try {
       await ComprasServices.createCompra(newCompraData);
       showSnackbar("¡Compra registrada exitosamente!", "success");
-      // Reset form after successful purchase
       setSelectedProveedor(null);
       setPurchaseItems([]);
     } catch (error: unknown) {
       let errorMessage = "Error al registrar la compra.";
-
-      // Use a type guard to check if the error is an instance of Error
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-
       setPurchaseError(errorMessage);
       showSnackbar(errorMessage, "error");
       console.error("Error saving purchase:", error);
@@ -304,10 +303,13 @@ export function Compra() {
   const totalBS = useMemo(() => {
     return purchaseItems.reduce(
       (sum, item) =>
-        sum + (item.material.precio_unitario_bs || 0) * item.cantidad,
+        sum +
+        (item.material.precio_unitario_usd || 0) *
+          (dollarOficial || 0) *
+          item.cantidad,
       0
     );
-  }, [purchaseItems]);
+  }, [purchaseItems, dollarOficial]);
 
   return (
     <>
@@ -512,9 +514,10 @@ export function Compra() {
                           <Typography variant="body2" color="text.secondary">
                             Bs
                             {(
-                              (item.material.precio_unitario_bs || 0) *
+                              (item.material.precio_unitario_usd || 0) *
+                              (dollarOficial || 0) *
                               item.cantidad
-                            ).toFixed(2)}{" "}
+                            ).toFixed(2)}
                           </Typography>
                         </Box>
                         <StyledButton

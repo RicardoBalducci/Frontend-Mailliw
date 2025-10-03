@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -127,6 +127,13 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
 }) => {
   const theme = useTheme();
 
+  const [dollarOficial, setDollarOficial] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedDollar = localStorage.getItem("dollar_oficial");
+
+    if (storedDollar) setDollarOficial(Number(storedDollar));
+  }, []);
   const filteredRows = rows.filter((row) =>
     Object.values(row).some(
       (value) =>
@@ -162,33 +169,54 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
       align: "left",
     },
     {
-      field: "precio_unitario_bs",
-      headerName: "Precio (Bs)",
-      flex: 1,
-      minWidth: 120,
-      // Updated renderCell to format the value
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500}>
-          {`Bs. ${Number(params.value).toFixed(2)}`}
-        </Typography>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
       field: "precio_unitario_usd",
       headerName: "Precio ($)",
       flex: 1,
       minWidth: 120,
-      // Updated renderCell to format the value
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500}>
-          {`$${Number(params.value).toFixed(2)}`}
-        </Typography>
-      ),
+      renderCell: (params) => {
+        const precioUSD = Number(params.value);
+        const formatted = new Intl.NumberFormat("es-VE", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(precioUSD);
+
+        return (
+          <Typography variant="body2" fontWeight={500}>
+            {formatted} {/* Ej: $1.234,56 */}
+          </Typography>
+        );
+      },
       headerAlign: "left",
       align: "left",
     },
+    {
+      field: "precio_unitario_bs",
+      headerName: "Precio (Bs)",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => {
+        const precioUSD = Number(params.row.precio_unitario_usd);
+        const precioBS = precioUSD * (dollarOficial || 0);
+
+        const formatted = new Intl.NumberFormat("es-VE", {
+          style: "currency",
+          currency: "VES", // Bolívar Soberano
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(precioBS);
+
+        return (
+          <Typography variant="body2" fontWeight={500}>
+            {formatted} {/* Ej: Bs. 1.000.000,00 */}
+          </Typography>
+        );
+      },
+      headerAlign: "left",
+      align: "left",
+    },
+
     {
       field: "stock",
       headerName: "Cantidad",

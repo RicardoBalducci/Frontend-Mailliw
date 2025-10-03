@@ -1,3 +1,4 @@
+import DolarServices from "../../../api/DolarServices";
 import UserServices from "../../../api/UserSevices";
 
 export const handleSubmit = async (
@@ -11,7 +12,6 @@ export const handleSubmit = async (
   setLoading(true);
   setError("");
 
-  // Validar campos
   if (!username || !password) {
     setError("Por favor, completa todos los campos.");
     setLoading(false);
@@ -25,21 +25,32 @@ export const handleSubmit = async (
       setError("Credenciales inválidas.");
       return;
     }
-    localStorage.setItem("access_token", response.data.access_token);
 
+    localStorage.setItem("access_token", response.data.access_token);
     localStorage.setItem("nombre", response.data.user.nombre);
     localStorage.setItem("role", response.data.user.role);
 
-    // Retornar el resultado para manejar la navegación en el componente
-    return true; // Indica que el inicio de sesión fue exitoso
+    // 👇 Llamada al método estático
+    try {
+      const dolarResponse = await DolarServices.getDolarToday();
+      if (dolarResponse?.dollar_oficial) {
+        localStorage.setItem(
+          "dollar_oficial",
+          dolarResponse.dollar_oficial.toString()
+        );
+      }
+    } catch (error) {
+      console.error("Error al obtener el dólar oficial:", error);
+    }
+
+    return true;
   } catch (error) {
-    // Manejo de errores
     if (error instanceof Error) {
       setError(error.message);
     } else {
       setError("Ocurrió un error desconocido.");
     }
   } finally {
-    setLoading(false); // Asegúrate de resetear el loading al final
+    setLoading(false);
   }
 };

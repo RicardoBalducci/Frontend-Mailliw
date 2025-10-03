@@ -115,7 +115,6 @@ export function Client() {
       const response = await ClienteServices.fetchClientes();
 
       if (response.success && response.data) {
-        setRows(response.data as ClientRow[]); // Cast to ClientRow[]
         setStats({
           total: response.data.length,
           personal: response.data.filter((client: ClienteDTO) =>
@@ -130,7 +129,6 @@ export function Client() {
         setAlertMessage(response.message || "Error al cargar los clientes.");
         setAlertSeverity("error");
         setAlertOpen(true);
-        setRows([]); // Clear rows on error
       }
     } catch (error) {
       console.error("Error fetching clientes:", error);

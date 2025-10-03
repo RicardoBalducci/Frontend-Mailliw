@@ -6,5 +6,10 @@ export interface ProductoDTO {
   stock: number;
   precio_unitario: number; // This will be in Bolívares
   precio_usd: number;
-  // category?: string;
+}
+export interface CreateProductoDTO {
+  nombre: string;
+  descripcion: string;
+  stock: number;
+  precio_unitario: number; // This will be in Bolívares
 }

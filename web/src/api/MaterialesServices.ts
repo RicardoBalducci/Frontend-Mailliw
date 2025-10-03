@@ -1,5 +1,5 @@
 import axios from "axios";
-import { MaterialesDto } from "../Dto/Materiales.dto";
+import { CreateMaterialesDto, MaterialesDto } from "../Dto/Materiales.dto";
 import { Material } from "../interface/material.interace";
 import { BASE_API } from "./Base";
 export interface PaginatedMaterialsResponse {
@@ -25,7 +25,7 @@ class MaterialesServices {
   }
 
   // Crear un nuevo material
-  async create(createMaterialDto: MaterialesDto): Promise<Material> {
+  async create(createMaterialDto: CreateMaterialesDto): Promise<Material> {
     const response = await axios.post(this.baseUrl, createMaterialDto, {
       headers: {
         Authorization: `Bearer ${this.token}`,

@@ -14,30 +14,30 @@ import {
   MenuItem,
   useTheme,
   Divider,
+  Chip,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
 interface AppBarProps {
   toggleSidebar: () => void;
-  isOpen: boolean;
-  onHelpClick?: () => void; // New prop for help icon click
+  isOpen?: boolean;
 }
 
 export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
   const [nombre, setNombre] = useState("");
   const [role, setRole] = useState("");
+  const [dollarOficial, setDollarOficial] = useState<number | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const theme = useTheme();
 
   useEffect(() => {
     const storedNombre = localStorage.getItem("nombre");
     const storedRole = localStorage.getItem("role");
-    if (storedNombre) {
-      setNombre(storedNombre);
-    }
-    if (storedRole) {
-      setRole(storedRole);
-    }
+    const storedDollar = localStorage.getItem("dollar_oficial");
+
+    if (storedNombre) setNombre(storedNombre);
+    if (storedRole) setRole(storedRole);
+    if (storedDollar) setDollarOficial(Number(storedDollar));
   }, []);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -64,10 +64,10 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
         <Toolbar
           sx={{
             justifyContent: "space-between",
-            minHeight: "56px", // Add this to make the toolbar shorter
+            minHeight: "56px",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <IconButton
               edge="start"
               color="inherit"
@@ -91,9 +91,18 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
             >
               Cerrajeria W
             </Typography>
+
+            {/* Chip con el dólar oficial */}
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            {dollarOficial && (
+              <Chip
+                label={`$ Dolar Actual ${dollarOficial.toFixed(2)}`}
+                color="success"
+                size="small"
+              />
+            )}
             <Tooltip title={`${nombre} - ${role}`}>
               <IconButton
                 edge="end"
@@ -105,8 +114,8 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
               >
                 <Avatar
                   sx={{
-                    width: 28, // Reduced from 32
-                    height: 28, // Reduced from 32
+                    width: 28,
+                    height: 28,
                     bgcolor: theme.palette.primary.main,
                     fontSize: "0.875rem",
                   }}
@@ -118,6 +127,7 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
           </Box>
         </Toolbar>
       </AppBar>
+
       <Menu
         anchorEl={anchorEl}
         anchorOrigin={{

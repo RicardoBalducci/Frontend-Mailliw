@@ -103,10 +103,10 @@ export const ModernSidebar: React.FC<SidebarProps> = ({
         </IconButton>
         <Avatar
           alt="Logo"
-          src="/placeholder.svg?height=56&width=56"
+          src="/Logo3.png?height=56&width=56"
           sx={{
-            width: 64,
-            height: 64,
+            width: 65,
+            height: 65,
             mt: 2,
             mb: 1,
             backgroundColor: theme.palette.primary.main,
@@ -126,7 +126,7 @@ export const ModernSidebar: React.FC<SidebarProps> = ({
             color: theme.palette.text.primary,
           }}
         >
-          POS System
+          Cerrajeria W
         </Typography>
         <Typography
           variant="body2"

@@ -17,11 +17,10 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"; // USD Icon
-import EuroIcon from "@mui/icons-material/Euro"; // Keeping EuroIcon for Bolívares (placeholder for a Bolívar icon if available)
 import NumbersIcon from "@mui/icons-material/Numbers";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ProductServices from "../../../api/ProductServices";
-import { ProductoDTO } from "../../../Dto/Productos.dto";
+import { CreateProductoDTO } from "../../../Dto/Productos.dto";
 import {
   ModalContent,
   ModalHeader,
@@ -47,19 +46,12 @@ export function ProductsAdd({
   const [descripcion, setDescripcion] = useState("");
   const [stock, setStock] = useState<number | "">("");
   const [precio_unitario, setPrecioUnitario] = useState<number | "">(""); // This is in Bolívares
-  const [precio_usd, setPrecioUsd] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleAddProduct = async () => {
-    if (
-      !nombre ||
-      !descripcion ||
-      stock === "" ||
-      precio_unitario === "" ||
-      precio_usd === ""
-    ) {
+    if (!nombre || !descripcion || stock === "" || precio_unitario === "") {
       setError(
         "Por favor, completa todos los campos requeridos (Nombre, Descripción, Stock, Precio Unitario (Bs), Precio Unitario (USD))."
       );
@@ -70,12 +62,11 @@ export function ProductsAdd({
     setError(null);
     setSuccess(null);
 
-    const newProductData: ProductoDTO = {
+    const newProductData: CreateProductoDTO = {
       nombre,
       descripcion,
       stock: Number(stock),
       precio_unitario: Number(precio_unitario),
-      precio_usd: Number(precio_usd),
     };
 
     try {
@@ -88,7 +79,6 @@ export function ProductsAdd({
         setDescripcion("");
         setStock("");
         setPrecioUnitario("");
-        setPrecioUsd("");
         if (onProductAdded) {
           onProductAdded();
         }
@@ -115,7 +105,6 @@ export function ProductsAdd({
       setDescripcion("");
       setStock("");
       setPrecioUnitario("");
-      setPrecioUsd("");
     }
   }, [open]);
 
@@ -230,7 +219,7 @@ export function ProductsAdd({
                 }}
               />
               <StyledTextField
-                label="Precio Unitario (Bs)" // Changed label to Bolívares
+                label="Precio Unitario ($)" // Changed label to Bolívares
                 variant="outlined"
                 fullWidth
                 type="number"
@@ -241,23 +230,8 @@ export function ProductsAdd({
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EuroIcon color="action" />{" "}
-                      {/* Using EuroIcon for Bolívares as no specific Bolívar icon is standard in MUI */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Precio Unitario (USD)"
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={precio_usd}
-                onChange={(e) => setPrecioUsd(parseFloat(e.target.value) || "")}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
                       <AttachMoneyIcon color="action" />
+                      {/* Using EuroIcon for Bolívares as no specific Bolívar icon is standard in MUI */}
                     </InputAdornment>
                   ),
                 }}

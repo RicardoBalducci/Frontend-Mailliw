@@ -24,8 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import DollarIcon from "@mui/icons-material/AttachMoney";
-import BolivarIcon from "@mui/icons-material/MonetizationOn";
-import { MaterialesDto } from "../../../Dto/Materiales.dto";
+import { CreateMaterialesDto } from "../../../Dto/Materiales.dto";
 import MaterialesServices from "../../../api/MaterialesServices";
 
 interface MaterialAddProps {
@@ -45,29 +44,9 @@ export function MaterialAdd({
   const [precioUnitarioDolar, setPrecioUnitarioDolar] = useState<
     number | string
   >("");
-  const [precioUnitarioBolivar, setPrecioUnitarioBolivar] = useState<
-    number | string
-  >("");
-  const [dollarPrice, setDollarPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  const fetchDollarPrice = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/exchange/dollar");
-      if (!response.ok) {
-        throw new Error("Error fetching dollar price");
-      }
-      const data = await response.json();
-      setDollarPrice(data.dollar_price);
-    } catch (err) {
-      console.error("Error fetching dollar price:", err);
-      setError(
-        "No se pudo obtener el precio del dólar. El precio en Bolívares no se calculará."
-      );
-    }
-  };
 
   useEffect(() => {
     if (open) {
@@ -77,19 +56,8 @@ export function MaterialAdd({
       setDescripcion("");
       setStock("");
       setPrecioUnitarioDolar("");
-      setPrecioUnitarioBolivar("");
-      fetchDollarPrice();
     }
   }, [open]);
-
-  useEffect(() => {
-    if (precioUnitarioDolar !== "" && dollarPrice !== null) {
-      const bolivarValue = Number(precioUnitarioDolar) * dollarPrice;
-      setPrecioUnitarioBolivar(bolivarValue.toFixed(2));
-    } else {
-      setPrecioUnitarioBolivar("");
-    }
-  }, [precioUnitarioDolar, dollarPrice]);
 
   const handleAddMaterial = async () => {
     if (!nombre || !descripcion || stock === "" || precioUnitarioDolar === "") {
@@ -101,12 +69,10 @@ export function MaterialAdd({
     setError(null);
     setSuccess(null);
 
-    const newMaterialData: MaterialesDto = {
-      id: 0,
+    const newMaterialData: CreateMaterialesDto = {
       nombre,
       descripcion,
       stock: Number(stock),
-      precio_unitario_bs: Number(precioUnitarioBolivar),
       precio_unitario_usd: Number(precioUnitarioDolar),
     };
 
@@ -119,7 +85,6 @@ export function MaterialAdd({
         setDescripcion("");
         setStock("");
         setPrecioUnitarioDolar("");
-        setPrecioUnitarioBolivar("");
         if (onMaterialAdded) {
           onMaterialAdded();
         }
@@ -257,21 +222,6 @@ export function MaterialAdd({
                   startAdornment: (
                     <InputAdornment position="start">
                       <DollarIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Precio en Bs"
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={precioUnitarioBolivar}
-                onChange={(e) => setPrecioUnitarioBolivar(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <BolivarIcon color="action" />
                     </InputAdornment>
                   ),
                 }}

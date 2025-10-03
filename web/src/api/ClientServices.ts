@@ -1,5 +1,5 @@
 // ClienteServices.ts (updated)
-import { ClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
+import { ClienteDTO, RespuestaClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
 import { BASE_API } from "./Base";
 
 class ClienteServices {
@@ -26,19 +26,25 @@ class ClienteServices {
     }
   }
 
-  async fetchClientes(): Promise<{
+  async fetchClientes(rif?: string): Promise<{
     success: boolean;
-    data?: ClienteDTO[]; // Use ClienteDTO for the data array
+    data?: RespuestaClienteDTO[];
     message?: string;
   }> {
     try {
-      const response = await fetch(this.baseUrl, {
+      // Construir la URL con query param si rif existe
+      const url = rif
+        ? `${this.baseUrl}?rif=${encodeURIComponent(rif)}`
+        : this.baseUrl;
+
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${this.token}`,
           "Content-Type": "application/json",
         },
       });
+
       return this.handleResponse(response);
     } catch (error) {
       console.error("Error fetching data:", error);

@@ -1,5 +1,5 @@
 // src/api/ProductServices.ts
-import { ProductoDTO } from "../Dto/Productos.dto";
+import { CreateProductoDTO, ProductoDTO } from "../Dto/Productos.dto";
 import { BASE_API } from "./Base";
 
 class ProductosServices {
@@ -61,7 +61,7 @@ class ProductosServices {
   }
 
   async createProduct(
-    product: ProductoDTO
+    product: CreateProductoDTO
   ): Promise<{ success: boolean; data?: ProductoDTO; message?: string }> {
     try {
       const response = await fetch(this.baseUrl, {
