@@ -21,19 +21,19 @@ import {
   Home,
   Users,
   Package,
-  DollarSign,
+  //DollarSign,
   Wrench,
   HardHat,
   Building,
-  ShoppingCart,
+  //ShoppingCart,
   Anvil,
   ArrowDownUp,
   //Clock,
 } from "lucide-react";
 
 import { Proveedor } from "../../layout/Proveedor/Proveedor";
-import { Compra } from "../../layout/Compra/Compra";
-import { HomeContent } from "../../layout/home/home";
+/* import { Compra } from "../../layout/Compra/Compra";
+ */import { HomeContent } from "../../layout/home/home";
 import { Servicios } from "../../layout/servicios/Servicios";
 //import { Ventas } from "../../layout/ventas";
 //import { Historial } from "../../layout/historial/Historial";
@@ -91,7 +91,7 @@ const sidebarItems: SidebarItem[] = [
     icon: <Building size={20} />,
     content: <Proveedor />, // Asegúrate de que el componente Proveedores esté definido
   },
-  {
+/*   {
     id: "compras",
     text: "Compras",
     icon: <ShoppingCart size={20} />,
@@ -102,7 +102,7 @@ const sidebarItems: SidebarItem[] = [
     text: "Ventas",
     icon: <DollarSign size={20} />, // ícono representativo de ventas
     content: <h1>En desarrollo...</h1>, // componente que mostrarás para la sección ventas <Ventas />,
-  },
+  }, */
   /* 
   {
     id: "historial",

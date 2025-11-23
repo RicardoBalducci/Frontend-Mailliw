@@ -6,7 +6,7 @@ import {
   Wrench,
   HardHat,
   Building,
-  ShoppingCart,
+  //ShoppingCart,
 } from "lucide-react";
 import { SidebarItem } from "../types";
 import { Client } from "../../../layout/client/Client";
@@ -15,8 +15,8 @@ import { Gastos } from "../../../layout/Gastos/Gastos";
 import { Tecnicos } from "../../../layout/Technics/Tecnicos";
 import { Materiales } from "../../../layout/Materiales/Materiales";
 import { Proveedor } from "../../../layout/Proveedor/Proveedor";
-import { Compra } from "../../../layout/Compra/Compra";
-
+/* import { Compra } from "../../../layout/Compra/Compra";
+ */
 export const sidebarItems: SidebarItem[] = [
   {
     id: "home",
@@ -60,10 +60,10 @@ export const sidebarItems: SidebarItem[] = [
     icon: <Building className="h-5 w-5" />,
     content: <Proveedor />,
   },
-  {
+/*   {
     id: "purchases",
     text: "Compras",
     icon: <ShoppingCart className="h-5 w-5" />,
     content: <Compra />,
-  },
+  }, */
 ];

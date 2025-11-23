@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 
 import { useState, useEffect } from "react";
 import { Box } from "@mui/material";
@@ -36,7 +36,6 @@ export function ServiciosEdit({
       setDescripcion(servicio.descripcion || "");
       setPrecioEstandarUsd(servicio.precio_estandar_usd || "");
       setTecnicosCalificados(servicio.tecnicosCalificados || []);
-      setMaterialesUsados(servicio.tecnicosCalificados || []);
     }
   }, [open, servicio]);
 
@@ -126,7 +125,6 @@ export function ServiciosEdit({
         />
       </Box>
 
-      {/* Puedes extender esta sección más adelante con chips o selectores para técnicos y materiales */}
       <Box sx={{ mt: 3, color: "text.secondary", fontSize: 14 }}>
         <Wrench size={16} style={{ marginRight: 6 }} />
         Técnicos calificados y materiales asociados serán gestionados en futuras
@@ -137,3 +135,4 @@ export function ServiciosEdit({
 }
 
 export default ServiciosEdit;
+ */

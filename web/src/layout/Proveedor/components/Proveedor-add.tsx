@@ -14,13 +14,11 @@ import { useSnackbar } from "../../../components/context/SnackbarContext";
 interface ProveedorAddProps {
   open: boolean;
   onClose: () => void;
-  onProveedorAdded?: () => void;
 }
 
 export function ProveedorAdd({
   open,
   onClose,
-  onProveedorAdded,
 }: ProveedorAddProps) {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -72,7 +70,6 @@ export function ProveedorAdd({
       setLoading(true);
       await ProveedorServices.create(newProveedorData);
       resetForm();
-      if (onProveedorAdded) onProveedorAdded();
       setTimeout(() => onClose(), 800);
       showSnackbar(`Proveedor "${nombre}" añadido exitosamente`, "success");
     } catch (err) {

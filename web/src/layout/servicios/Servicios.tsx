@@ -26,12 +26,12 @@ import {
 } from "../../theme/StyledComponents";
 import ServiciosTable from "./components/Servicios-table";
 import { ServicioAdd } from "./components/Servicios-add";
-import Swal from "sweetalert2";
-import HeaderSection from "../../components/global/Header/header";
+/* import Swal from "sweetalert2";
+ */import HeaderSection from "../../components/global/Header/header";
 import { Anvil } from "lucide-react";
 import ConfirmModal from "../../components/global/modal/ConfirmModal";
-import ServiciosEdit from "./components/Servicio-Update";
-
+/* import ServiciosEdit from "./components/Servicio-Update";
+ */
 export function Servicios() {
   const theme = useTheme();
   const [servicios, setServicios] = useState<ServicioDTO[]>([]);
@@ -79,20 +79,21 @@ export function Servicios() {
   const handleOpenAddModal = () => setOpenAddModal(true);
   const handleCloseAddModal = () => setOpenAddModal(false);
 
-  const [openEditModal, setOpenEditModal] = useState(false);
+/*   const [openEditModal, setOpenEditModal] = useState(false);
   const [servicioToModify, setServicioToModify] = useState<ServicioDTO | null>(
     null
-  );
+  ); */
 
-  const handleModify = (servicio: ServicioDTO) => {
-    setServicioToModify(servicio);
-    setOpenEditModal(true);
+ const handleModify = (servicio: ServicioDTO) => {
+  console.log(servicio)
+/*     setServicioToModify(servicio);
+    setOpenEditModal(true); */
   };
 
-  const handleCloseEditModal = () => {
+/*   const handleCloseEditModal = () => {
     setOpenEditModal(false);
     setServicioToModify(null);
-  };
+  };  */
 
   // 🔥 Manejo de eliminación
   const handleDelete = (servicio: ServicioDTO) => {
@@ -258,14 +259,14 @@ export function Servicios() {
               confirmText="Eliminar"
               /* confirmColor="error" */
             />
-            <ServiciosEdit
+            {/* <ServiciosEdit
               open={openEditModal}
               onClose={handleCloseEditModal}
               servicio={servicioToModify}
               onServicioUpdated={() =>
                 handleServicioActionSuccess("Servicio modificado exitosamente!")
               }
-            />
+            /> */}
           </Box>
         </Fade>
       </Container>
