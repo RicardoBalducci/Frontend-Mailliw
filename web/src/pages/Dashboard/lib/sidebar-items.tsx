@@ -15,6 +15,7 @@ import { Gastos } from "../../../layout/Gastos/Gastos";
 import { Tecnicos } from "../../../layout/Technics/Tecnicos";
 import { Materiales } from "../../../layout/Materiales/Materiales";
 import { Proveedor } from "../../../layout/Proveedor/Proveedor";
+import { Personal } from "../../../layout/Personal/Personal"
 /* import { Compra } from "../../../layout/Compra/Compra";
  */
 export const sidebarItems: SidebarItem[] = [
@@ -59,6 +60,12 @@ export const sidebarItems: SidebarItem[] = [
     text: "Proveedores",
     icon: <Building className="h-5 w-5" />,
     content: <Proveedor />,
+  },
+  {
+    id: "personal",
+    text: "Personal",
+    icon: <Building className="h-5 w-5" />,
+    content: <Personal />,
   },
 /*   {
     id: "purchases",

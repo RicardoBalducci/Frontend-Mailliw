@@ -105,6 +105,7 @@ export function ProveedorAdd({
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           startIcon={<BriefcaseBusiness />}
+          onlyLetters
           disabled={loading}
           errorMessage={errors.nombre}
         />

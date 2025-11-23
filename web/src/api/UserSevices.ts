@@ -35,6 +35,21 @@ class UserServices {
     }
   }
 
+
+    static async getAll() {
+    try {
+      const response = await axios.get(`${BASE_API}users`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Error al obtener técnicos"
+        );
+      }
+      throw new Error("Error de conexión");
+    }
+  }
+
   static async createTechnician(technicianData: UserDto) {
     try {
       const response = await axios.post(

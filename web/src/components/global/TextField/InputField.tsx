@@ -5,14 +5,20 @@ type InputFieldProps = TextFieldProps & {
   startIcon?: React.ReactNode;
   large?: boolean;
   onlyNumbers?: boolean;
-  errorMessage?: string; // ✅ nuevo: muestra mensaje de error en rojo
+  onlyLetters?: boolean;  // ✅ NUEVO
+  errorMessage?: string;
+  maxLength?: number;
+  minLength?: number;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
   startIcon,
   large = false,
   onlyNumbers = false,
+  onlyLetters = false,   // ✅ NUEVO
   errorMessage,
+  maxLength,
+  minLength,
   sx,
   onInput,
   ...props
@@ -24,8 +30,8 @@ const InputField: React.FC<InputFieldProps> = ({
       {...props}
       fullWidth
       margin="normal"
-      error={hasError} // activa el estilo rojo
-      helperText={errorMessage || ""} // muestra el texto de error debajo
+      error={hasError}
+      helperText={errorMessage || ""}
       InputProps={{
         startAdornment: startIcon ? (
           <InputAdornment position="start">{startIcon}</InputAdornment>
@@ -38,12 +44,37 @@ const InputField: React.FC<InputFieldProps> = ({
               inputMode: "numeric",
               pattern: "[0-9]*",
               onInput: (e: React.FormEvent<HTMLInputElement>) => {
-                const target = e.target as HTMLInputElement;
-                target.value = target.value.replace(/\D/g, ""); // elimina todo lo que no sea número
+                const target = e.currentTarget;
+                target.value = target.value.replace(/\D/g, "");
+
+                if (maxLength) {
+                  target.value = target.value.slice(0, maxLength);
+                }
+
                 if (onInput) onInput(e);
               },
             }
           : {}),
+
+        ...(onlyLetters
+          ? {
+              inputMode: "text",
+              pattern: "[A-Za-zÁÉÍÓÚáéíóúÑñ ]*",
+              onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                const target = e.currentTarget;
+                target.value = target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, "");
+
+                if (maxLength) {
+                  target.value = target.value.slice(0, maxLength);
+                }
+
+                if (onInput) onInput(e);
+              },
+            }
+          : {}),
+
+        ...(maxLength ? { maxLength } : {}),
+        ...(minLength ? { minLength } : {}),
         ...props.inputProps,
       }}
       sx={{

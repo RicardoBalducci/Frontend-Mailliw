@@ -18,7 +18,6 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline"; // Import Help ic
 import MiniChat from "../../components/Mini-chat";
 import { Materiales } from "../../layout/Materiales/Materiales";
 import {
-  Home,
   Users,
   Package,
   //DollarSign,
@@ -28,6 +27,8 @@ import {
   //ShoppingCart,
   Anvil,
   ArrowDownUp,
+  UserLock,
+  LayoutDashboard,
   //Clock,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ import { Proveedor } from "../../layout/Proveedor/Proveedor";
 /* import { Compra } from "../../layout/Compra/Compra";
  */import { HomeContent } from "../../layout/home/home";
 import { Servicios } from "../../layout/servicios/Servicios";
+import Personal from "../../layout/Personal/Personal";
 //import { Ventas } from "../../layout/ventas";
 //import { Historial } from "../../layout/historial/Historial";
 
@@ -44,8 +46,8 @@ const DRAWER_WIDTH = 0; // Changed from 0 to 240
 const sidebarItems: SidebarItem[] = [
   {
     id: "home",
-    text: "Inicio",
-    icon: <Home size={20} />,
+    text: "Dashboard",
+    icon: <LayoutDashboard size={20} />,
     content: <HomeContent />,
   },
   {
@@ -91,6 +93,12 @@ const sidebarItems: SidebarItem[] = [
     icon: <Building size={20} />,
     content: <Proveedor />, // Asegúrate de que el componente Proveedores esté definido
   },
+  {
+    id: "personal",
+    text: "Personal",
+    icon: <UserLock size={20} />, // icono de personal
+    content: <Personal />, // Asegúrate de que el componente Personal/Proveedores esté definido
+  }
 /*   {
     id: "compras",
     text: "Compras",

@@ -2,7 +2,6 @@
 import React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
   Box,
@@ -21,7 +20,6 @@ interface ProveedorTableProps {
   rows: ProveedorDto[];
   searchTerm: string; // Not directly used in the table, but passed from parent
   onModify: (proveedor: ProveedorDto) => void;
-  onDelete: (id: number, name: string) => void;
   totalItems: number;
   currentPage: number; // This is 1-indexed from the parent
   itemsPerPage: number;
@@ -129,7 +127,6 @@ const ProveedorTable: React.FC<ProveedorTableProps> = ({
   rows,
   searchTerm, // This prop is correctly passed but not directly used for filtering here.
   onModify,
-  onDelete,
   totalItems,
   currentPage,
   itemsPerPage,
@@ -207,22 +204,6 @@ const ProveedorTable: React.FC<ProveedorTableProps> = ({
               }}
             >
               <EditIcon />
-            </ActionButton>
-          </Tooltip>
-          <Tooltip title="Eliminar proveedor">
-            <ActionButton
-              variant="contained"
-              color="error"
-              size="small"
-              onClick={() => onDelete(params.row.id, params.row.nombre)}
-              sx={{
-                bgcolor: alpha(theme.palette.error.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.error.main,
-                },
-              }}
-            >
-              <DeleteIcon />
             </ActionButton>
           </Tooltip>
         </Box>

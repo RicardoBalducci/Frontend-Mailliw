@@ -52,7 +52,10 @@ const ClientModal: React.FC<ClientModalProps> = ({
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [telefono, setTelefono] = useState("");
+
+  // ✅ ESTADOS DE TELÉFONO
+  const [phoneCode, setPhoneCode] = useState("0412");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const [errors, setErrors] = useState({
     rifNumber: "",
@@ -64,24 +67,37 @@ const ClientModal: React.FC<ClientModalProps> = ({
 
   const { showSnackbar } = useSnackbar();
 
+  // ✅ CARGA DE CLIENTE AL EDITAR
   useEffect(() => {
     if (currentClient) {
       const rifParts = currentClient.rif.split("-");
       setRifType(rifParts[0] || "V");
       setRifNumber(rifParts[1] || "");
+
       setNombre(currentClient.nombre);
       setApellido(currentClient.apellido || "");
       setDireccion(currentClient.direccion);
-      setTelefono(currentClient.telefono);
+
+      // === CARGA TELEFONO DESGLOSADO ===
+      if (currentClient.telefono.includes("-")) {
+        const [code, number] = currentClient.telefono.split("-");
+        setPhoneCode(code || "0412");
+        setPhoneNumber(number || "");
+      } else {
+        setPhoneCode("0412");
+        setPhoneNumber(currentClient.telefono);
+      }
     } else {
       setRifType("V");
       setRifNumber("");
       setNombre("");
       setApellido("");
       setDireccion("");
-      setTelefono("");
+
+      setPhoneCode("0412");
+      setPhoneNumber("");
     }
-    // Reset errors al abrir modal
+
     setErrors({
       rifNumber: "",
       nombre: "",
@@ -93,6 +109,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
 
   const isCompany = rifType === "G" || rifType === "J";
 
+  // ✅ VALIDACIÓN AJUSTADA
   const validateForm = (): boolean => {
     let valid = true;
     const newErrors = { ...errors };
@@ -117,7 +134,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
       valid = false;
     } else newErrors.direccion = "";
 
-    if (!telefono.trim()) {
+    if (!phoneNumber.trim()) {
       newErrors.telefono = "Campo requerido";
       valid = false;
     } else newErrors.telefono = "";
@@ -126,6 +143,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
     return valid;
   };
 
+  // ✅ GUARDADO CONCATENADO
   const handleLocalSave = async () => {
     if (!validateForm()) return;
 
@@ -135,7 +153,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
       nombre,
       apellido: apellido || "",
       direccion,
-      telefono,
+      telefono: `${phoneCode}-${phoneNumber}`, // ← ✔ AQUÍ
     };
 
     try {
@@ -150,9 +168,18 @@ const ClientModal: React.FC<ClientModalProps> = ({
         onRefresh();
       }
     } finally {
-      onClose(); // cierra automáticamente el modal
+      onClose();
     }
   };
+
+  const rifMaxLength =
+    {
+      V: 8,
+      E: 9,
+      J: 9,
+      G: 9,
+      R: 10,
+    }[rifType] || 10;
 
   return (
     <BaseModal
@@ -162,6 +189,7 @@ const ClientModal: React.FC<ClientModalProps> = ({
       onSave={handleLocalSave}
       title={currentClient ? "Editar Cliente" : "Nuevo Cliente"}
     >
+      {/* ===================== RIF ===================== */}
       <Box display="flex" gap={2} flexWrap="wrap">
         <StyledTextField
           select
@@ -184,17 +212,21 @@ const ClientModal: React.FC<ClientModalProps> = ({
           value={rifNumber}
           onChange={(e) => setRifNumber(e.target.value)}
           startIcon={<Hash />}
+          onlyNumbers
+          maxLength={rifMaxLength}
           errorMessage={errors.rifNumber}
           sx={{ flex: 2, minWidth: 200 }}
         />
       </Box>
 
+      {/* ===================== NOMBRE ===================== */}
       <InputField
         label="Nombre"
         value={nombre}
         onChange={(e) => setNombre(e.target.value)}
         startIcon={<User />}
         errorMessage={errors.nombre}
+        onlyLetters
       />
 
       {!isCompany && (
@@ -204,9 +236,11 @@ const ClientModal: React.FC<ClientModalProps> = ({
           onChange={(e) => setApellido(e.target.value)}
           startIcon={<User />}
           errorMessage={errors.apellido}
+          onlyLetters
         />
       )}
 
+      {/* ===================== DIRECCIÓN ===================== */}
       <TextAreaField
         label="Dirección"
         value={direccion}
@@ -215,13 +249,35 @@ const ClientModal: React.FC<ClientModalProps> = ({
         errorMessage={errors.direccion}
       />
 
-      <InputField
-        label="Teléfono"
-        value={telefono}
-        onChange={(e) => setTelefono(e.target.value)}
-        startIcon={<Phone />}
-        errorMessage={errors.telefono}
-      />
+      {/* ===================== TELÉFONO ===================== */}
+      <Box display="flex" gap={2}>
+        <StyledTextField
+          select
+          label="Código"
+          value={phoneCode}
+          onChange={(e) => setPhoneCode(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{ flex: 1, minWidth: 120 }}
+        >
+          <MenuItem value="0412">0412</MenuItem>
+          <MenuItem value="0414">0414</MenuItem>
+          <MenuItem value="0416">0416</MenuItem>
+          <MenuItem value="0424">0424</MenuItem>
+          <MenuItem value="0426">0426</MenuItem>
+        </StyledTextField>
+
+        <InputField
+          label="Teléfono"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          startIcon={<Phone />}
+          onlyNumbers
+          maxLength={7}
+          errorMessage={errors.telefono}
+          sx={{ flex: 2 }}
+        />
+      </Box>
     </BaseModal>
   );
 };

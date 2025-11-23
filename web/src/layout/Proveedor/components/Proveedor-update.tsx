@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box } from "@mui/material";
+import { Box, MenuItem, TextField } from "@mui/material";
 
 import ProveedorServices from "../../../api/ProveedorServices";
 import { ProveedorDto, ProveedorUpdateDto } from "../../../Dto/Proveedor.dto";
@@ -25,7 +25,8 @@ export function ProveedorUpdate({
   onProveedorUpdated,
 }: ProveedorUpdateProps) {
   const [nombre, setNombre] = useState("");
-  const [telefono, setTelefono] = useState("");
+  const [phoneCode, setPhoneCode] = useState("0412");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [direccion, setDireccion] = useState("");
   const [loading, setLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
@@ -39,7 +40,14 @@ export function ProveedorUpdate({
   useEffect(() => {
     if (open && proveedorToEdit) {
       setNombre(proveedorToEdit.nombre || "");
-      setTelefono(proveedorToEdit.telefono || "");
+      if (proveedorToEdit.telefono?.includes("-")) {
+        const [code, number] = proveedorToEdit.telefono.split("-");
+        setPhoneCode(code || "0412");
+        setPhoneNumber(number || "");
+      } else {
+        setPhoneCode("0412");
+        setPhoneNumber(proveedorToEdit.telefono || "");
+      }
       setDireccion(proveedorToEdit.direccion || "");
       setErrors({ nombre: "", telefono: "", direccion: "" });
     } else if (!open) {
@@ -49,7 +57,8 @@ export function ProveedorUpdate({
 
   const resetForm = () => {
     setNombre("");
-    setTelefono("");
+    setPhoneCode("0412");
+    setPhoneNumber("");
     setDireccion("");
     setErrors({ nombre: "", telefono: "", direccion: "" });
   };
@@ -57,7 +66,11 @@ export function ProveedorUpdate({
   const validateFields = () => {
     const newErrors = {
       nombre: !nombre.trim() ? "Campo obligatorio" : "",
-      telefono: "",
+      telefono: !phoneNumber.trim()
+        ? "Campo obligatorio"
+        : !/^\d+$/.test(phoneNumber)
+        ? "Solo números"
+        : "",
       direccion: "",
     };
     setErrors(newErrors);
@@ -70,7 +83,7 @@ export function ProveedorUpdate({
 
     const updatedProveedorData: ProveedorUpdateDto = {
       nombre: nombre.trim(),
-      telefono: telefono.trim() || null,
+      telefono: `${phoneCode}-${phoneNumber}`,
       direccion: direccion.trim() || null,
     };
 
@@ -117,14 +130,36 @@ export function ProveedorUpdate({
           errorMessage={errors.nombre}
         />
 
-        <InputField
-          label="Teléfono"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          startIcon={<Phone />}
-          disabled={loading}
-          errorMessage={errors.telefono}
-        />
+        {/* Teléfono con código + número */}
+        <Box display="flex" gap={2}>
+          <TextField
+            select
+            label="Código"
+            value={phoneCode}
+            onChange={(e) => setPhoneCode(e.target.value)}
+            fullWidth
+            margin="normal"
+            sx={{ flex: 1, minWidth: 120 }}
+          >
+            <MenuItem value="0412">0412</MenuItem>
+            <MenuItem value="0414">0414</MenuItem>
+            <MenuItem value="0416">0416</MenuItem>
+            <MenuItem value="0424">0424</MenuItem>
+            <MenuItem value="0426">0426</MenuItem>
+          </TextField>
+
+          <InputField
+            label="Teléfono"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            startIcon={<Phone />}
+            onlyNumbers
+            maxLength={7}
+            disabled={loading}
+            errorMessage={errors.telefono}
+            sx={{ flex: 2 }}
+          />
+        </Box>
 
         <InputField
           label="Dirección"

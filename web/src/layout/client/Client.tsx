@@ -159,68 +159,70 @@ export function Client() {
     setCurrentClient(null); // Clear current client state
   };
 
+  const handleSaveClient = async (clientData: ClientData) => {
+  try {
+    Swal.fire({
+      title: "Guardando cliente...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: {
+        popup: "swal-over-modal",
+      },
+    });
+
+    let response;
+
+    if (clientData.id) {
+      response = await ClientServices.updateCliente(clientData.id, clientData);
+    } else {
+      response = await ClientServices.createCliente(clientData);
+    }
+
+    if (response.success) {
+      showSnackbar(
+        clientData.id
+          ? "Cliente actualizado correctamente"
+          : "Cliente creado correctamente",
+        "success"
+      );
+      handleRefresh();
+      return true; // 🔥 Solo devuelve éxito
+    }
+
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: response.message || "No se pudo guardar el cliente.",
+      customClass: {
+        popup: "swal-over-modal",
+      },
+    });
+    return false;
+
+  } catch (error) {
+    console.error("Error al guardar cliente:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Ocurrió un error al guardar el cliente.",
+      customClass: {
+        popup: "swal-over-modal",
+      },
+    });
+    return false;
+
+  } finally {
+    Swal.close();
+  }
+};
+
   const handleRefresh = () => {
     fetchClientes();
     setRefreshKey((prev) => prev + 1); // Force table refresh
   };
 
-  const handleSaveClient = async (clientData: ClientData) => {
-    try {
-      Swal.fire({
-        title: "Guardando cliente...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-        customClass: {
-          popup: "swal-over-modal",
-        },
-      });
 
-      let response;
-      if (clientData.id) {
-        response = await ClientServices.updateCliente(
-          clientData.id,
-          clientData
-        );
-      } else {
-        response = await ClientServices.createCliente(clientData);
-      }
 
-      if (response.success) {
-        showSnackbar(
-          clientData.id
-            ? "Cliente actualizado correctamente"
-            : "Cliente creado correctamente",
-          "success"
-        );
-        handleRefresh(); // refresca la tabla
-        return true;
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "No se pudo guardar el cliente.",
-          customClass: {
-            popup: "swal-over-modal",
-          },
-        });
-        return false;
-      }
-    } catch (error) {
-      console.error("Error al guardar cliente:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Ocurrió un error al guardar el cliente.",
-        customClass: {
-          popup: "swal-over-modal",
-        },
-      });
-      return false;
-    } finally {
-      Swal.close(); // ⬅️ cierra SweetAlert
-      handleCloseModal(); // ⬅️ cierra el modal automáticamente
-    }
-  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
