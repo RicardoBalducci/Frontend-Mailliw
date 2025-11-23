@@ -1,35 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Alert,
-  Fade,
-  IconButton,
-  Chip,
-  InputAdornment,
-  Stack,
-  CircularProgress,
-} from "@mui/material";
+import { Box } from "@mui/material";
 
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"; // USD Icon
-import NumbersIcon from "@mui/icons-material/Numbers";
-import DescriptionIcon from "@mui/icons-material/Description";
 import ProductServices from "../../../api/ProductServices";
 import { CreateProductoDTO } from "../../../Dto/Productos.dto";
-import {
-  ModalContent,
-  ModalHeader,
-  StyledModal,
-  ModalBody,
-  StyledTextField,
-  ModalFooter,
-  StyledButton,
-} from "../../../theme/StyledModalComponents";
+
+import BaseModal from "../../../components/global/modal/modal";
+import InputField from "../../../components/global/TextField/InputField";
+import TextAreaField from "../../../components/global/TextField/TextAreaField";
+import { Box as BoxIcon, FileText, Hash, Package } from "lucide-react";
+import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface ProductsAddProps {
   open: boolean;
@@ -45,224 +26,145 @@ export function ProductsAdd({
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [stock, setStock] = useState<number | "">("");
-  const [precio_unitario, setPrecioUnitario] = useState<number | "">(""); // This is in Bolívares
+  const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbar();
+
+  const [errors, setErrors] = useState({
+    nombre: "",
+    descripcion: "",
+    stock: "",
+    precioUnitario: "",
+  });
+
+  const resetForm = () => {
+    setNombre("");
+    setDescripcion("");
+    setStock("");
+    setPrecioUnitario("");
+    setErrors({
+      nombre: "",
+      descripcion: "",
+      stock: "",
+      precioUnitario: "",
+    });
+  };
+
+  const validateFields = () => {
+    const newErrors = {
+      nombre: !nombre.trim() ? "Campo obligatorio" : "",
+      descripcion: !descripcion.trim() ? "Campo obligatorio" : "",
+      stock: stock === "" ? "Campo obligatorio" : "",
+      precioUnitario: precioUnitario === "" ? "Campo obligatorio" : "",
+    };
+
+    setErrors(newErrors);
+
+    // Si no hay errores, retorna true
+    return Object.values(newErrors).every((e) => e === "");
+  };
 
   const handleAddProduct = async () => {
-    if (!nombre || !descripcion || stock === "" || precio_unitario === "") {
-      setError(
-        "Por favor, completa todos los campos requeridos (Nombre, Descripción, Stock, Precio Unitario (Bs), Precio Unitario (USD))."
-      );
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    if (!validateFields()) return;
 
     const newProductData: CreateProductoDTO = {
-      nombre,
-      descripcion,
+      nombre: nombre.trim(),
+      descripcion: descripcion.trim(),
       stock: Number(stock),
-      precio_unitario: Number(precio_unitario),
+      precio_unitario: Number(precioUnitario),
     };
 
     try {
-      const response = await ProductServices.createProduct(newProductData); // Use the service
+      setLoading(true);
+      const response = await ProductServices.createProduct(newProductData);
 
-      if (response.success) {
-        setSuccess("¡Producto añadido exitosamente!");
-
-        setNombre("");
-        setDescripcion("");
-        setStock("");
-        setPrecioUnitario("");
-        if (onProductAdded) {
-          onProductAdded();
-        }
-
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-      } else {
-        setError(response.message || "Error al añadir el producto.");
+      if (response?.success) {
+        resetForm();
+        if (onProductAdded) onProductAdded();
+        setTimeout(() => onClose(), 800);
+        showSnackbar("Creado exitosamente", "success");
       }
     } catch (err) {
-      setError("Ocurrió un error inesperado al añadir el producto.");
-      console.error("Error adding product:", err);
+      console.error("Error creando producto:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (open) {
-      setError(null);
-      setSuccess(null);
-      setNombre("");
-      setDescripcion("");
-      setStock("");
-      setPrecioUnitario("");
-    }
+    if (open) resetForm();
   }, [open]);
 
+  const handleNumericInput = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    return cleaned === "" ? "" : Number(cleaned);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddProduct();
+    }
+  };
+
   return (
-    <StyledModal
+    <BaseModal
       open={open}
+      saveText="Añadir Producto"
       onClose={onClose}
-      closeAfterTransition
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
+      onSave={handleAddProduct}
+      title="Añadir Producto"
     >
-      <Fade in={open}>
-        <ModalContent>
-          <ModalHeader>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box
-                sx={{
-                  mr: 2,
-                  p: 1,
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  borderRadius: "50%",
-                }}
-              >
-                <ShoppingCartIcon />
-              </Box>
-              <Typography variant="h5" component="h2" fontWeight={600}>
-                {"Añadir Producto"}
-              </Typography>
-            </Box>
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Chip
-              label={"Nuevo Producto"}
-              icon={<AddIcon />}
-              size="small"
-              sx={{
-                position: "absolute",
-                right: 48,
-                top: 12,
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                fontWeight: 500,
-              }}
-            />
-          </ModalHeader>
+      <Box component="form" onKeyDown={handleKeyPress}>
+        <InputField
+          label="Nombre del Producto"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          startIcon={<Package />}
+          sx={{ flex: 2, minWidth: 200 }}
+          disabled={loading}
+          errorMessage={errors.nombre}
+        />
 
-          <ModalBody>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-            <Stack spacing={3}>
-              <StyledTextField
-                label="Nombre del Producto"
-                variant="outlined"
-                fullWidth
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ShoppingCartIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Descripción del Producto"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DescriptionIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Stock"
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={stock}
-                onChange={(e) => setStock(parseInt(e.target.value) || "")}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <NumbersIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Precio Unitario ($)" // Changed label to Bolívares
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={precio_unitario}
-                onChange={(e) =>
-                  setPrecioUnitario(parseFloat(e.target.value) || "")
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AttachMoneyIcon color="action" />
-                      {/* Using EuroIcon for Bolívares as no specific Bolívar icon is standard in MUI */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Stack>
-          </ModalBody>
+        <TextAreaField
+          label="Descripción del Producto"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          startIcon={<FileText />}
+          sx={{ flex: 2, minWidth: 200 }}
+          rows={4}
+          disabled={loading}
+          errorMessage={errors.descripcion}
+        />
 
-          <ModalFooter>
-            <StyledButton
-              variant="outlined"
-              color="primary"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancelar
-            </StyledButton>
-            <StyledButton
-              variant="contained"
-              color="primary"
-              onClick={handleAddProduct}
-              disabled={loading}
-            >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Añadir Producto"
-              )}
-            </StyledButton>
-          </ModalFooter>
-        </ModalContent>
-      </Fade>
-    </StyledModal>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>
+          <InputField
+            label="Stock"
+            value={stock}
+            onChange={(e) => setStock(handleNumericInput(e.target.value))}
+            startIcon={<BoxIcon />}
+            sx={{ flex: 1, minWidth: 150 }}
+            onlyNumbers
+            disabled={loading}
+            errorMessage={errors.stock}
+          />
+
+          <InputField
+            label="Precio Unitario (USD)"
+            value={precioUnitario}
+            onChange={(e) =>
+              setPrecioUnitario(handleNumericInput(e.target.value))
+            }
+            startIcon={<Hash />}
+            sx={{ flex: 1, minWidth: 150 }}
+            onlyNumbers
+            disabled={loading}
+            errorMessage={errors.precioUnitario}
+          />
+        </Box>
+      </Box>
+    </BaseModal>
   );
 }
+
+export default ProductsAdd;

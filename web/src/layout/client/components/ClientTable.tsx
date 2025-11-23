@@ -1,4 +1,6 @@
-import type React from "react";
+"use client";
+
+import React from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -34,62 +36,51 @@ interface ClientTableProps {
   onDelete: (id: number) => void;
 }
 
-// Styled components for enhanced visual design
+// === Styled DataGrid ===
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   border: "none",
   backgroundColor: "#ffffff",
   borderRadius: 12,
-  boxShadow: "0 6px 30px rgba(0, 0, 0, 0.1)", // Subtle but more pronounced shadow
+  boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
   transition: "all 0.3s ease",
 
   "& .MuiDataGrid-columnHeaders": {
-    backgroundColor: theme.palette.primary.main,
-    fontSize: "0.95rem", // Larger font size for headers
-    fontWeight: 600,
+    backgroundColor: "#ffffff",
+    color: "#000000",
+    fontSize: "0.9rem",
+    fontWeight: 700,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     "& .MuiDataGrid-columnSeparator": {
-      color: "rgba(255, 255, 255, 0.2)",
+      color: alpha(theme.palette.common.black, 0.1),
     },
     "& .MuiDataGrid-columnHeaderTitle": {
-      fontWeight: 700,
-      textTransform: "uppercase", // Uppercase text
-      letterSpacing: "0.05em", // Letter spacing
-    },
-    "& .MuiDataGrid-columnHeaderTitleContainer": {
-      display: "flex",
-      justifyContent: "flex-start", // Align header text to start
-      alignItems: "center",
+      fontWeight: 800,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em",
     },
   },
 
   "& .MuiDataGrid-cell": {
     borderBottom: "1px solid rgba(224, 224, 224, 0.4)",
-    fontSize: "0.9rem", // Larger font size for cells
-    padding: "12px 16px", // More padding for spacious design
-    display: "flex", // Ensure content aligns correctly
-    alignItems: "center", // Vertically center cell content
-    "&:focus": {
-      outline: "none",
-    },
-    "&:focus-within": {
-      outline: "none",
-    },
+    fontSize: "0.9rem",
+    padding: "12px 16px",
+    display: "flex",
+    alignItems: "center",
+    "&:focus, &:focus-within": { outline: "none" },
   },
 
   "& .MuiDataGrid-row": {
     "&:nth-of-type(even)": {
-      backgroundColor: alpha(theme.palette.primary.light, 0.04), // Lighter alpha for even rows
+      backgroundColor: alpha(theme.palette.primary.light, 0.04),
     },
     "&:hover": {
-      backgroundColor: alpha(theme.palette.primary.light, 0.1), // Slightly more opaque on hover
+      backgroundColor: alpha(theme.palette.primary.light, 0.1),
       transition: "background-color 0.2s ease",
     },
     "&.Mui-selected": {
-      backgroundColor: alpha(theme.palette.primary.light, 0.15), // Slightly more opaque when selected
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.light, 0.2),
-      },
+      backgroundColor: alpha(theme.palette.primary.light, 0.15),
+      "&:hover": { backgroundColor: alpha(theme.palette.primary.light, 0.2) },
     },
   },
 
@@ -98,37 +89,26 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.04),
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
-    padding: theme.spacing(1.5, 2), // More padding
+    padding: theme.spacing(1.5, 2),
     display: "flex",
-    justifyContent: "flex-end", // Align paginator to the right
-  },
-
-  "& .MuiTablePagination-root": {
-    color: theme.palette.text.secondary,
-  },
-
-  "& .MuiDataGrid-virtualScroller": {
-    backgroundColor: "#ffffff",
-  },
-
-  "& .MuiCheckbox-root": {
-    color: theme.palette.primary.main,
+    justifyContent: "flex-end",
   },
 }));
 
+// === Styled Action Buttons ===
 const ActionButton = styled(Button)(({ theme }) => ({
   minWidth: 0,
-  padding: "7px 10px", // Adjusted padding for slightly larger icons
+  padding: "7px 10px",
   borderRadius: 8,
-  transition: "all 0.2s ease",
+  transition: "all 0.3s ease",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    transform: "translateY(-2px) scale(1.05)",
+    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
   },
-  color: theme.palette.common.white, // Ensure icon color is white
+  color: theme.palette.common.white,
   "& .MuiSvgIcon-root": {
-    fontSize: "1.2rem", // Slightly larger icons
+    fontSize: "1.2rem",
   },
 }));
 
@@ -140,11 +120,14 @@ const ClientTable: React.FC<ClientTableProps> = ({
 }) => {
   const theme = useTheme();
 
-  const filteredRows = rows.filter((row) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredRows = React.useMemo(() => {
+    if (!searchTerm.trim()) return rows;
+    return rows.filter((row) =>
+      Object.values(row).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [rows, searchTerm]);
 
   const columns: GridColDef[] = [
     {
@@ -157,8 +140,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
           {params.value}
         </Typography>
       ),
-      headerAlign: "left",
-      align: "left",
     },
     {
       field: "nombre",
@@ -170,8 +151,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
           {params.value}
         </Typography>
       ),
-      headerAlign: "left",
-      align: "left",
     },
     {
       field: "apellido",
@@ -181,8 +160,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
       renderCell: (params) => (
         <Typography variant="body2">{params.value || "—"}</Typography>
       ),
-      headerAlign: "left",
-      align: "left",
     },
     {
       field: "direccion",
@@ -204,8 +181,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
           </Typography>
         </Tooltip>
       ),
-      headerAlign: "left",
-      align: "left",
     },
     {
       field: "telefono",
@@ -217,8 +192,6 @@ const ClientTable: React.FC<ClientTableProps> = ({
           {params.value}
         </Typography>
       ),
-      headerAlign: "left",
-      align: "left",
     },
     {
       field: "acciones",
@@ -233,21 +206,17 @@ const ClientTable: React.FC<ClientTableProps> = ({
         <Box
           display="flex"
           gap={1}
-          justifyContent="center" // Ensures horizontal centering
-          alignItems="center" // Ensures vertical centering
-          sx={{ width: "100%", height: "100%" }} // Make the Box fill the cell
+          justifyContent="center"
+          alignItems="center"
+          sx={{ width: "100%", height: "100%" }}
         >
           <Tooltip title="Editar cliente">
             <ActionButton
               variant="contained"
-              color="primary"
-              size="small"
               onClick={() => onModify(params.row)}
               sx={{
                 bgcolor: alpha(theme.palette.primary.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.primary.main,
-                },
+                "&:hover": { bgcolor: theme.palette.primary.main },
               }}
             >
               <EditIcon />
@@ -258,13 +227,10 @@ const ClientTable: React.FC<ClientTableProps> = ({
             <ActionButton
               variant="contained"
               color="error"
-              size="small"
               onClick={() => onDelete(params.row.id)}
               sx={{
                 bgcolor: alpha(theme.palette.error.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.error.main,
-                },
+                "&:hover": { bgcolor: theme.palette.error.main },
               }}
             >
               <DeleteIcon />
@@ -283,23 +249,27 @@ const ClientTable: React.FC<ClientTableProps> = ({
         width: "100%",
         borderRadius: 3,
         overflow: "hidden",
-        boxShadow: "0 6px 30px rgba(0, 0, 0, 0.1)",
+        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
         border: "1px solid rgba(0, 0, 0, 0.05)",
       }}
     >
       <StyledDataGrid
         rows={filteredRows}
         columns={columns}
+        getRowId={(row) => row.id}
         initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
-          },
+          pagination: { paginationModel: { page: 0, pageSize: 10 } },
         }}
         pageSizeOptions={[5, 10, 25]}
         disableRowSelectionOnClick
         density="comfortable"
         autoHeight={false}
         sx={{ height: "100%" }}
+        loading={!rows.length} // ✅ Skeleton activo mientras carga
+        localeText={{
+          noRowsLabel: "No hay clientes disponibles",
+          noResultsOverlayLabel: "No se encontraron resultados",
+        }}
       />
     </Paper>
   );

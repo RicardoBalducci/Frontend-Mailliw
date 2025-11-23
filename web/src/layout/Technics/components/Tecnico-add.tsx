@@ -1,32 +1,17 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { UserDto } from "../interface/user.dto";
-import UserServices from "../../../api/UserSevices";
-import {
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  StyledButton,
-  StyledModal,
-  StyledTextField,
-} from "../../../theme/StyledModalComponents";
-import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Fade,
-  IconButton,
-  InputAdornment,
-  Stack,
-  Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import EngineeringIcon from "@mui/icons-material/Engineering"; // More appropriate icon for technicians
+import BaseModal from "../../../components/global/modal/modal";
+import InputField from "../../../components/global/TextField/InputField";
+
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+
+import { UserDto } from "../interface/user.dto";
+import UserServices from "../../../api/UserSevices";
+import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface TecnicoAddProps {
   open: boolean;
@@ -39,23 +24,57 @@ export function TecnicoAdd({ open, onClose, onTecnicoAdded }: TecnicoAddProps) {
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  const { showSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [, setSuccess] = useState<string | null>(null);
+  const [errors, setErrors] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    phone: "",
+  });
 
-  const handleAddProduct = async () => {
-    if (!nombre || !apellido || !email || !phone) {
-      setError(
-        "Por favor, completa todos los campos requeridos (Nombre, Descripción, Stock, Precio Unitario (Bs), Precio Unitario (USD))."
-      );
-      return;
-    }
+  // ✅ Validación básica por campo
+  const validateFields = (): boolean => {
+    const newErrors = {
+      nombre: !nombre.trim() ? "El nombre es obligatorio" : "",
+      apellido: !apellido.trim() ? "El apellido es obligatorio" : "",
+      email: !email.trim()
+        ? "El correo es obligatorio"
+        : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ? "Correo electrónico inválido"
+        : "",
+      phone: !phone.trim()
+        ? "El teléfono es obligatorio"
+        : !/^\d+$/.test(phone)
+        ? "Solo se permiten números"
+        : "",
+    };
+    showSnackbar("Todos los campos son obligatorios.", "error");
 
-    setLoading(true);
-    setError(null);
+    setErrors(newErrors);
+    return Object.values(newErrors).every((err) => err === "");
+  };
+
+  const resetForm = () => {
+    setNombre("");
+    setApellido("");
+    setEmail("");
+    setPhone("");
+    setErrors({
+      nombre: "",
+      apellido: "",
+      email: "",
+      phone: "",
+    });
     setSuccess(null);
+  };
 
-    const newProductData: UserDto = {
+  const handleAddTecnico = async () => {
+    if (!validateFields()) return;
+
+    const newTecnico: UserDto = {
       username: nombre,
       nombre,
       apellido,
@@ -66,191 +85,87 @@ export function TecnicoAdd({ open, onClose, onTecnicoAdded }: TecnicoAddProps) {
     };
 
     try {
-      const response = await UserServices.createTechnician(newProductData); // Use the service
+      setLoading(true);
+      const response = await UserServices.createTechnician(newTecnico);
 
       if (response.success) {
-        setSuccess("Tecnico añadido exitosamente!");
+        showSnackbar("Tecnico añadido exitosamente", "success");
+        if (onTecnicoAdded) onTecnicoAdded();
 
-        setNombre("");
-        setApellido("");
-        setEmail("");
-        setPhone("");
-        if (onTecnicoAdded) {
-          onTecnicoAdded();
-        }
-        setTimeout(() => {
-          onClose();
-        }, 1500);
+        resetForm();
+        onClose();
       } else {
-        setError(response.message || "Error al añadir el tecnico.");
+        setErrors((prev) => ({
+          ...prev,
+          nombre: response.message || "Error al añadir el técnico",
+        }));
       }
     } catch (err) {
-      setError("Ocurrió un error inesperado al añadir el tecnico.");
-      console.error("Error adding product:", err);
+      console.error("Error al crear técnico:", err);
+      showSnackbar("Error al crear técnico:", "error");
+      setErrors((prev) => ({
+        ...prev,
+        nombre: "Error inesperado al añadir el técnico.",
+      }));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (open) {
-      setError(null);
-      setSuccess(null);
-      setNombre("");
-      setApellido("");
-      setEmail("");
-      setPhone("");
-    }
+    if (open) resetForm();
   }, [open]);
 
   return (
-    <StyledModal
+    <BaseModal
       open={open}
+      saveText={loading ? "Guardando..." : "Añadir Técnico"}
       onClose={onClose}
-      closeAfterTransition
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
+      onSave={handleAddTecnico}
+      title="Añadir Técnico"
     >
-      <Fade in={open}>
-        <ModalContent>
-          <ModalHeader>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box
-                sx={{
-                  mr: 2,
-                  p: 1,
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  borderRadius: "50%",
-                }}
-              >
-                <EngineeringIcon />
-              </Box>
-              <Typography variant="h5" component="h2" fontWeight={600}>
-                {"Añadir Tecnico"}
-              </Typography>
-            </Box>
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Chip
-              label={"Nuevo Tecnico"}
-              icon={<AddIcon />}
-              size="small"
-              sx={{
-                position: "absolute",
-                right: 48,
-                top: 12,
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                fontWeight: 500,
-              }}
-            />
-          </ModalHeader>
+      <InputField
+        label="Nombre"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        startIcon={<PersonIcon />}
+        sx={{ flex: 1, minWidth: 200 }}
+        disabled={loading}
+        errorMessage={errors.nombre}
+      />
 
-          {/*BODY */}
-          <ModalBody>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-            <Stack spacing={3}>
-              <StyledTextField
-                label="Nombre del Tecnico"
-                variant="outlined"
-                fullWidth
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Apellido del Tecnico"
-                variant="outlined"
-                fullWidth
-                value={apellido}
-                onChange={(e) => setApellido(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Correo electrónico"
-                variant="outlined"
-                fullWidth
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon color="action" /> {/* Email icon */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Teléfono "
-                variant="outlined"
-                fullWidth
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon color="action" /> {/* Phone icon */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Stack>
-            <ModalFooter>
-              <StyledButton
-                variant="outlined"
-                color="primary"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancelar
-              </StyledButton>
-              <StyledButton
-                variant="contained"
-                color="primary"
-                onClick={handleAddProduct}
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Añadir Producto"
-                )}
-              </StyledButton>
-            </ModalFooter>
-          </ModalBody>
-        </ModalContent>
-      </Fade>
-    </StyledModal>
+      <InputField
+        label="Apellido"
+        value={apellido}
+        onChange={(e) => setApellido(e.target.value)}
+        startIcon={<EngineeringIcon />}
+        sx={{ flex: 1, minWidth: 200 }}
+        disabled={loading}
+        errorMessage={errors.apellido}
+      />
+
+      <InputField
+        label="Correo Electrónico"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        startIcon={<EmailIcon />}
+        sx={{ flex: 1, minWidth: 200 }}
+        disabled={loading}
+        errorMessage={errors.email}
+      />
+
+      <InputField
+        label="Teléfono"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        startIcon={<PhoneIcon />}
+        sx={{ flex: 1, minWidth: 200 }}
+        onlyNumbers
+        disabled={loading}
+        errorMessage={errors.phone}
+      />
+    </BaseModal>
   );
 }
+
+export default TecnicoAdd;

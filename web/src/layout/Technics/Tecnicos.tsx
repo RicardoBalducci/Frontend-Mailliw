@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   alpha,
   Box,
   Container,
@@ -8,17 +7,11 @@ import {
   Fade,
   IconButton,
   InputAdornment,
-  Snackbar,
   Tooltip,
   useTheme,
 } from "@mui/material";
 import { UserDto } from "./interface/user.dto";
-import HeaderTecnicos from "./components/Header-tecnicos";
-import {
-  ActionButton,
-  SearchTextField,
-  StyledPaper,
-} from "../../theme/StyledComponents";
+import { SearchTextField, StyledPaper } from "../../theme/StyledComponents";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import LoadingIndicator from "../../utils/LoadingIndicator";
 import ErrorMessagePanel from "../../utils/ErrorIndicator";
@@ -26,9 +19,13 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import AddIcon from "@mui/icons-material/Add";
 import TechnicianTable from "./components/Tecnicos-tabla";
 import { TecnicoAdd } from "./components/Tecnico-add";
-import TecnicoDelete from "./components/Tecnico-delete";
 import UserServices from "../../api/UserSevices";
 import TecnicoUpdate from "./components/Tecnico-update"; // Make sure this import is correct
+import SaveButton from "../../components/global/Button/Save";
+import ConfirmModal from "../../components/global/modal/ConfirmModal";
+import { Wrench } from "lucide-react";
+import HeaderSection from "../../components/global/Header/header";
+import { useSnackbar } from "../../components/context/SnackbarContext";
 
 export interface TecnicoRow extends UserDto {
   id?: number;
@@ -47,12 +44,7 @@ export function Tecnicos() {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [tecnicoToDelete, setTecnicoToDelete] = useState<UserDto | null>(null);
 
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
-    "success"
-  );
-
+  const { showSnackbar } = useSnackbar();
   useEffect(() => {
     fetchTecnicos();
   }, []);
@@ -62,7 +54,6 @@ export function Tecnicos() {
     setError(null);
     try {
       const data = await UserServices.getTechnicians();
-      // Ensure 'id' exists for table keys, if not provided by the backend, generate one.
       const tecnicosWithIds: (UserDto & { id: number })[] = data.map(
         (tecnico: UserDto, index: number) => ({
           ...tecnico,
@@ -116,17 +107,9 @@ export function Tecnicos() {
     setOpenDeleteModal(true);
   };
 
-  const handleTecnicoActionSuccess = (message: string) => {
+  const handleTecnicoActionSuccess = () => {
+    showSnackbar("Técnico añadido exitosamente!", "success");
     fetchTecnicos();
-    setAlertMessage(message);
-    setAlertSeverity("success");
-    setAlertOpen(true);
-  };
-
-  const handleTecnicoActionError = (message: string) => {
-    setAlertMessage(message);
-    setAlertSeverity("error");
-    setAlertOpen(true);
   };
 
   const filteredTecnicos = tecnicos.filter((tecnico) =>
@@ -150,12 +133,55 @@ export function Tecnicos() {
     setTecnicoToDelete(null);
   };
 
+  const handleDeleteConfirm = async () => {
+    if (
+      !tecnicoToDelete ||
+      tecnicoToDelete.id === undefined ||
+      tecnicoToDelete.id === null
+    ) {
+      showSnackbar(
+        "Error: No se pudo obtener el ID del técnico para eliminar.",
+        "error"
+      );
+      console.error(
+        "Attempted to delete a technician without an ID:",
+        tecnicoToDelete
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await UserServices.deleteUser(tecnicoToDelete.id);
+      fetchTecnicos();
+
+      showSnackbar(
+        `Técnico '${
+          tecnicoToDelete.username || tecnicoToDelete.nombre || "Desconocido"
+        }' eliminado correctamente.`
+      );
+      handleCloseDeleteModal(); // Cierra el modal
+    } catch (error) {
+      console.error("Error deleting technician:", error);
+      let errorMessage = "Error de conexión al eliminar el técnico.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      showSnackbar(errorMessage, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Fade in={true} timeout={800}>
           <Box>
-            <HeaderTecnicos tecnicos={tecnicos} />
+            <HeaderSection
+              title="Lista de Técnicos"
+              icon={<Wrench />}
+              chipLabel={`${tecnicos.length} técnicos`}
+            />
             <StyledPaper>
               <Box
                 display="flex"
@@ -194,15 +220,11 @@ export function Tecnicos() {
                       <RefreshIcon color="primary" />
                     </IconButton>
                   </Tooltip>
-                  <ActionButton
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenAddModal} // Changed to open add modal
+                  <SaveButton
+                    onClick={handleOpenAddModal}
                     startIcon={<AddIcon />}
-                    sx={{ ml: 2 }}
-                  >
-                    Añadir Tecnico
-                  </ActionButton>
+                    texto="Añadir Tecnico"
+                  />
                 </Box>
               </Box>
               <Divider sx={{ mb: 3 }} />
@@ -214,50 +236,25 @@ export function Tecnicos() {
                 onDelete={handleDelete}
               />
             </StyledPaper>
-
             <TecnicoAdd
               open={openAddModal}
               onClose={handleCloseAddModal}
-              onTecnicoAdded={() =>
-                handleTecnicoActionSuccess("Técnico añadido exitosamente!")
-              }
+              onTecnicoAdded={() => handleTecnicoActionSuccess()}
             />
-            <TecnicoDelete
+            <ConfirmModal
               open={openDeleteModal}
               onClose={handleCloseDeleteModal}
-              tecnico={tecnicoToDelete}
-              onDeleteSuccess={() =>
-                handleTecnicoActionSuccess("Técnico eliminado exitosamente!")
-              }
-              onDeleteError={handleTecnicoActionError}
+              onConfirm={handleDeleteConfirm}
             />
             <TecnicoUpdate
               open={openUpdateModal}
               onClose={handleCloseUpdateModal}
-              selectedTecnico={selectedTecnico || undefined}
-              onTecnicoUpdated={() =>
-                handleTecnicoActionSuccess("Técnico actualizado exitosamente!")
-              } // This prop is correctly set
-              onTecnicoUpdateError={handleTecnicoActionError}
+              selectedTecnico={selectedTecnico}
+              onTecnicoUpdated={fetchTecnicos} // 👈 Esto refresca automáticamente la tabla
             />
           </Box>
         </Fade>
       </Container>
-
-      <Snackbar
-        open={alertOpen}
-        autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setAlertOpen(false)}
-          severity={alertSeverity}
-          sx={{ width: "100%" }}
-        >
-          {alertMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

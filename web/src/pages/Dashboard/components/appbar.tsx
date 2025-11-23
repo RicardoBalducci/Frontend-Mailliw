@@ -98,7 +98,7 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             {dollarOficial && (
               <Chip
-                label={`$ Dolar Actual ${dollarOficial.toFixed(2)}`}
+                label={`Tasa BCV del día ${dollarOficial.toFixed(2)}`}
                 color="success"
                 size="small"
               />

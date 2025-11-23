@@ -13,6 +13,7 @@ import {
 import WarningIcon from "@mui/icons-material/Warning";
 import { useTheme } from "@mui/material/styles";
 import ProductServices from "../../../api/ProductServices";
+import { useSnackbar } from "../../../components/context/SnackbarContext"; // ✅ Import
 
 interface DeleteProductProps {
   open: boolean;
@@ -33,6 +34,7 @@ export const DeleteProduct: React.FC<DeleteProductProps> = ({
 }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
+  const { showSnackbar } = useSnackbar(); // ✅ Accede al método
 
   const handleDeleteConfirm = async () => {
     if (productId === null) return;
@@ -41,8 +43,11 @@ export const DeleteProduct: React.FC<DeleteProductProps> = ({
     try {
       const response = await ProductServices.deleteProduct(productId);
       if (response.success) {
-        onDeleteSuccess("Producto eliminado correctamente.");
-        onClose(); // Close modal on success
+        showSnackbar("Producto eliminado exitosamente", "success"); // ✅ Snackbar
+        onDeleteSuccess(
+          response.message || "Producto eliminado correctamente."
+        );
+        onClose(); // Cierra el modal
       } else {
         onDeleteError(response.message || "Error al eliminar el producto.");
       }

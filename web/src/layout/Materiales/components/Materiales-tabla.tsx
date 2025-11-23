@@ -170,7 +170,7 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
     },
     {
       field: "precio_unitario_usd",
-      headerName: "Precio ($)",
+      headerName: "Precio (USD)",
       flex: 1,
       minWidth: 120,
       renderCell: (params) => {

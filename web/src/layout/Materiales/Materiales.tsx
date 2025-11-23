@@ -1,26 +1,13 @@
 // src/pages/Materiales/Materiales.tsx
 import React, { useEffect, useState } from "react";
+import { Box, Container, Divider, Fade, InputAdornment } from "@mui/material";
 import {
-  alpha,
-  Box,
-  Container,
-  Divider,
-  Fade,
-  IconButton,
-  InputAdornment,
-  Tooltip,
-  useTheme,
-} from "@mui/material";
-import HeaderMateriales from "./components/Header-Materiales";
-import {
-  ActionButton, // Assuming this is defined in your StyledComponents
   SearchTextField, // Assuming this is defined in your StyledComponents
   StyledPaper, // Assuming this is defined in your StyledComponents
 } from "../../theme/StyledComponents";
 import BuildIcon from "@mui/icons-material/Build";
 import LoadingIndicator from "../../utils/LoadingIndicator";
 import ErrorMessagePanel from "../../utils/ErrorIndicator";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import { MaterialesDto } from "../../Dto/Materiales.dto";
 import MaterialesServices from "../../api/MaterialesServices";
 import MaterialTable from "./components/Materiales-tabla";
@@ -29,9 +16,11 @@ import { MaterialAdd } from "./components/Materiales-add";
 import { DeleteMaterial } from "./widget/Delete-Materiales";
 import { toast } from "react-toastify";
 import { MaterialUpdate } from "./components/Materiales-update";
+import HeaderSection from "../../components/global/Header/header";
+import SaveButton from "../../components/global/Button/Save";
+import RefreshButton from "../../components/global/Button/RefreshButton";
 
 export function Materiales() {
-  const theme = useTheme();
   const [materiales, setMateriales] = useState<MaterialesDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -165,22 +154,25 @@ export function Materiales() {
     setMaterialToEdit(null); // Clear the material being edited
   };
 
-  const handleUpdateSuccess = (message: string) => {
-    toast.success(message);
-    fetchMateriales(currentPage, itemsPerPage); // Re-fetch materials after successful update
+  const handleUpdateSuccess = () => {
+    // Re-fetch materials after update
+    fetchMateriales(currentPage, itemsPerPage);
   };
 
-  const handleUpdateError = (message: string) => {
-    toast.error(message);
-  };
   // --------------------------------------------
-
+  const handleRefresh = () => {
+    fetchMateriales(currentPage, itemsPerPage);
+  };
   return (
     <>
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Fade in={true} timeout={800}>
           <Box>
-            <HeaderMateriales Materiales={materiales} />
+            <HeaderSection
+              title="Lista de Materiales"
+              icon={<BuildIcon />}
+              chipLabel={`${materiales.length} Materiales`}
+            />
             <StyledPaper>
               <Box
                 display="flex"
@@ -204,29 +196,13 @@ export function Materiales() {
                   sx={{ maxWidth: 500, bgcolor: "white" }}
                 />
                 <Box>
-                  <Tooltip title="Actualizar tabla">
-                    <IconButton
-                      onClick={() => fetchMateriales(currentPage, itemsPerPage)}
-                      sx={{
-                        ml: 1,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        "&:hover": {
-                          bgcolor: alpha(theme.palette.primary.main, 0.2),
-                        },
-                      }}
-                    >
-                      <RefreshIcon color="primary" />
-                    </IconButton>
-                  </Tooltip>
-                  <ActionButton
-                    variant="contained"
-                    color="primary"
+                  <RefreshButton onRefresh={handleRefresh} />
+
+                  <SaveButton
                     onClick={handleOpenAddModal}
                     startIcon={<AddIcon />}
-                    sx={{ ml: 2 }}
-                  >
-                    Añadir Material
-                  </ActionButton>
+                    texto="Añadir Material"
+                  />
                 </Box>
               </Box>
               <Divider sx={{ mb: 3 }} />
@@ -259,8 +235,7 @@ export function Materiales() {
               open={openUpdateModal}
               onClose={handleCloseUpdateModal}
               materialToEdit={materialToEdit}
-              onUpdateSuccess={handleUpdateSuccess}
-              onUpdateError={handleUpdateError}
+              onUpdateSuccess={handleUpdateSuccess} // <- aquí pasamos la función
             />
             {/* ---------------------------------- */}
           </Box>

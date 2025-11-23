@@ -1,31 +1,14 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import {
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  StyledButton,
-  StyledModal,
-  StyledTextField,
-} from "../../../theme/StyledModalComponents";
-import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Fade,
-  IconButton,
-  InputAdornment,
-  Stack,
-  Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import DescriptionIcon from "@mui/icons-material/Description";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import DollarIcon from "@mui/icons-material/AttachMoney";
-import { CreateMaterialesDto } from "../../../Dto/Materiales.dto";
+import { Box } from "@mui/material";
+import BaseModal from "../../../components/global/modal/modal";
+import InputField from "../../../components/global/TextField/InputField";
+import TextAreaField from "../../../components/global/TextField/TextAreaField";
 import MaterialesServices from "../../../api/MaterialesServices";
+import { CreateMaterialesDto } from "../../../Dto/Materiales.dto";
+import { useSnackbar } from "../../../components/context/SnackbarContext";
+import { FileText, Hash } from "lucide-react";
 
 interface MaterialAddProps {
   open: boolean;
@@ -40,218 +23,139 @@ export function MaterialAdd({
 }: MaterialAddProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [stock, setStock] = useState<number | string>("");
-  const [precioUnitarioDolar, setPrecioUnitarioDolar] = useState<
-    number | string
-  >("");
+  const [stock, setStock] = useState<number | "">("");
+  const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  const [errors, setErrors] = useState({
+    nombre: "",
+    descripcion: "",
+    stock: "",
+    precioUnitario: "",
+  });
+
+  const { showSnackbar } = useSnackbar();
+
+  const resetForm = () => {
+    setNombre("");
+    setDescripcion("");
+    setStock("");
+    setPrecioUnitario("");
+    setErrors({
+      nombre: "",
+      descripcion: "",
+      stock: "",
+      precioUnitario: "",
+    });
+  };
 
   useEffect(() => {
-    if (open) {
-      setError(null);
-      setSuccess(null);
-      setNombre("");
-      setDescripcion("");
-      setStock("");
-      setPrecioUnitarioDolar("");
-    }
+    if (open) resetForm();
   }, [open]);
 
+  const validateFields = () => {
+    const newErrors = {
+      nombre: !nombre.trim() ? "Campo obligatorio" : "",
+      descripcion: !descripcion.trim() ? "Campo obligatorio" : "",
+      stock: stock === "" ? "Campo obligatorio" : "",
+      precioUnitario: precioUnitario === "" ? "Campo obligatorio" : "",
+    };
+    setErrors(newErrors);
+    return Object.values(newErrors).every((e) => e === "");
+  };
+
+  const handleNumericInput = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    return cleaned === "" ? "" : Number(cleaned);
+  };
+
   const handleAddMaterial = async () => {
-    if (!nombre || !descripcion || stock === "" || precioUnitarioDolar === "") {
-      setError("Por favor, completa todos los campos requeridos.");
-      return;
-    }
+    if (!validateFields()) return;
 
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    const newMaterialData: CreateMaterialesDto = {
-      nombre,
-      descripcion,
+    const newMaterial: CreateMaterialesDto = {
+      nombre: nombre.trim(),
+      descripcion: descripcion.trim(),
       stock: Number(stock),
-      precio_unitario_usd: Number(precioUnitarioDolar),
+      precio_unitario_usd: Number(precioUnitario),
     };
 
     try {
-      const response = await MaterialesServices.create(newMaterialData);
+      setLoading(true);
+      const response = await MaterialesServices.create(newMaterial);
 
       if (response) {
-        setSuccess("Material añadido exitosamente!");
-        setNombre("");
-        setDescripcion("");
-        setStock("");
-        setPrecioUnitarioDolar("");
-        if (onMaterialAdded) {
-          onMaterialAdded();
-        }
-        setTimeout(() => {
-          onClose();
-        }, 150);
-      } else {
-        setError("Error al añadir el material.");
+        resetForm();
+        if (onMaterialAdded) onMaterialAdded();
+        setTimeout(() => onClose(), 800);
+        showSnackbar("Material creado exitosamente", "success"); // ✅ Snackbar
       }
     } catch (err) {
-      setError("Ocurrió un error inesperado al añadir el material.");
-      console.error("Error adding material:", err);
+      console.error("Error creando material:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <StyledModal
-      open={open}
-      onClose={onClose}
-      closeAfterTransition
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
-    >
-      <Fade in={open}>
-        <ModalContent>
-          <ModalHeader>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box
-                sx={{
-                  mr: 2,
-                  p: 1,
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  borderRadius: "50%",
-                }}
-              >
-                <InventoryIcon />
-              </Box>
-              <Typography variant="h5" component="h2" fontWeight={600}>
-                Añadir Material
-              </Typography>
-            </Box>
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Chip
-              label="Nuevo Material"
-              icon={<AddIcon />}
-              size="small"
-              sx={{
-                position: "absolute",
-                right: 48,
-                top: 12,
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                fontWeight: 500,
-              }}
-            />
-          </ModalHeader>
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddMaterial();
+    }
+  };
 
-          {/* BODY */}
-          <ModalBody>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-            <Stack spacing={3}>
-              <StyledTextField
-                label="Nombre del Material"
-                variant="outlined"
-                fullWidth
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DescriptionIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Descripción del Material"
-                variant="outlined"
-                fullWidth
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DescriptionIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Stock"
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <InventoryIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Precio en $"
-                variant="outlined"
-                fullWidth
-                type="number"
-                value={precioUnitarioDolar}
-                onChange={(e) => setPrecioUnitarioDolar(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <DollarIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Stack>
-            <ModalFooter>
-              <StyledButton
-                variant="outlined"
-                color="primary"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancelar
-              </StyledButton>
-              <StyledButton
-                variant="contained"
-                color="primary"
-                onClick={handleAddMaterial}
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Añadir Material"
-                )}
-              </StyledButton>
-            </ModalFooter>
-          </ModalBody>
-        </ModalContent>
-      </Fade>
-    </StyledModal>
+  return (
+    <BaseModal
+      open={open}
+      saveText="Añadir Material"
+      onClose={onClose}
+      onSave={handleAddMaterial}
+      title="Añadir Material"
+    >
+      <Box component="form" onKeyDown={handleKeyPress}>
+        <InputField
+          label="Nombre del Material"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          startIcon={<FileText />}
+          disabled={loading}
+          errorMessage={errors.nombre}
+        />
+
+        <TextAreaField
+          label="Descripción del Material"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          startIcon={<FileText />}
+          disabled={loading}
+          errorMessage={errors.descripcion}
+        />
+
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>
+          <InputField
+            label="Stock"
+            value={stock}
+            onChange={(e) => setStock(handleNumericInput(e.target.value))}
+            startIcon={<Hash />}
+            onlyNumbers
+            disabled={loading}
+            errorMessage={errors.stock}
+          />
+
+          <InputField
+            label="Precio Unitario (USD)"
+            value={precioUnitario}
+            onChange={(e) =>
+              setPrecioUnitario(handleNumericInput(e.target.value))
+            }
+            startIcon={<Hash />}
+            onlyNumbers
+            disabled={loading}
+            errorMessage={errors.precioUnitario}
+          />
+        </Box>
+      </Box>
+    </BaseModal>
   );
 }
+
+export default MaterialAdd;

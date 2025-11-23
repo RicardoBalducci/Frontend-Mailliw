@@ -27,6 +27,7 @@ import {
   Building,
   ShoppingCart,
   Anvil,
+  ArrowDownUp,
   //Clock,
 } from "lucide-react";
 
@@ -62,7 +63,7 @@ const sidebarItems: SidebarItem[] = [
   {
     id: "gastos",
     text: "Gastos",
-    icon: <DollarSign size={20} />,
+    icon: <ArrowDownUp size={20} />,
     content: <Gastos />,
   },
   {

@@ -7,6 +7,12 @@ export interface MaterialesDto {
   precio_unitario_usd: number;
 }
 
+export interface UpdateMaterialesDto {
+  nombre: string;
+  descripcion: string;
+  stock: number;
+  precio_unitario_usd: number;
+}
 export interface CreateMaterialesDto {
   nombre: string;
   descripcion: string;

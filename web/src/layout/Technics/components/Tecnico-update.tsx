@@ -1,36 +1,18 @@
-import {
-  Alert,
-  Box,
-  Chip,
-  Fade,
-  IconButton,
-  InputAdornment,
-  Stack,
-  Typography,
-  Button, // Import Button for actions
-} from "@mui/material";
-import { UserDto } from "../interface/user.dto"; // Ensure UserDto contains 'phone'
-import { StyledModal } from "../theme/StyleModalDelete";
-import {
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  StyledTextField,
-} from "../../../theme/StyledModalComponents";
-import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import { useEffect, useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
+import BaseModal from "../../../components/global/modal/modal";
+import InputField from "../../../components/global/TextField/InputField";
+import { UserDto } from "../interface/user.dto";
 import UserServices from "../../../api/UserSevices";
+import { Mail, Phone, User } from "lucide-react";
+import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface TecnicoUpdateProps {
   open: boolean;
   onClose: () => void;
-  selectedTecnico?: UserDto; // This will contain the technician data to edit
-  onTecnicoUpdated?: () => void; // Callback for successful update
-  onTecnicoUpdateError?: (message: string) => void; // Callback for update error
+  selectedTecnico: UserDto | null;
+  onTecnicoUpdated?: () => void; // callback para refrescar datos
 }
 
 export function TecnicoUpdate({
@@ -38,233 +20,127 @@ export function TecnicoUpdate({
   onClose,
   selectedTecnico,
   onTecnicoUpdated,
-  onTecnicoUpdateError,
 }: TecnicoUpdateProps) {
-  const [formData, setFormData] = useState<UserDto>({
-    id: undefined,
-    nombre: "",
-    apellido: "",
-    email: "",
-    phone: "",
-  });
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
+  const { showSnackbar } = useSnackbar();
+  // Cargar los datos del técnico cuando se abre el modal
   useEffect(() => {
     if (open && selectedTecnico) {
-      setError(null);
-      setSuccess(null);
-      setFormData({
-        id: selectedTecnico.id,
-        nombre: selectedTecnico.nombre || "",
-        apellido: selectedTecnico.apellido || "",
-        username: selectedTecnico.username || "",
-        email: selectedTecnico.email || "",
-        phone: selectedTecnico.phone || "", // Changed from selectedTecnico.phone
-      });
-    } else if (!open) {
-      // Reset form data when the modal closes
-      setFormData({
-        id: undefined,
-        nombre: "",
-        apellido: "",
-        username: "",
-        email: "",
-        phone: "",
-      });
+      setNombre(selectedTecnico.nombre || "");
+      setApellido(selectedTecnico.apellido || "");
+      setEmail(selectedTecnico.email || "");
+      setTelefono(selectedTecnico.phone || "");
     }
   }, [open, selectedTecnico]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  // ✅ Actualizar técnico
+  const handleUpdateTecnico = async () => {
+    if (
+      !nombre.trim() ||
+      !apellido.trim() ||
+      !email.trim() ||
+      !telefono.trim()
+    ) {
+      showSnackbar("Todos los campos son obligatorios.", "error");
 
-  const handleSubmit = async () => {
-    if (!formData.id) {
-      setError("No se pudo obtener el ID del técnico para actualizar.");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    if (!selectedTecnico?.id) {
+      console.error("❌ No hay técnico seleccionado para actualizar.");
+      return;
+    }
+
+    const updatedData: Partial<UserDto> = {
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      email: email.trim(),
+      phone: telefono.trim(),
+    };
 
     try {
-      await UserServices.updateTechnician(formData.id, formData);
-      setSuccess("Técnico actualizado exitosamente!");
-      onTecnicoUpdated?.(); // Trigger refresh in parent
-      setTimeout(() => {
-        onClose(); // Close the modal after success message is shown
-      }, 1500);
+      setLoading(true);
+      const response = await UserServices.updateTechnician(
+        selectedTecnico.id,
+        updatedData
+      );
+
+      if (response && response.id) {
+        showSnackbar("Técnico actualizado correctamente", "success");
+
+        if (onTecnicoUpdated) onTecnicoUpdated();
+
+        onClose();
+      } else {
+        console.error(
+          "❌ Error: No se recibió un objeto válido al actualizar."
+        );
+        alert("Error: No se pudo actualizar el técnico correctamente.");
+      }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Error desconocido al actualizar el técnico.";
-      setError(errorMessage);
-      onTecnicoUpdateError?.(errorMessage);
+      console.error("💥 Error al actualizar el técnico:", err);
+      showSnackbar("Error al actualizar el técnico", "success");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <StyledModal
-      open={open}
-      onClose={onClose}
-      closeAfterTransition
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
-    >
-      <Fade in={open}>
-        <ModalContent>
-          <ModalHeader>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box
-                sx={{
-                  mr: 2,
-                  p: 1,
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  borderRadius: "50%",
-                }}
-              >
-                <EditIcon />
-              </Box>
-              <Typography variant="h5" component="h2" fontWeight={600}>
-                {"Modificar Técnico"}
-              </Typography>
-            </Box>
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <Chip
-              label={"Modificar Técnico"}
-              icon={<EditIcon />}
-              size="small"
-              color="primary"
-              sx={{
-                position: "absolute",
-                right: 48,
-                top: 12,
-                bgcolor: "rgba(255,255,255,0.2)",
-                color: "white",
-                fontWeight: 500,
-              }}
-            />
-          </ModalHeader>
+  // Permitir solo caracteres válidos en el campo teléfono
+  const handlePhoneChange = (value: string) => {
+    const valid = value.replace(/[^0-9+\-\s()]/g, "");
+    setTelefono(valid);
+  };
 
-          {/*BODY */}
-          <ModalBody>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-            <Stack spacing={3}>
-              <StyledTextField
-                label="Nombre del Técnico"
-                variant="outlined"
-                fullWidth
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Apellido del Técnico"
-                variant="outlined"
-                fullWidth
-                name="apellido"
-                value={formData.apellido}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Email"
-                variant="outlined"
-                fullWidth
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <StyledTextField
-                label="Teléfono" // Label in Spanish
-                variant="outlined"
-                fullWidth
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => {
-                  // Regular expression to allow only numbers, +, spaces, and parentheses
-                  const validValue = e.target.value.replace(
-                    /[^0-9+()-\s]/g,
-                    ""
-                  );
-                  setFormData((prevData) => ({
-                    ...prevData,
-                    phone: validValue,
-                  }));
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Stack>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? "Guardando..." : "Guardar Cambios"}
-              </Button>
-            </Box>
-          </ModalBody>
-        </ModalContent>
-      </Fade>
-    </StyledModal>
+  return (
+    <BaseModal
+      open={open}
+      saveText="Guardar Cambios"
+      onClose={onClose}
+      onSave={handleUpdateTecnico}
+      title="Modificar Técnico"
+    >
+      <InputField
+        label="Nombre"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        startIcon={<User />}
+        disabled={loading}
+        errorMessage={!nombre ? "Campo obligatorio" : undefined}
+      />
+
+      <InputField
+        label="Apellido"
+        value={apellido}
+        onChange={(e) => setApellido(e.target.value)}
+        startIcon={<User />}
+        disabled={loading}
+        errorMessage={!apellido ? "Campo obligatorio" : undefined}
+      />
+
+      <InputField
+        label="Correo Electrónico"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        startIcon={<Mail />}
+        disabled={loading}
+        errorMessage={!email ? "Campo obligatorio" : undefined}
+      />
+
+      <InputField
+        label="Teléfono"
+        value={telefono}
+        onChange={(e) => handlePhoneChange(e.target.value)}
+        startIcon={<Phone />}
+        disabled={loading}
+        errorMessage={!telefono ? "Campo obligatorio" : undefined}
+      />
+    </BaseModal>
   );
 }
+
 export default TecnicoUpdate;

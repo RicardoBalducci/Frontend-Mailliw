@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import type { ReactElement } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
@@ -124,6 +124,12 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
   onDelete,
 }): ReactElement => {
   const theme = useTheme();
+  const [dollarOficial, setDollarOficial] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedDollar = localStorage.getItem("dollar_oficial");
+    if (storedDollar) setDollarOficial(Number(storedDollar));
+  }, []);
 
   const safeSearch = (value: unknown, searchTerm: string): boolean => {
     if (value === null || value === undefined) return false;
@@ -166,14 +172,6 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
 
   const columns: GridColDef[] = [
     {
-      field: "id",
-      headerName: "ID",
-      width: 90,
-      headerAlign: "left",
-      headerClassName: "header-black",
-      align: "left",
-    },
-    {
       field: "nombre",
       headerName: "Nombre",
       flex: 1.5,
@@ -200,27 +198,6 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
       ),
       headerAlign: "left",
       align: "left",
-    },
-    {
-      field: "precio_estandar_usd",
-      headerName: "Precio (USD)",
-      flex: 1,
-      minWidth: 100,
-      renderCell: (params) => (
-        <Chip
-          label={`$${params.value || 0}`}
-          color="primary"
-          size="small"
-          sx={{
-            fontWeight: 700,
-            bgcolor: alpha(theme.palette.secondary.main, 0.9), // Color más vibrante
-            color: theme.palette.secondary.contrastText,
-            boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-          }}
-        />
-      ),
-      headerAlign: "center",
-      align: "center",
     },
     {
       field: "tecnicosCalificados",
@@ -320,6 +297,50 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
               />
             )}
           </Box>
+        );
+      },
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "precio_estandar_usd",
+      headerName: "Precio (USD)",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => {
+        const precioUSD = Number(params.value) || 0;
+
+        return (
+          <Typography variant="body2" fontWeight={500}>
+            {new Intl.NumberFormat("es-VE", {
+              style: "currency",
+              currency: "USD",
+              minimumFractionDigits: 2,
+            }).format(precioUSD)}{" "}
+          </Typography>
+        );
+      },
+      headerAlign: "right",
+      align: "right",
+    },
+    {
+      field: "precio_estandar_bs",
+      headerName: "Precio (Bs)",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => {
+        const precioUSD = Number(params.row.precio_estandar_usd) || 0;
+        const precioBS = precioUSD * (dollarOficial || 0);
+
+        return (
+          <Typography variant="body2" fontWeight={500}>
+            {new Intl.NumberFormat("es-VE", {
+              style: "currency",
+              currency: "VES",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(precioBS)}{" "}
+          </Typography>
         );
       },
       headerAlign: "left",

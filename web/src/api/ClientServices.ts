@@ -1,5 +1,6 @@
 // ClienteServices.ts (updated)
-import { ClienteDTO, RespuestaClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
+import { ClienteDTO } from "../Dto/Cliente.dto"; // Adjust path as needed
+import { ClientRow } from "../layout/client/Client";
 import { BASE_API } from "./Base";
 
 class ClienteServices {
@@ -28,11 +29,10 @@ class ClienteServices {
 
   async fetchClientes(rif?: string): Promise<{
     success: boolean;
-    data?: RespuestaClienteDTO[];
+    data?: ClientRow[];
     message?: string;
   }> {
     try {
-      // Construir la URL con query param si rif existe
       const url = rif
         ? `${this.baseUrl}?rif=${encodeURIComponent(rif)}`
         : this.baseUrl;

@@ -14,7 +14,7 @@ class ProveedorServices {
   static async create(proveedor: ProveedorCreateDto): Promise<ProveedorDto> {
     try {
       const response = await axios.post<ProveedorDto>(
-        `${BASE_URL}/proveedores`,
+        `${BASE_URL}proveedores`,
         proveedor
       );
       return response.data;

@@ -33,7 +33,7 @@ const HeaderTecnicos: React.FC<HeaderTecnicosProps> = ({ tecnicos }) => {
       >
         <EngineeringIcon sx={{ mr: 1 }} />{" "}
         {/* Changed icon to EngineeringIcon */}
-        Gestión de Técnicos
+        Lista de Técnicos
       </Typography>
       <Chip
         label={`${tecnicos.length} técnicos`}

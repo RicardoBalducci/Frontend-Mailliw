@@ -97,13 +97,6 @@ class ServiciosServices {
       ) {
         throw new Error("El precio en USD debe ser un número mayor a 0");
       }
-      if (
-        typeof servicioData.monto_bs !== "number" ||
-        servicioData.monto_bs <= 0
-      ) {
-        throw new Error("El monto en Bs debe ser un número mayor a 0");
-      }
-
       const response = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {

@@ -1,12 +1,15 @@
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
 import Dashboard from "./Dashboard";
+import { SnackbarProvider } from "../../components/context/SnackbarContext";
 
 function Dashboards() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Dashboard />
+      <SnackbarProvider>
+        <Dashboard />
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

@@ -8,7 +8,6 @@ export interface ProveedorDto {
   nombre: string;
   telefono: string | null;
   direccion: string | null;
-  catalogo: string | null;
   createdAt: Date; // Assuming your backend adds timestamps
   updatedAt: Date; // Assuming your backend adds timestamps
 }
@@ -21,7 +20,6 @@ export interface ProveedorCreateDto {
   nombre: string;
   telefono?: string | null; // Optional, can be null
   direccion?: string | null; // Optional, can be null
-  catalogo?: string | null; // Optional, can be null
 }
 
 /**
@@ -32,5 +30,4 @@ export interface ProveedorUpdateDto {
   nombre?: string;
   telefono?: string | null;
   direccion?: string | null;
-  catalogo?: string | null;
 }

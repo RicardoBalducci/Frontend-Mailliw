@@ -1,5 +1,9 @@
 import axios from "axios";
-import { CreateMaterialesDto, MaterialesDto } from "../Dto/Materiales.dto";
+import {
+  CreateMaterialesDto,
+  MaterialesDto,
+  UpdateMaterialesDto,
+} from "../Dto/Materiales.dto";
 import { Material } from "../interface/material.interace";
 import { BASE_API } from "./Base";
 export interface PaginatedMaterialsResponse {
@@ -25,13 +29,32 @@ class MaterialesServices {
   }
 
   // Crear un nuevo material
-  async create(createMaterialDto: CreateMaterialesDto): Promise<Material> {
-    const response = await axios.post(this.baseUrl, createMaterialDto, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
-    return response.data;
+  async create(createMaterialDto: CreateMaterialesDto): Promise<{
+    success: boolean;
+    message: string;
+    data: Material | null;
+  }> {
+    try {
+      const response = await axios.post(this.baseUrl, createMaterialDto, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      });
+
+      return {
+        success: true,
+        message: "Material creado exitosamente.",
+        data: response.data,
+      };
+    } catch (error) {
+      console.error("Error creando material:", error);
+
+      return {
+        success: false,
+        message: "Error al crear el material.",
+        data: null,
+      };
+    }
   }
 
   async findAll(
@@ -76,7 +99,7 @@ class MaterialesServices {
   // Actualizar un material
   async update(
     id: number,
-    updateMaterialDto: MaterialesDto
+    updateMaterialDto: UpdateMaterialesDto
   ): Promise<Material> {
     const response = await axios.patch(
       `${this.baseUrl}/${id}`,

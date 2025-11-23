@@ -12,11 +12,7 @@ import {
   useTheme,
 } from "@mui/material";
 import HeaderProveedor from "./components/Proveedor-header";
-import {
-  ActionButton,
-  SearchTextField,
-  StyledPaper,
-} from "../../theme/StyledComponents";
+import { SearchTextField, StyledPaper } from "../../theme/StyledComponents";
 import SearchIcon from "@mui/icons-material/Search"; // Use a more fitting search icon
 import LoadingIndicator from "../../utils/LoadingIndicator";
 import ErrorMessagePanel from "../../utils/ErrorIndicator";
@@ -32,6 +28,7 @@ import { ProveedorAdd } from "./components/Proveedor-add";
 import { PaginatedResponse } from "../../api/PaginatedResponse.dto";
 import { ProveedorDelete } from "./components/Proveedor-delete";
 import { ProveedorUpdate } from "./components/Proveedor-update";
+import SaveButton from "../../components/global/Button/Save";
 
 export function Proveedor() {
   const theme = useTheme();
@@ -143,15 +140,6 @@ export function Proveedor() {
     fetchProveedores(currentPage, itemsPerPage); // Re-fetch data after adding
   };
 
-  const handleAddSuccess = (message: string) => {
-    toast.success(message);
-    fetchProveedores(currentPage, itemsPerPage); // Re-fetch to update table
-  };
-
-  const handleAddError = (message: string) => {
-    toast.error(message);
-  };
-
   // Handler for search input (updates searchTerm immediately)
   const handleSearch = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -191,15 +179,7 @@ export function Proveedor() {
   const handleCloseUpdateModal = () => {
     setOpenUpdateModal(false);
     setProveedorToEdit(null); // Clear the material being edited
-  };
-
-  const handleUpdateSuccess = (message: string) => {
-    toast.success(message);
-    fetchProveedores(currentPage, itemsPerPage); // Re-fetch materials after successful update
-  };
-
-  const handleUpdateError = (message: string) => {
-    toast.error(message);
+    fetchProveedores(currentPage, itemsPerPage); // Re-fetch data after adding
   };
 
   return (
@@ -248,15 +228,11 @@ export function Proveedor() {
                       <RefreshIcon color="primary" />
                     </IconButton>
                   </Tooltip>
-                  <ActionButton
-                    variant="contained"
-                    color="primary"
+                  <SaveButton
                     onClick={handleOpenAddModal}
                     startIcon={<AddIcon />}
-                    sx={{ ml: 2 }}
-                  >
-                    Añadir Proveedor
-                  </ActionButton>
+                    texto="Añadir Proveedor"
+                  />
                 </Box>
               </Box>
               <Divider sx={{ mb: 3 }} />
@@ -274,9 +250,9 @@ export function Proveedor() {
             </StyledPaper>
             <ProveedorAdd
               open={openAddModal}
-              onClose={handleCloseAddModal}
+              onClose={handleCloseAddModal} /* 
               onProveedorAdded={handleAddSuccess}
-              onAddError={handleAddError}
+              onAddError={handleAddError} */
             />
 
             <ProveedorDelete
@@ -292,8 +268,6 @@ export function Proveedor() {
               open={openUpdateModal}
               onClose={handleCloseUpdateModal}
               proveedorToEdit={proveedorToEdit}
-              onUpdateSuccess={handleUpdateSuccess}
-              onUpdateError={handleUpdateError}
             />
           </Box>
         </Fade>

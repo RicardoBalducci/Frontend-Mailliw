@@ -6,32 +6,28 @@ import {
   Container,
   Paper,
   TextField,
-  Button,
   Box,
-  Typography,
   InputAdornment,
   Fade,
-  Chip,
-  IconButton,
-  Tooltip,
   Divider,
-  useTheme,
   alpha,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import ClienteServices from "../../api/ClientServices";
 import ClientTable from "./components/ClientTable";
-import ClientModal from "./components/ClientModal";
-import ConfirmDeleteModal from "./components/ConfirmDeleteModal";
+import ClientModal, { ClientData } from "./components/ClientModal";
 import { styled } from "@mui/material/styles";
-
-// Import the ClienteDTO
-import { ClienteDTO } from "../../Dto/Cliente.dto"; // ADJUST THIS PATH if your DTO is located elsewhere!
+import Swal from "sweetalert2";
+import { ClienteDTO } from "../../Dto/Cliente.dto";
+import SaveButtom from "../../components/global/Button/Save";
+import ClientServices from "../../api/ClientServices";
+import ConfirmModal from "../../components/global/modal/ConfirmModal";
+import RefreshButton from "../../components/global/Button/RefreshButton";
+import { Users } from "lucide-react";
+import HeaderSection from "../../components/global/Header/header";
+import { useSnackbar } from "../../components/context/SnackbarContext";
 
 // Styled components for enhanced UI
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -65,25 +61,12 @@ const SearchTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: (theme.shape.borderRadius as number) * 3,
-  padding: "10px 24px",
-  boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
-  transition: "all 0.3s",
-  fontWeight: 600,
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
-  },
-}));
-
 // We can extend ClienteDTO for ClientRow if there's an ID
 export interface ClientRow extends ClienteDTO {
   id: number; // ID is usually added by the backend
 }
 
 export function Client() {
-  const theme = useTheme();
   const [rows, setRows] = useState<ClientRow[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -92,13 +75,7 @@ export function Client() {
   const [clientToDelete, setClientToDelete] = useState<ClientRow | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
-    "success"
-  ); // Added alert severity
-
+  const { showSnackbar } = useSnackbar();
   const [stats, setStats] = useState({
     total: 0,
     personal: 0,
@@ -115,6 +92,7 @@ export function Client() {
       const response = await ClienteServices.fetchClientes();
 
       if (response.success && response.data) {
+        setRows(response.data as ClientRow[]); // Cast to ClientRow[]
         setStats({
           total: response.data.length,
           personal: response.data.filter((client: ClienteDTO) =>
@@ -126,15 +104,10 @@ export function Client() {
           ).length,
         });
       } else {
-        setAlertMessage(response.message || "Error al cargar los clientes.");
-        setAlertSeverity("error");
-        setAlertOpen(true);
+        setRows([]);
       }
     } catch (error) {
       console.error("Error fetching clientes:", error);
-      setAlertMessage("Error de conexión al cargar los clientes.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
       setRows([]);
     } finally {
       setLoading(false);
@@ -162,22 +135,17 @@ export function Client() {
     try {
       const response = await ClienteServices.deleteCliente(clientToDelete.id);
       if (response.success) {
-        setAlertMessage("Cliente eliminado correctamente.");
-        setAlertSeverity("success");
-        setAlertOpen(true);
+        showSnackbar("Cliente eliminado correctamente", "success");
         handleRefresh();
-        setDeleteModalOpen(false);
-        setClientToDelete(null);
       } else {
-        setAlertMessage(response.message || "Error al eliminar el cliente.");
-        setAlertSeverity("error");
-        setAlertOpen(true);
+        showSnackbar("Error al eliminar cliente", "error");
       }
     } catch (error) {
       console.error("Error eliminando cliente:", error);
-      setAlertMessage("Ocurrió un error inesperado al eliminar el cliente.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      showSnackbar("Ocurrió un error al eliminar el cliente", "error");
+    } finally {
+      setDeleteModalOpen(false); // ⬅️ cierra el modal automáticamente
+      setClientToDelete(null); // limpia la referencia
     }
   };
 
@@ -196,48 +164,81 @@ export function Client() {
     setRefreshKey((prev) => prev + 1); // Force table refresh
   };
 
+  const handleSaveClient = async (clientData: ClientData) => {
+    try {
+      Swal.fire({
+        title: "Guardando cliente...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        customClass: {
+          popup: "swal-over-modal",
+        },
+      });
+
+      let response;
+      if (clientData.id) {
+        response = await ClientServices.updateCliente(
+          clientData.id,
+          clientData
+        );
+      } else {
+        response = await ClientServices.createCliente(clientData);
+      }
+
+      if (response.success) {
+        showSnackbar(
+          clientData.id
+            ? "Cliente actualizado correctamente"
+            : "Cliente creado correctamente",
+          "success"
+        );
+        handleRefresh(); // refresca la tabla
+        return true;
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo guardar el cliente.",
+          customClass: {
+            popup: "swal-over-modal",
+          },
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Error al guardar cliente:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al guardar el cliente.",
+        customClass: {
+          popup: "swal-over-modal",
+        },
+      });
+      return false;
+    } finally {
+      Swal.close(); // ⬅️ cierra SweetAlert
+      handleCloseModal(); // ⬅️ cierra el modal automáticamente
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>
-          <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-            <Typography
-              variant="h4"
-              component="h1"
-              fontWeight="700"
-              color="primary"
-              sx={{
-                position: "relative",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -8,
-                  left: 0,
-                  width: 60,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: theme.palette.primary.main,
-                },
-              }}
-            >
-              Gestión de Clientes
-            </Typography>
-            <Chip
-              label={`${stats.total} clientes`}
-              color="primary"
-              variant="outlined"
-              sx={{ ml: 2, fontWeight: 500, height: 28 }}
-            />
-          </Box>
-
-          {/* Stats Cards - You might want to implement these based on your design */}
-
+          <HeaderSection
+            title="Lista de Clientes"
+            icon={<Users />}
+            chipLabel={`${stats.total} Clientes`}
+          />
           <StyledPaper>
             <Box
               display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
-              alignItems="center"
+              alignItems={{ xs: "stretch", sm: "center" }}
               mb={3}
+              gap={2}
             >
               <SearchTextField
                 placeholder="Buscar por nombre, RIF, dirección..."
@@ -252,32 +253,25 @@ export function Client() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ maxWidth: 500, bgcolor: "white" }}
+                sx={{
+                  maxWidth: { xs: "100%", sm: 500 },
+                  bgcolor: "white",
+                }}
               />
-              <Box>
-                <Tooltip title="Actualizar tabla">
-                  <IconButton
-                    onClick={handleRefresh}
-                    sx={{
-                      ml: 1,
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      "&:hover": {
-                        bgcolor: alpha(theme.palette.primary.main, 0.2),
-                      },
-                    }}
-                  >
-                    <RefreshIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-                <ActionButton
-                  variant="contained"
-                  color="primary"
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "row" }} // 📱 botones uno debajo del otro
+                justifyContent={{ xs: "center", sm: "flex-start" }}
+                alignItems={{ xs: "stretch", sm: "center" }}
+                gap={1.5}
+                width={{ xs: "100%", sm: "auto" }} // 📱 ocupa todo el ancho en móvil
+              >
+                <RefreshButton onRefresh={handleRefresh} />
+                <SaveButtom
                   onClick={handleOpenModal}
                   startIcon={<AddIcon />}
-                  sx={{ ml: 2 }}
-                >
-                  Añadir Cliente
-                </ActionButton>
+                  texto="Añadir Cliente"
+                />
               </Box>
             </Box>
 
@@ -316,28 +310,14 @@ export function Client() {
             onClose={handleCloseModal}
             currentClient={currentClient} // currentClient is already ClientRow | null
             onRefresh={fetchClientes}
+            onSave={handleSaveClient}
           />
 
-          <ConfirmDeleteModal
+          <ConfirmModal
             open={deleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
             onConfirm={confirmDelete}
-            client={clientToDelete}
           />
-          <Snackbar
-            open={alertOpen}
-            autoHideDuration={6000}
-            onClose={() => setAlertOpen(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          >
-            <Alert
-              onClose={() => setAlertOpen(false)}
-              severity={alertSeverity} // Use the alertSeverity state
-              sx={{ width: "100%" }}
-            >
-              {alertMessage}
-            </Alert>
-          </Snackbar>
         </Box>
       </Fade>
     </Container>

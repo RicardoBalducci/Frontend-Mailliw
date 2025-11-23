@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { useTheme } from "@mui/material/styles";
-import MaterialesServices from "../../../api/MaterialesServices"; // Assuming this path is correct
-import axios from "axios"; // Import axios to check for AxiosError
+import MaterialesServices from "../../../api/MaterialesServices";
+import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface DeleteMaterialProps {
   open: boolean;
@@ -34,6 +34,8 @@ export const DeleteMaterial: React.FC<DeleteMaterialProps> = ({
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
 
+  const { showSnackbar } = useSnackbar(); // ✅ obtener showSnackbar
+
   const handleDeleteConfirm = async () => {
     if (materialId === null) return;
 
@@ -41,33 +43,14 @@ export const DeleteMaterial: React.FC<DeleteMaterialProps> = ({
     try {
       await MaterialesServices.delete(materialId);
 
+      // Mostrar snackbar al eliminar
+      showSnackbar("Material eliminado exitosamente", "success");
+
       onDeleteSuccess("Material eliminado con éxito.");
-      onClose(); // Close modal on success
+      onClose(); // Cerrar modal
     } catch (error) {
       console.error("Error deleting material:", error);
-
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          onDeleteError(
-            error.response.data?.message ||
-              `Error: ${error.response.status} - ${error.response.statusText}`
-          );
-        } else if (error.request) {
-          // The request was made but no response was received
-          onDeleteError(
-            "No se recibió respuesta del servidor. Intenta de nuevo."
-          );
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          onDeleteError(
-            "Error al configurar la solicitud para eliminar el material."
-          );
-        }
-      } else if (error instanceof Error) {
-        onDeleteError(error.message);
-      } else {
-        onDeleteError("Ocurrió un error desconocido al eliminar el material.");
-      }
+      onDeleteError("Ocurrió un error al eliminar el material.");
     } finally {
       setLoading(false);
     }

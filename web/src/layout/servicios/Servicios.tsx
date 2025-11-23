@@ -12,7 +12,6 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import HeaderServicios from "./components/Header-Servicios";
 import ServiciosServices from "../../api/ServiciosServices";
 import { ServicioDTO } from "../../Dto/Servicio.dto";
 import LoadingIndicator from "../../utils/LoadingIndicator";
@@ -20,7 +19,6 @@ import ErrorMessagePanel from "../../utils/ErrorIndicator";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AddIcon from "@mui/icons-material/Add";
 import ServicesIcon from "@mui/icons-material/BuildCircleOutlined";
-
 import {
   StyledPaper,
   SearchTextField,
@@ -28,8 +26,11 @@ import {
 } from "../../theme/StyledComponents";
 import ServiciosTable from "./components/Servicios-table";
 import { ServicioAdd } from "./components/Servicios-add";
-import ServicioDelete from "./components/Servicio-Delete";
 import Swal from "sweetalert2";
+import HeaderSection from "../../components/global/Header/header";
+import { Anvil } from "lucide-react";
+import ConfirmModal from "../../components/global/modal/ConfirmModal";
+import ServiciosEdit from "./components/Servicio-Update";
 
 export function Servicios() {
   const theme = useTheme();
@@ -43,7 +44,6 @@ export function Servicios() {
   const [servicioToDelete, setServicioToDelete] = useState<ServicioDTO | null>(
     null
   );
-  const [, setServicioToModify] = useState<ServicioDTO | null>(null); // New state for editing
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -59,34 +59,42 @@ export function Servicios() {
     setLoading(true);
     setError(null);
     try {
-      // ✨ Asigna el array directamente al estado
       const serviciosData = await ServiciosServices.getServicios();
       setServicios(serviciosData);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Ocurrió un error desconocido al cargar los servicios.");
-      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error desconocido al cargar los servicios."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
   const handleOpenAddModal = () => setOpenAddModal(true);
   const handleCloseAddModal = () => setOpenAddModal(false);
 
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [servicioToModify, setServicioToModify] = useState<ServicioDTO | null>(
+    null
+  );
+
   const handleModify = (servicio: ServicioDTO) => {
     setServicioToModify(servicio);
-    Swal.fire("En proceso de desarrollo", "", "info");
-
-    // Open a new modal for modification, e.g., setOpenUpdateModal(true)
+    setOpenEditModal(true);
   };
 
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setServicioToModify(null);
+  };
+
+  // 🔥 Manejo de eliminación
   const handleDelete = (servicio: ServicioDTO) => {
     setServicioToDelete(servicio);
     setOpenDeleteModal(true);
@@ -110,8 +118,31 @@ export function Servicios() {
     setAlertOpen(true);
   };
 
-  // The filtering logic should now be inside ServiciosTable, but we can keep it here to pass filtered data if desired.
-  // The DataGrid component handles its own filtering, so passing unfiltered `servicios` and `searchTerm` is the preferred approach.
+  // ✅ Confirmar eliminación
+  const confirmDelete = async () => {
+    if (!servicioToDelete?.id) {
+      handleServicioActionError("No se pudo obtener el ID del servicio.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await ServiciosServices.deleteServicio(servicioToDelete.id);
+      handleServicioActionSuccess(
+        `Servicio "${servicioToDelete.nombre}" eliminado correctamente.`
+      );
+      handleCloseDeleteModal();
+    } catch (error) {
+      console.error("Error al eliminar servicio:", error);
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : "Error al eliminar el servicio.";
+      handleServicioActionError(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -134,12 +165,20 @@ export function Servicios() {
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Fade in={true} timeout={800}>
           <Box>
-            <HeaderServicios servicios={servicios} />
+            <HeaderSection
+              title="Lista de Servicios"
+              icon={<Anvil />}
+              chipLabel={`${servicios.length} servicios`}
+            />
+
             <StyledPaper>
+              {/* 🔍 Barra de búsqueda y acciones */}
               <Box
                 display="flex"
+                flexDirection={{ xs: "column", sm: "row" }}
                 justifyContent="space-between"
-                alignItems="center"
+                alignItems={{ xs: "stretch", sm: "center" }}
+                gap={2}
                 mb={3}
               >
                 <SearchTextField
@@ -155,42 +194,53 @@ export function Servicios() {
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ maxWidth: 500, bgcolor: "white" }}
+                  sx={{ maxWidth: { xs: "100%", sm: 500 }, bgcolor: "white" }}
                 />
 
-                <Box>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  alignItems="center"
+                  gap={1.5}
+                >
                   <Tooltip title="Actualizar tabla">
                     <IconButton
                       onClick={fetchServicios}
                       sx={{
-                        ml: 1,
                         bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        "&:hover": {
+                          bgcolor: alpha(theme.palette.primary.main, 0.2),
+                        },
                       }}
                     >
                       <RefreshIcon color="primary" />
                     </IconButton>
                   </Tooltip>
+
                   <ActionButton
                     variant="contained"
                     color="primary"
                     onClick={handleOpenAddModal}
                     startIcon={<AddIcon />}
-                    sx={{ ml: 2 }}
+                    sx={{ width: { xs: "100%", sm: "auto" } }}
                   >
                     Añadir Servicio
                   </ActionButton>
                 </Box>
               </Box>
+
               <Divider sx={{ mb: 3 }} />
 
+              {/* 🧾 Tabla de servicios */}
               <ServiciosTable
-                rows={servicios} // Pass the full list of services
-                searchTerm={searchTerm} // Pass the searchTerm for internal filtering
+                rows={servicios}
+                searchTerm={searchTerm}
                 onModify={handleModify}
                 onDelete={handleDelete}
               />
             </StyledPaper>
 
+            {/* ➕ Modal de agregar servicio */}
             <ServicioAdd
               open={openAddModal}
               onClose={handleCloseAddModal}
@@ -199,22 +249,28 @@ export function Servicios() {
               }
             />
 
-            <ServicioDelete
+            <ConfirmModal
               open={openDeleteModal}
               onClose={handleCloseDeleteModal}
-              servicio={servicioToDelete}
-              onDeleteSuccess={() =>
-                handleServicioActionSuccess("Servicio eliminado exitosamente!")
-              }
-              onDeleteError={handleServicioActionError}
+              onConfirm={confirmDelete}
+              title="Eliminar Servicio"
+              description={`¿Estás seguro de eliminar el servicio "${servicioToDelete?.nombre}"?`}
+              confirmText="Eliminar"
+              /* confirmColor="error" */
             />
-
-            {/* You will need to create and add the ServicioUpdate component */}
-            {/* <ServicioUpdate /> */}
+            <ServiciosEdit
+              open={openEditModal}
+              onClose={handleCloseEditModal}
+              servicio={servicioToModify}
+              onServicioUpdated={() =>
+                handleServicioActionSuccess("Servicio modificado exitosamente!")
+              }
+            />
           </Box>
         </Fade>
       </Container>
 
+      {/* 🔔 Snackbar de alertas */}
       <Snackbar
         open={alertOpen}
         autoHideDuration={6000}

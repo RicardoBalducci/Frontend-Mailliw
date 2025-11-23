@@ -3,14 +3,11 @@ import {
   Box,
   Container,
   Typography,
-  useTheme,
-  Chip,
   Fade,
   CircularProgress,
   Alert,
   Paper,
 } from "@mui/material";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import Calendar from "react-calendar"; // Import React Calendar
 import "react-calendar/dist/Calendar.css"; // Default React Calendar styles
 import "./GastosCalendar.css"; // <-- NEW: Import your custom CSS for the calendar
@@ -22,9 +19,10 @@ import { Gasto as BaseGasto, gastosService } from "../../api/GastosServices";
 type Gasto = BaseGasto & { isProjectedFixed?: boolean };
 import { GastoDetailsDialog } from "./Components/GastoDetailsDialog";
 import { NewGastoDialog } from "./Components/AddGasto";
+import HeaderSection from "../../components/global/Header/header";
+import { ArrowDownUp } from "lucide-react";
 
 export function Gastos() {
-  const theme = useTheme();
   const [gastos, setGastos] = useState<Gasto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -206,36 +204,11 @@ export function Gastos() {
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Fade in={true} timeout={800}>
           <Box>
-            <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-              <Typography
-                variant="h4"
-                component="h1"
-                fontWeight="700"
-                color="primary"
-                sx={{
-                  position: "relative",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    bottom: -8,
-                    left: 0,
-                    width: 60,
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: theme.palette.primary.main,
-                  },
-                }}
-              >
-                <MonetizationOnIcon sx={{ mr: 1 }} />
-                Gestión de Gastos
-              </Typography>
-              <Chip
-                label={`${gastos.length} gastos registrados`}
-                color="primary"
-                variant="outlined"
-                sx={{ ml: 2, fontWeight: 500, height: 28 }}
-              />
-            </Box>
+            <HeaderSection
+              title="Gestión de Gastos"
+              icon={<ArrowDownUp />}
+              chipLabel={`${gastos.length} gastos registrados`}
+            />
 
             {loading && (
               <Box

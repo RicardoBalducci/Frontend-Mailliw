@@ -11,3 +11,11 @@ export interface ServicioDTO {
   materialesUsados: MaterialesDto[];
   tecnicosCalificados: UserDto[];
 }
+
+export interface UpdateServicioDTO {
+  nombre: string;
+  descripcion: string;
+  precio_estandar_usd: number;
+  materialesUsados: MaterialesDto[];
+  tecnicosCalificados: UserDto[];
+}

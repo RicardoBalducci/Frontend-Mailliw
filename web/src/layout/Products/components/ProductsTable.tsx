@@ -144,8 +144,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
   searchTerm,
   onModify,
   onDelete,
-  /*onModifyStock,
-  onModifyPrice,*/
 }) => {
   const theme = useTheme();
   const [dollarOficial, setDollarOficial] = useState<number | null>(null);
@@ -224,7 +222,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
     },
     {
       field: "precio_unitario",
-      headerName: "Precio ($)",
+      headerName: "Precio (USD)",
       flex: 1,
       minWidth: 120,
       renderCell: (params) => {
@@ -237,7 +235,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
               currency: "USD",
               minimumFractionDigits: 2,
             }).format(precioUSD)}{" "}
-            {/* Ej: $1,000.00 */}
           </Typography>
         );
       },
@@ -252,23 +249,19 @@ const ProductTable: React.FC<ProductTableProps> = ({
       renderCell: (params) => {
         const precioUSD = Number(params.row.precio_unitario);
         const precioBS = precioUSD * (dollarOficial || 0);
-
         return (
           <Typography variant="body2" fontWeight={500}>
-            {new Intl.NumberFormat("es-VE", {
-              style: "currency",
-              currency: "VES", // Bolívar Soberano
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }).format(precioBS)}{" "}
-            {/* Ej: Bs. 1.000.000,00 */}
+            {"Bs. " +
+              new Intl.NumberFormat("es-VE", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(precioBS)}
           </Typography>
         );
       },
       headerAlign: "left",
       align: "left",
     },
-
     {
       field: "acciones",
       headerName: "Acciones",

@@ -3,7 +3,7 @@ export interface CreateServicioDto {
   nombre: string;
   descripcion: string;
   precio_estandar_usd: number;
-  monto_bs: number;
+  //monto_bs: number;
   // Opcionalmente, si la API espera IDs de las relaciones en el DTO
   materiales_utilizados?: number[];
   tecnicos_calificados?: number[];
