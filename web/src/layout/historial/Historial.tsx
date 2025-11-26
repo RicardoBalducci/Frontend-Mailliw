@@ -1,170 +1,125 @@
-
-{
-  
-  /* 
-  
-  import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Container,
-  Fade,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Link,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Container, Fade, CircularProgress, Alert } from "@mui/material";
+import { Clock } from "lucide-react";
+import HeaderSection from "../../components/global/Header/header";
+import { StyledPaper } from "../../theme/StyledComponents";
 import HistorialServices, { HistorialDTO } from "../../api/HistorialServices";
 
-export const Historial = () => {
-  const [historiales, setHistoriales] = useState<HistorialDTO[]>([]);
+// Interfaces
+interface Material {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  stock: number;
+  precio_unitario_usd: number;
+}
 
-  const fetchHistorial = async () => {
-    const response = await HistorialServices.fetchHistorial({
-      page: 1,
-      limit: 10,
-    });
+interface HistorialMaterialDTO {
+  id: number;
+  cantidad: number;
+  precio_unitario_bs: number;
+  precio_unitario_usd: number;
+  material: Material;
+}
 
-    if (response.success) {
-      setHistoriales(response.data);
-    } else {
-      console.error(response.errors);
-    }
-  };
+
+export function HistorialPage() {
+  const [historial, setHistorial] = useState<HistorialDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHistorial();
   }, []);
 
+  const fetchHistorial = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await HistorialServices.fetchHistorial();
+      if (res.success) {
+        setHistorial(res.data || []);
+      } else {
+        setError(res.message || "No se pudo obtener el historial.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error al obtener el historial.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={800}>
         <Box>
-          <Typography
-            variant="h4"
-            fontWeight="700"
-            color="primary"
-            sx={{ mb: 4 }}
-          >
-            Historial
-          </Typography>
+          <HeaderSection title="Historial" icon={<Clock />} />
 
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Fecha</TableCell>
-                  <TableCell>Proveedor</TableCell>
-                  <TableCell>Teléfono</TableCell>
-                  <TableCell>Dirección</TableCell>
-                  <TableCell>Catálogo</TableCell>
-                  <TableCell>Materiales</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {historiales.map((h) => (
-                  <TableRow key={h.id}>
-                    <TableCell>{h.id}</TableCell>
-                    <TableCell>{new Date(h.fecha).toLocaleString()}</TableCell>
-                    <TableCell>
-                      {h.materiales.map((m) => (
-                        <Box key={m.id}>
-                          Cantidad: {m.cantidad}, USD: {m.precio_unitario_usd},
-                          Bs: {m.precio_unitario_bs}
+          <StyledPaper sx={{ mt: 3, p: 2 }}>
+            {loading && <CircularProgress />}
+            {error && <Alert severity="error">{error}</Alert>}
+
+            {!loading && !error && (
+              <>
+                {historial.length === 0 ? (
+                  <p>No hay historial disponible.</p>
+                ) : (
+                  historial.map((h) => (
+                    <Box
+                      key={h.id}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        border: "1px solid #ccc",
+                        borderRadius: 1,
+                        backgroundColor: "#f9f9f9",
+                      }}
+                    >
+                      <p>
+                        <strong>ID:</strong> {h.id}
+                      </p>
+                      <p>
+                        <strong>Tipo:</strong> {h.fecha || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Fecha:</strong> {new Date(h.fecha).toLocaleString()}
+                      </p>
+                      {h.proveedor && (
+                        <p>
+                          <strong>Proveedor:</strong> {h.proveedor.nombre}
+                        </p>
+                      )}
+                      {h.user && (
+                        <p>
+                          <strong>Usuario:</strong> {h.user.nombre}
+                        </p>
+                      )}
+                      {h.materiales && h.materiales.length > 0 && (
+                        <Box sx={{ ml: 2 }}>
+                          <p>
+                            <strong>Materiales:</strong>
+                          </p>
+                          <ul>
+                            {h.materiales.map((m) => (
+                              <li key={m.id}>
+                                {m.material.nombre} - Cantidad: {m.cantidad} - Precio
+                                USD: {Number(m.precio_unitario_usd).toFixed(2)}
+                              </li>
+                            ))}
+                          </ul>
                         </Box>
-                      ))}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                      )}
+                    </Box>
+                  ))
+                )}
+              </>
+            )}
+          </StyledPaper>
         </Box>
       </Fade>
     </Container>
   );
-};
-
-  <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <Box display="flex" gap={1} mb={3} flexWrap="nowrap">
-                <DatePicker
-                  label="Fecha Inicio"
-                  value={fechaInicio}
-                  onChange={(newValue) => setFechaInicio(newValue)}
-                  slotProps={{
-                    textField: {
-                      size: "medium",
-                      sx: { minWidth: 200, height: 50 },
-                    },
-                  }}
-                />
-                <DatePicker
-                  label="Fecha Fin"
-                  value={fechaFin}
-                  onChange={(newValue) => setFechaFin(newValue)}
-                  slotProps={{
-                    textField: {
-                      size: "medium",
-                      sx: { minWidth: 200, height: 50 },
-                    },
-                  }}
-                />
-                <TextField
-                  select
-                  label="Proveedor"
-                  value={proveedor}
-                  onChange={(e) => setProveedor(e.target.value)}
-                  size="medium"
-                  sx={{ minWidth: 200, height: 50 }}
-                >
-                  {proveedores.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  select
-                  label="Cliente"
-                  value={cliente}
-                  onChange={(e) => setCliente(e.target.value)}
-                  size="medium"
-                  sx={{ minWidth: 200, height: 50 }}
-                >
-                  {clientes.map((c) => (
-                    <MenuItem key={c} value={c}>
-                      {c}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  select
-                  label="Tipo"
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value)}
-                  size="medium"
-                  sx={{ minWidth: 150, height: 50 }}
-                >
-                  {tipos.map((t) => (
-                    <MenuItem key={t} value={t}>
-                      {t}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<Download />}
-                  sx={{ height: 50 }}
-                  onClick={() => alert("Exportar")}
-                >
-                  Exportar
-                </Button>
-              </Box>
-            </LocalizationProvider> */
 }
+
+export default HistorialPage;

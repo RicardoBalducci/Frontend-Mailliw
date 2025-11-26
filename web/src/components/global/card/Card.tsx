@@ -3,7 +3,7 @@ import  { ReactElement } from "react";
 
 interface DashboardCardProps {
   lineColor?: string;
-  icon?: ReactElement; // cualquier icono JSX
+  icon?: ReactElement;
   iconBg?: string;
   title?: string;
   value?: string | number;

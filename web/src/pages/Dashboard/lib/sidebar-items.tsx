@@ -67,6 +67,7 @@ export const sidebarItems: SidebarItem[] = [
     icon: <Building className="h-5 w-5" />,
     content: <Personal />,
   },
+  
 /*   {
     id: "purchases",
     text: "Compras",

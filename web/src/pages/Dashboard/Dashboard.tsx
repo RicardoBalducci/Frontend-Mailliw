@@ -29,6 +29,7 @@ import {
   ArrowDownUp,
   UserLock,
   LayoutDashboard,
+  Clock,
   //Clock,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ import { Proveedor } from "../../layout/Proveedor/Proveedor";
  */import { HomeContent } from "../../layout/home/home";
 import { Servicios } from "../../layout/servicios/Servicios";
 import Personal from "../../layout/Personal/Personal";
+import HistorialPage from "../../layout/historial/Historial";
 //import { Ventas } from "../../layout/ventas";
 //import { Historial } from "../../layout/historial/Historial";
 
@@ -98,6 +100,12 @@ const sidebarItems: SidebarItem[] = [
     text: "Personal",
     icon: <UserLock size={20} />, // icono de personal
     content: <Personal />, // Asegúrate de que el componente Personal/Proveedores esté definido
+  },
+  {
+    id: "historial",
+    text: "Historial",
+    icon: <Clock size={20} />, // icono de personal
+    content: <HistorialPage />, // Asegúrate de que el componente Personal/Proveedores esté definido
   }
 /*   {
     id: "compras",
