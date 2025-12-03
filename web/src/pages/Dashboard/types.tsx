@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
-
 export interface SidebarItem {
   id: string;
   text: string;
-  icon: ReactNode;
-  content: ReactNode;
+  icon: React.ReactNode;
+  content?: React.ReactNode;      // Para items simples
+  subItems?: SidebarItem[];       // Para items con subramas
 }

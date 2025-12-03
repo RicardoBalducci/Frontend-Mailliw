@@ -159,7 +159,11 @@ const handleFilterRole = (event: SelectChangeEvent<string>) => {
                     >
                     <MenuItem value="all">Todos</MenuItem>
                     <MenuItem value="administrador">Administrador</MenuItem>
+                    <MenuItem value="gerente">Gerente</MenuItem>
+                    <MenuItem value="desarrollo">Desarrollo</MenuItem>
                     <MenuItem value="tecnico">Técnico</MenuItem>
+                    <MenuItem value="asistente">Asistente</MenuItem>
+                    <MenuItem value="atc">ATC</MenuItem>
                     </Select>
                 </FormControl>
 

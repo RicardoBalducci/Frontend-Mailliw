@@ -56,7 +56,7 @@ export const LoginPage = () => {
       }}
     >
       <img
-        src="/Logo2.png"
+        src="/Logo4.jpeg"
         alt=""
         style={{ width: "20%", display: "block", margin: "0 auto" }} // Size in % and centered
       />

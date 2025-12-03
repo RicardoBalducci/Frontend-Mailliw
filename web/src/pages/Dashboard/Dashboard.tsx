@@ -30,15 +30,23 @@ import {
   UserLock,
   LayoutDashboard,
   Clock,
+  ShoppingCart,
+/*   ListChecks,
+  PlusCircle, */
+  //Percent,
   //Clock,
 } from "lucide-react";
 
 import { Proveedor } from "../../layout/Proveedor/Proveedor";
 /* import { Compra } from "../../layout/Compra/Compra";
- */import { HomeContent } from "../../layout/home/home";
+ */
+
 import { Servicios } from "../../layout/servicios/Servicios";
 import Personal from "../../layout/Personal/Personal";
 import HistorialPage from "../../layout/historial/Historial";
+import HomeContent from "../../layout/home/home";
+//import CrearVentas from "../../layout/ventas/crear";
+import { Compra } from "../../layout/Compra/Compra";
 //import { Ventas } from "../../layout/ventas";
 //import { Historial } from "../../layout/historial/Historial";
 
@@ -76,82 +84,82 @@ const sidebarItems: SidebarItem[] = [
     icon: <Wrench size={20} />,
     content: <Tecnicos />,
   },
-
   {
-    id: "Servicios",
+    id: "servicios",
     text: "Servicios",
     icon: <Anvil size={20} />,
     content: <Servicios />,
+  },
+/*   {
+    id: "ventas",
+    text: "Ventas",
+    icon: <Percent size={20} />, // Icono principal de ventas
+    subItems: [
+      {
+        id: "ventas-listado",
+        text: "Listado",
+        icon: <ListChecks size={20} />, // Icono subitem listado
+        content: <CrearVentas/>, // Componente real de listado de ventas
+      },
+      {
+        id: "ventas-crear",
+        text: "Creación",
+        icon: <PlusCircle size={20} />, // Icono subitem crear
+        content: <CrearVentas/>, // Componente real de creación de ventas
+      },
+    ],
+  }, */
+/*   {
+    id: "compra",
+    text: "Compras",
+    icon: <ShoppingCart size={20} />, // Icono principal de compras (puede cambiarse)
+    subItems: [
+      {
+        id: "compra-listado",
+        text: "Listado",
+        icon: <ListChecks size={20} />, // Icono subitem listado
+        content: <></>, // Componente real de listado de compras
+      },
+      {
+        id: "compra-crear",
+        text: "Creación",
+        icon: <PlusCircle size={20} />, // Icono subitem crear
+        content: <Compra/>, // Componente real de creación de compras
+      },
+    ],
+  }, */
+  {
+    id: "compra",
+    text: "Compra",
+    icon: <ShoppingCart size={20} />, // Icono subitem crear
+    content: <Compra/>, 
   },
   {
     id: "materiales",
     text: "Materiales",
     icon: <HardHat size={20} />,
-    content: <Materiales />, // Asegúrate de que el componente Materiales esté definido
+    content: <Materiales />,
   },
   {
     id: "proveedores",
     text: "Proveedores",
     icon: <Building size={20} />,
-    content: <Proveedor />, // Asegúrate de que el componente Proveedores esté definido
+    content: <Proveedor />,
   },
   {
     id: "personal",
     text: "Personal",
-    icon: <UserLock size={20} />, // icono de personal
-    content: <Personal />, // Asegúrate de que el componente Personal/Proveedores esté definido
+    icon: <UserLock size={20} />,
+    content: <Personal />,
   },
-  {
-    id: "historial",
-    text: "Historial",
-    icon: <Clock size={20} />, // icono de personal
-    content: <HistorialPage />, // Asegúrate de que el componente Personal/Proveedores esté definido
-  }
-/*   {
-    id: "compras",
-    text: "Compras",
-    icon: <ShoppingCart size={20} />,
-    content: <Compra />,
-  },
-  {
-    id: "ventas",
-    text: "Ventas",
-    icon: <DollarSign size={20} />, // ícono representativo de ventas
-    content: <h1>En desarrollo...</h1>, // componente que mostrarás para la sección ventas <Ventas />,
-  }, */
-  /* 
   {
     id: "historial",
     text: "Historial",
     icon: <Clock size={20} />,
-    content: <Historial />,
+    content: <HistorialPage />,
   },
- */
-  /*{
-    id: "servicios",
-    text: "Servicios",
-    icon: <ServiceIcon />, // Ícono para Servicios
-    content: <Materiales />, // Asegúrate de que el componente Servicios esté definido
-  },
-  {
-    id: "compra",
-    text: "Compra",
-    icon: <ShoppingCartIcon />, // Ícono para Compra
-    content: <Materiales />, // Asegúrate de que el componente Compra esté definido
-  },
-  {
-    id: "venta",
-    text: "Venta",
-    icon: <AttachMoneyIcon />, // Ícono para Venta
-    content: <Materiales />, // Asegúrate de que el componente Venta esté definido
-  },
-  {
-    id: "reportes",
-    text: "Reportes",
-    icon: <AssessmentIcon />, // Ícono para Reportes
-    content: <Materiales />, // Asegúrate de que el componente Reportes esté definido
-  },*/
 ];
+
 
 export const Dashboard: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false); // State for MiniChat visibility

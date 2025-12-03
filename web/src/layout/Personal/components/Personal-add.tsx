@@ -35,6 +35,10 @@ interface PersonalAddProps {
 const roles = [
   { value: "administrador", label: "Administrador" },
   { value: "tecnico", label: "Técnico" },
+  { value: "asistente", label: "Asistente" },
+  { value: "gerente", label: "Gerente" },
+  { value: "desarrollo", label: "Desarrollo" },
+  { value: "atc", label: "ATC" },
 ];
 
 export function PersonalAdd({ open, onClose, onPersonalAdded }: PersonalAddProps) {

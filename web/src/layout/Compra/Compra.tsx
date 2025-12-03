@@ -1,4 +1,4 @@
-/* "use client";
+ "use client";
 
 import React from "react";
 import {
@@ -143,14 +143,6 @@ export function Compra() {
     showSnackbar("Material añadido exitosamente!", "success");
   };
 
-  const handleProveedorAdded = (message: string) => {
-    showSnackbar(message, "success");
-    fetchProveedores(); // Refresh the list of suppliers after a new one is added
-  };
-
-  const handleAddError = (message: string) => {
-    showSnackbar(message, "error");
-  };
 
   const handleMaterialSelected = (material: MaterialesDto) => {
     setPurchaseItems((prevItems) => {
@@ -329,7 +321,6 @@ export function Compra() {
                 Nueva Orden de Compra
               </Typography>
 
-              {/* Sección de Selección de Proveedor 
               <Box sx={{ mb: 4, pb: 3, borderBottom: "1px dashed #eee" }}>
                 <Typography
                   variant="h6"
@@ -389,7 +380,6 @@ export function Compra() {
                 </Stack>
               </Box>
 
-              {/* Sección de Materiales 
               <Box sx={{ mb: 4, pb: 3, borderBottom: "1px dashed #eee" }}>
                 <Typography
                   variant="h6"
@@ -427,7 +417,6 @@ export function Compra() {
                   </StyledButton>
                 </Stack>
 
-                {/* Lista de Materiales Seleccionados 
                 {purchaseItems.length === 0 ? (
                   <Box
                     minHeight={150}
@@ -546,7 +535,6 @@ export function Compra() {
                 )}
               </Box>
 
-              {/* Resumen de la Compra 
               <Box sx={{ mt: 4, pt: 3, borderTop: "1px dashed #eee" }}>
                 <Typography variant="h6" component="h3" gutterBottom>
                   Resumen de la Compra
@@ -596,14 +584,12 @@ export function Compra() {
                 </Box>
               </Box>
 
-              {/* Mensajes de error de la compra 
               {purchaseError && (
                 <StyledAlert severity="error" sx={{ mt: 3 }}>
                   {purchaseError}
                 </StyledAlert>
               )}
 
-              {/* Botones de Acción 
               <Box
                 display="flex"
                 justifyContent="flex-end"
@@ -649,7 +635,6 @@ export function Compra() {
         </Fade>
       </Container>
 
-      {/* Modales 
       <MaterialAdd
         open={openMaterialAddModal}
         onClose={handleCloseMaterialAddModal}
@@ -658,8 +643,6 @@ export function Compra() {
       <ProveedorAdd
         open={openProveedorModal}
         onClose={handleCloseProveedorModal}
-        onProveedorAdded={handleProveedorAdded}
-        onAddError={handleAddError}
       />
       <MaterialSelectModal
         open={openMaterialSelectModal}
@@ -683,4 +666,3 @@ export function Compra() {
     </>
   );
 }
- */

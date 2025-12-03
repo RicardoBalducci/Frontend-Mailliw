@@ -188,7 +188,7 @@ export function Client() {
       handleRefresh();
       return true; // 🔥 Solo devuelve éxito
     }
-
+    handleRefresh();
     Swal.fire({
       icon: "error",
       title: "Error",
