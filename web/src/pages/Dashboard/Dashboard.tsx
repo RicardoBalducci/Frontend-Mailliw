@@ -29,7 +29,7 @@ import {
   ArrowDownUp,
   UserLock,
   LayoutDashboard,
-  Clock,
+  //Clock,
   ShoppingCart,
 /*   ListChecks,
   PlusCircle, */
@@ -43,7 +43,7 @@ import { Proveedor } from "../../layout/Proveedor/Proveedor";
 
 import { Servicios } from "../../layout/servicios/Servicios";
 import Personal from "../../layout/Personal/Personal";
-import HistorialPage from "../../layout/historial/Historial";
+//import HistorialPage from "../../layout/historial/Historial";
 import HomeContent from "../../layout/home/home";
 //import CrearVentas from "../../layout/ventas/crear";
 import { Compra } from "../../layout/Compra/Compra";
@@ -152,12 +152,12 @@ const sidebarItems: SidebarItem[] = [
     icon: <UserLock size={20} />,
     content: <Personal />,
   },
-  {
+/*   {
     id: "historial",
     text: "Historial",
     icon: <Clock size={20} />,
     content: <HistorialPage />,
-  },
+  }, */
 ];
 
 
