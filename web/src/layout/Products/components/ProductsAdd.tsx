@@ -9,7 +9,7 @@ import { CreateProductoDTO } from "../../../Dto/Productos.dto";
 import BaseModal from "../../../components/global/modal/modal";
 import InputField from "../../../components/global/TextField/InputField";
 import TextAreaField from "../../../components/global/TextField/TextAreaField";
-import { Box as BoxIcon, FileText, Hash, Package } from "lucide-react";
+import { Box as BoxIcon, FileText, Hash, Package, Tag } from "lucide-react";
 import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface ProductsAddProps {
@@ -18,15 +18,14 @@ interface ProductsAddProps {
   onProductAdded?: () => void;
 }
 
-export function ProductsAdd({
-  open,
-  onClose,
-  onProductAdded,
-}: ProductsAddProps) {
+export function ProductsAdd({ open, onClose, onProductAdded }: ProductsAddProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [stock, setStock] = useState<number | "">("");
+  const [marca, setMarca] = useState("");
   const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
+  const [precioVenta, setPrecioVenta] = useState<number | "">("");
+
   const [loading, setLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
 
@@ -35,6 +34,8 @@ export function ProductsAdd({
     descripcion: "",
     stock: "",
     precioUnitario: "",
+    precioVenta: "",
+    marca: "",
   });
 
   const resetForm = () => {
@@ -42,11 +43,15 @@ export function ProductsAdd({
     setDescripcion("");
     setStock("");
     setPrecioUnitario("");
+    setPrecioVenta("");
+    setMarca("");
     setErrors({
       nombre: "",
       descripcion: "",
       stock: "",
       precioUnitario: "",
+      precioVenta: "",
+      marca: "",
     });
   };
 
@@ -56,11 +61,11 @@ export function ProductsAdd({
       descripcion: !descripcion.trim() ? "Campo obligatorio" : "",
       stock: stock === "" ? "Campo obligatorio" : "",
       precioUnitario: precioUnitario === "" ? "Campo obligatorio" : "",
+      precioVenta: precioVenta === "" ? "Campo obligatorio" : "",
+      marca: !marca.trim() ? "Campo obligatorio" : "",
     };
 
     setErrors(newErrors);
-
-    // Si no hay errores, retorna true
     return Object.values(newErrors).every((e) => e === "");
   };
 
@@ -72,6 +77,8 @@ export function ProductsAdd({
       descripcion: descripcion.trim(),
       stock: Number(stock),
       precio_unitario: Number(precioUnitario),
+      precio_venta: Number(precioVenta),
+      marca: marca.trim(),
     };
 
     try {
@@ -80,12 +87,13 @@ export function ProductsAdd({
 
       if (response?.success) {
         resetForm();
-        if (onProductAdded) onProductAdded();
-        setTimeout(() => onClose(), 800);
-        showSnackbar("Creado exitosamente", "success");
+        onProductAdded?.();
+        setTimeout(() => onClose(), 600);
+        showSnackbar("Producto creado correctamente", "success");
       }
     } catch (err) {
       console.error("Error creando producto:", err);
+      showSnackbar("Error creando producto", "error");
     } finally {
       setLoading(false);
     }
@@ -116,6 +124,7 @@ export function ProductsAdd({
       title="Añadir Producto"
     >
       <Box component="form" onKeyDown={handleKeyPress}>
+        {/* Nombre */}
         <InputField
           label="Nombre del Producto"
           value={nombre}
@@ -126,6 +135,7 @@ export function ProductsAdd({
           errorMessage={errors.nombre}
         />
 
+        {/* Descripción */}
         <TextAreaField
           label="Descripción del Producto"
           value={descripcion}
@@ -137,7 +147,20 @@ export function ProductsAdd({
           errorMessage={errors.descripcion}
         />
 
+        {/* Marca */}
+        <InputField
+          label="Marca"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
+          startIcon={<Tag />}
+          sx={{ flex: 1, minWidth: 150 }}
+          disabled={loading}
+          errorMessage={errors.marca}
+        />
+
+        {/* PRECIOS Y STOCK */}
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>
+          {/* Stock */}
           <InputField
             label="Stock"
             value={stock}
@@ -149,17 +172,27 @@ export function ProductsAdd({
             errorMessage={errors.stock}
           />
 
+          {/* Precio unitario */}
           <InputField
-            label="Precio Unitario (USD)"
+            label="Precio Unitario Costo"
             value={precioUnitario}
-            onChange={(e) =>
-              setPrecioUnitario(handleNumericInput(e.target.value))
-            }
+            onChange={(e) => setPrecioUnitario(handleNumericInput(e.target.value))}
             startIcon={<Hash />}
             sx={{ flex: 1, minWidth: 150 }}
             onlyNumbers
             disabled={loading}
             errorMessage={errors.precioUnitario}
+          />
+
+          <InputField
+            label="Precio Venta (USD)"
+            value={precioVenta}
+            onChange={(e) => setPrecioVenta(handleNumericInput(e.target.value))}
+            startIcon={<Tag />}
+            sx={{ flex: 1, minWidth: 150 }}
+            onlyNumbers
+            disabled={loading}
+            errorMessage={errors.precioVenta}
           />
         </Box>
       </Box>

@@ -14,18 +14,17 @@ import {
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
 import ServicesIcon from "@mui/icons-material/BuildCircleOutlined";
-import PersonIcon from "@mui/icons-material/Person";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import { FileText, Hash } from "lucide-react";
 
 import type { CreateServicioDto } from "../../../Dto/Servicio-request.dto";
 import ServiciosServices from "../../../api/ServiciosServices";
-import UserServices from "../../../api/UserSevices";
 import MaterialServices from "../../../api/MaterialesServices";
-import type { UserDto } from "../../../Dto/UserDto";
 import type { MaterialesDto } from "../../../Dto/Materiales.dto";
 import BaseModal from "../../../components/global/modal/modal";
 import InputField from "../../../components/global/TextField/InputField";
+import ProductServices from "../../../api/ProductServices";
+import { ProductoDTO } from "../../../Dto/Productos.dto";
 
 // 🔹 FormControl personalizado
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
@@ -49,13 +48,6 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
       },
     },
   },
-  "& .MuiInputLabel-root": {
-    fontWeight: 500,
-    "&.Mui-focused": {
-      color: theme.palette.primary.main,
-      fontWeight: 600,
-    },
-  },
 }));
 
 // 🔹 Alert personalizado
@@ -64,14 +56,6 @@ const StyledAlert = styled(Alert)(({ theme }) => ({
   backdropFilter: "blur(10px)",
   border: "1px solid",
   fontWeight: 500,
-  "& .MuiAlert-icon": {
-    fontSize: "1.2rem",
-  },
-  "&.MuiAlert-standardInfo": {
-    backgroundColor: alpha(theme.palette.info.main, 0.1),
-    borderColor: alpha(theme.palette.info.main, 0.2),
-    color: theme.palette.info.dark,
-  },
   "&.MuiAlert-standardError": {
     backgroundColor: alpha(theme.palette.error.main, 0.1),
     borderColor: alpha(theme.palette.error.main, 0.2),
@@ -92,12 +76,6 @@ const SelectionChip = styled(Chip)(({ theme }) => ({
   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
   fontWeight: 500,
   fontSize: "0.75rem",
-  "& .MuiChip-deleteIcon": {
-    color: alpha(theme.palette.primary.main, 0.7),
-    "&:hover": {
-      color: theme.palette.primary.main,
-    },
-  },
 }));
 
 interface ServicioAddProps {
@@ -106,20 +84,17 @@ interface ServicioAddProps {
   onServicioAdded: () => void;
 }
 
-export function ServicioAdd({
-  open,
-  onClose,
-  onServicioAdded,
-}: ServicioAddProps) {
+export function ServicioAdd({ open, onClose, onServicioAdded }: ServicioAddProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio_estandar_usd, setPrecioEstandarUsd] = useState<number | "">("");
-  const [tecnicosCalificados, setTecnicosCalificados] = useState<number[]>([]);
+
   const [materialesUsados, setMaterialesUsados] = useState<number[]>([]);
-  const [availableTecnicos, setAvailableTecnicos] = useState<UserDto[]>([]);
-  const [availableMateriales, setAvailableMateriales] = useState<
-    MaterialesDto[]
-  >([]);
+  const [productosAsociados, setProductosAsociados] = useState<number[]>([]);
+
+  const [availableMateriales, setAvailableMateriales] = useState<MaterialesDto[]>([]);
+  const [availableProductos, setAvailableProductos] = useState<ProductoDTO[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -137,7 +112,7 @@ export function ServicioAdd({
     setNombre("");
     setDescripcion("");
     setPrecioEstandarUsd("");
-    setTecnicosCalificados([]);
+    setProductosAsociados([]);
     setMaterialesUsados([]);
     setError(null);
     setSuccess(null);
@@ -148,45 +123,38 @@ export function ServicioAdd({
     setError(null);
 
     try {
-      const [tecnicosResponse, materialesResponse] = await Promise.all([
-        UserServices.getTechnicians().catch(() => ({ data: [] })),
-        MaterialServices.findAll().catch(() => ({ data: [] })),
+      const [materialesResponse, productosResponse] = await Promise.all([
+        MaterialServices.findAll().catch(() => []),
+        ProductServices.fetchProductos().catch(() => []),
       ]);
 
-      const tecnicos = Array.isArray(tecnicosResponse)
-        ? tecnicosResponse
-        : tecnicosResponse?.data || [];
       const materiales = Array.isArray(materialesResponse)
         ? materialesResponse
         : materialesResponse?.data || [];
 
-      setAvailableTecnicos(tecnicos);
+      const productos = Array.isArray(productosResponse)
+        ? productosResponse
+        : productosResponse?.data || [];
+
       setAvailableMateriales(materiales);
+      setAvailableProductos(productos);
+
     } catch {
-      setError("Error al cargar la lista de técnicos o materiales.");
+      setError("Error al cargar materiales o productos.");
     } finally {
       setFetchingData(false);
     }
   };
 
-  // 🔹 Validación
   const validateForm = (): boolean => {
-    if (!nombre.trim()) {
-      setError("El nombre del servicio es requerido.");
-      return false;
-    }
-    if (!descripcion.trim()) {
-      setError("La descripción es requerida.");
-      return false;
-    }
-    if (precio_estandar_usd === "" || precio_estandar_usd <= 0) {
-      setError("El precio en USD debe ser mayor a 0.");
-      return false;
-    }
+    if (!nombre.trim()) return setError("El nombre del servicio es requerido."), false;
+    if (!descripcion.trim()) return setError("La descripción es requerida."), false;
+    if (precio_estandar_usd === "" || precio_estandar_usd <= 0)
+      return setError("El precio en USD debe ser mayor a 0."), false;
+
     return true;
   };
 
-  // 🔹 Crear servicio
   const handleAddServicio = async () => {
     if (!validateForm()) return;
 
@@ -194,24 +162,21 @@ export function ServicioAdd({
     setError(null);
     setSuccess(null);
 
-    const newServicioData: CreateServicioDto = {
+   const newServicioData: CreateServicioDto = {
       nombre: nombre.trim(),
       descripcion: descripcion.trim(),
       precio_estandar_usd: Number(precio_estandar_usd),
-      tecnicos_calificados: tecnicosCalificados,
-      materiales_utilizados: materialesUsados,
-    };
 
+      materiales_utilizados: materialesUsados,
+      productos_asociados: productosAsociados
+    };
     try {
       await ServiciosServices.createServicio(newServicioData);
       setSuccess("¡Servicio añadido exitosamente!");
       onServicioAdded();
       onClose();
     } catch (err) {
-      let errorMessage = "Ocurrió un error al añadir el servicio.";
-      if (err instanceof Error) errorMessage = err.message;
-      else if (typeof err === "string") errorMessage = err;
-      setError(errorMessage);
+      setError(err instanceof Error ? err.message : "Error al añadir el servicio.");
     } finally {
       setLoading(false);
     }
@@ -232,15 +197,8 @@ export function ServicioAdd({
       onSave={handleAddServicio}
       title="Añadir Servicio"
     >
-      <Box
-        component="form"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 0.8, // Espaciado más compacto (~6px)
-          "& > *": { mb: 1 }, // separa suavemente los campos sin dejar tanto espacio
-        }}
-      >
+      <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+
         <InputField
           label="Nombre del Servicio"
           value={nombre}
@@ -267,38 +225,35 @@ export function ServicioAdd({
           disabled={loading}
         />
 
-        {/* Técnicos */}
+        {/* Productos */}
         <StyledFormControl fullWidth disabled={loading || fetchingData}>
-          <InputLabel id="tecnicos-calificados-label">
+          <InputLabel id="productos-asociados-label">
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <PersonIcon sx={{ fontSize: "1rem" }} />
-              Técnicos Calificados
+              <InventoryIcon sx={{ fontSize: "1rem" }} />
+              Productos Asociados
             </Box>
           </InputLabel>
+
           <Select
-            labelId="tecnicos-calificados-label"
+            labelId="productos-asociados-label"
             multiple
-            value={tecnicosCalificados}
+            value={productosAsociados}
             onChange={(e) =>
-              setTecnicosCalificados(
+              setProductosAsociados(
                 typeof e.target.value === "string"
                   ? e.target.value.split(",").map(Number)
                   : e.target.value
               )
             }
-            input={<OutlinedInput label="Técnicos Calificados" />}
+            input={<OutlinedInput label="Productos Asociados" />}
             renderValue={(selected) => (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                 {selected.map((value) => {
-                  const tecnico = availableTecnicos.find((t) => t.id === value);
+                  const prod = availableProductos.find((p) => p.id === value);
                   return (
                     <SelectionChip
                       key={value}
-                      label={
-                        tecnico
-                          ? `${tecnico.nombre} ${tecnico.apellido || ""}`.trim()
-                          : `ID: ${value}`
-                      }
+                      label={prod ? prod.nombre : `ID: ${value}`}
                       size="small"
                     />
                   );
@@ -306,13 +261,11 @@ export function ServicioAdd({
               </Box>
             )}
           >
-            {availableTecnicos.map((tecnico) => (
-              <MenuItem key={tecnico.id} value={tecnico.id}>
+            {availableProductos.map((prod) => (
+              <MenuItem key={prod.id} value={prod.id}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <PersonIcon
-                    sx={{ fontSize: "1rem", color: "action.active" }}
-                  />
-                  {`${tecnico.nombre} ${tecnico.apellido || ""}`.trim()}
+                  <InventoryIcon sx={{ fontSize: "1rem", color: "action.active" }} />
+                  {prod.nombre}
                 </Box>
               </MenuItem>
             ))}
@@ -327,6 +280,7 @@ export function ServicioAdd({
               Materiales Utilizados
             </Box>
           </InputLabel>
+
           <Select
             labelId="materiales-usados-label"
             multiple
@@ -342,9 +296,7 @@ export function ServicioAdd({
             renderValue={(selected) => (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                 {selected.map((value) => {
-                  const material = availableMateriales.find(
-                    (m) => m.id === value
-                  );
+                  const material = availableMateriales.find((m) => m.id === value);
                   return (
                     <SelectionChip
                       key={value}
@@ -356,35 +308,26 @@ export function ServicioAdd({
               </Box>
             )}
           >
-            {availableMateriales.map((material) => {
-              if (material.id == null) return null;
-              return (
-                <MenuItem key={material.id} value={material.id}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <InventoryIcon
-                      sx={{ fontSize: "1rem", color: "action.active" }}
-                    />
-                    {material.nombre}
-                  </Box>
-                </MenuItem>
-              );
-            })}
+            {availableMateriales.map((material) => (
+              <MenuItem key={material.id ?? 0} value={material.id ?? 0}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InventoryIcon sx={{ fontSize: "1rem", color: "action.active" }} />
+                  {material.nombre}
+                </Box>
+              </MenuItem>
+            ))}
           </Select>
         </StyledFormControl>
 
-        {/* Mensajes */}
         {error && (
           <StyledAlert severity="error">
-            <Typography variant="body2" fontWeight={500}>
-              {error}
-            </Typography>
+            <Typography variant="body2" fontWeight={500}>{error}</Typography>
           </StyledAlert>
         )}
+
         {success && (
           <StyledAlert severity="success">
-            <Typography variant="body2" fontWeight={500}>
-              {success}
-            </Typography>
+            <Typography variant="body2" fontWeight={500}>{success}</Typography>
           </StyledAlert>
         )}
       </Box>

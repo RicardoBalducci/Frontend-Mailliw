@@ -20,37 +20,29 @@ import { Materiales } from "../../layout/Materiales/Materiales";
 import {
   Users,
   Package,
-  //DollarSign,
   Wrench,
   HardHat,
   Building,
-  //ShoppingCart,
   Anvil,
   ArrowDownUp,
   UserLock,
   LayoutDashboard,
-  //Clock,
   ShoppingCart,
-/*   ListChecks,
-  PlusCircle, */
-  //Percent,
-  //Clock,
+  Percent,
+  Clock,
+  PlusCircle,
+
 } from "lucide-react";
 
 import { Proveedor } from "../../layout/Proveedor/Proveedor";
-/* import { Compra } from "../../layout/Compra/Compra";
- */
+
 
 import { Servicios } from "../../layout/servicios/Servicios";
 import Personal from "../../layout/Personal/Personal";
-//import HistorialPage from "../../layout/historial/Historial";
 import HomeContent from "../../layout/home/home";
-//import CrearVentas from "../../layout/ventas/crear";
-import { Compra } from "../../layout/Compra/Compra";
-//import { Ventas } from "../../layout/ventas";
-//import { Historial } from "../../layout/historial/Historial";
-
-// Define the width of the sidebar here. This value MUST match the one in ModernSidebar.
+import Compra from "../../layout/Compras";
+import Ventas from "../../layout/ventas";
+import { HistorialVentas } from "../../layout/ventas/historial";
 const DRAWER_WIDTH = 0; // Changed from 0 to 240
 
 const sidebarItems: SidebarItem[] = [
@@ -78,6 +70,25 @@ const sidebarItems: SidebarItem[] = [
     icon: <ArrowDownUp size={20} />,
     content: <Gastos />,
   },
+   {
+    id: "ventas",
+    text: "Ventas",
+    icon: <Percent size={20} />, // Icono principal de ventas
+    subItems: [
+      {
+        id: "ventas-historial",
+        text: "Historial",
+        icon: <Clock size={20} />, // Icono subitem listado
+        content: <HistorialVentas />, // Componente real de listado de ventas
+      },
+      {
+        id: "ventas-crear",
+        text: "Creación",
+        icon: <PlusCircle size={20} />, // Icono subitem crear
+        content: <Ventas />, // Componente real de creación de ventas
+      },
+    ],
+  },
   {
     id: "tecnicos",
     text: "Tecnicos",
@@ -90,49 +101,11 @@ const sidebarItems: SidebarItem[] = [
     icon: <Anvil size={20} />,
     content: <Servicios />,
   },
-/*   {
-    id: "ventas",
-    text: "Ventas",
-    icon: <Percent size={20} />, // Icono principal de ventas
-    subItems: [
-      {
-        id: "ventas-listado",
-        text: "Listado",
-        icon: <ListChecks size={20} />, // Icono subitem listado
-        content: <CrearVentas/>, // Componente real de listado de ventas
-      },
-      {
-        id: "ventas-crear",
-        text: "Creación",
-        icon: <PlusCircle size={20} />, // Icono subitem crear
-        content: <CrearVentas/>, // Componente real de creación de ventas
-      },
-    ],
-  }, */
-/*   {
-    id: "compra",
-    text: "Compras",
-    icon: <ShoppingCart size={20} />, // Icono principal de compras (puede cambiarse)
-    subItems: [
-      {
-        id: "compra-listado",
-        text: "Listado",
-        icon: <ListChecks size={20} />, // Icono subitem listado
-        content: <></>, // Componente real de listado de compras
-      },
-      {
-        id: "compra-crear",
-        text: "Creación",
-        icon: <PlusCircle size={20} />, // Icono subitem crear
-        content: <Compra/>, // Componente real de creación de compras
-      },
-    ],
-  }, */
   {
     id: "compra",
     text: "Compra",
     icon: <ShoppingCart size={20} />, // Icono subitem crear
-    content: <Compra/>, 
+    content: <Compra />, 
   },
   {
     id: "materiales",
@@ -152,12 +125,7 @@ const sidebarItems: SidebarItem[] = [
     icon: <UserLock size={20} />,
     content: <Personal />,
   },
-/*   {
-    id: "historial",
-    text: "Historial",
-    icon: <Clock size={20} />,
-    content: <HistorialPage />,
-  }, */
+
 ];
 
 

@@ -7,7 +7,7 @@ export interface ClienteDTO {
 }
 
 export interface RespuestaClienteDTO {
-  id: string;
+  id: number;
   rif: string;
   nombre: string;
   apellido?: string; // Optional because it might not always be present for companies

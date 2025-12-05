@@ -5,6 +5,7 @@ export interface ProductoDTO {
   descripcion: string;
   stock: number;
   precio_unitario: number; // This will be in Bolívares
+  marca: string;
   precio_usd: number;
 }
 export interface CreateProductoDTO {
@@ -12,6 +13,8 @@ export interface CreateProductoDTO {
   descripcion: string;
   stock: number;
   precio_unitario: number; // This will be in Bolívares
+  marca: string;
+  precio_venta: number;
 }
 export interface UpdateProductoDTO {
   nombre?: string;

@@ -1,55 +1,48 @@
-import React from "react";
-import { Card, CardContent, Typography, Box } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
-import HomeIcon from "@mui/icons-material/Home";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { ClienteDTO } from "../../../Dto/Cliente.dto";
+import type React from "react"
+import { Card, CardContent, Typography, Box } from "@mui/material"
+import PersonIcon from "@mui/icons-material/Person"
+import PhoneIcon from "@mui/icons-material/Phone"
+import HomeIcon from "@mui/icons-material/Home"
+import type { ProveedorDto } from "../../Dto/Proveedor.dto"
 
-interface ClienteInfoProps {
-  cliente: ClienteDTO;
+interface ProveedorInfoProps {
+  proveedor: ProveedorDto
 }
 
-const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
+const ProveedorInfo: React.FC<ProveedorInfoProps> = ({ proveedor }) => {
   const infoItems = [
     {
       icon: PersonIcon,
-      label: "RIF",
-      value: cliente.rif,
-      color: "#1e88e5",
-    },
-    {
-      icon: AccountCircleIcon,
       label: "Nombre",
-      value: `${cliente.nombre} ${cliente.apellido || "N/A"}`,
-      color: "#43a047",
+      value: proveedor.nombre,
+      color: "#1e88e5",
     },
     {
       icon: PhoneIcon,
       label: "Teléfono",
-      value: cliente.telefono,
-      color: "#fb8c00",
+      value: proveedor.telefono,
+      color: "#43a047",
     },
     {
       icon: HomeIcon,
       label: "Dirección",
-      value: cliente.direccion,
-      color: "#8e24aa",
+      value: proveedor.direccion,
+      color: "#fb8c00",
     },
-  ];
+  ]
 
   return (
     <Card
       sx={{
         mt: 3,
         borderRadius: 2,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
         background: "#ffffff",
-        border: "1px solid rgba(0,0,0,0.06)",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
         overflow: "hidden",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover": {
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
           transform: "translateY(-2px)",
         },
       }}
@@ -60,18 +53,19 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
           height: "4px",
         }}
       />
+
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ mb: 3 }}>
           <Typography
             variant="h5"
             sx={{
-              fontWeight: 700,
+              fontWeight: "700",
               color: "#1a1a1a",
               letterSpacing: "-0.5px",
               mb: 0.5,
             }}
           >
-            Información del Cliente
+            Información del Proveedor
           </Typography>
           <Box
             sx={{
@@ -85,7 +79,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {infoItems.map((item, index) => {
-            const IconComponent = item.icon;
+            const IconComponent = item.icon
             return (
               <Box
                 key={index}
@@ -125,7 +119,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
                       display: "block",
                       color: "#666",
                       fontSize: "12px",
-                      fontWeight: 600,
+                      fontWeight: "600",
                       letterSpacing: "0.5px",
                       textTransform: "uppercase",
                       mb: 0.5,
@@ -137,9 +131,9 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
                     variant="body2"
                     sx={{
                       color: "#1a1a1a",
-                      fontWeight: 500,
+                      fontWeight: "500",
                       fontSize: "14px",
-                      lineHeight: 1.5,
+                      lineHeight: "1.5",
                       wordBreak: "break-word",
                     }}
                   >
@@ -147,12 +141,12 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({ cliente }) => {
                   </Typography>
                 </Box>
               </Box>
-            );
+            )
           })}
         </Box>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default ClienteInfo;
+export default ProveedorInfo

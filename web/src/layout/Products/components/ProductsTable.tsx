@@ -25,12 +25,14 @@ interface ProductTableProps {
     stock: number;
     precio_unitario: number;
     precio_usd: number;
+    marca:string;
   }>;
   searchTerm: string;
   onModify: (row: {
     id: number;
     nombre: string;
     descripcion: string;
+    marca:string;
     stock: number;
     precio_unitario: number;
     precio_usd: number;
@@ -263,6 +265,27 @@ const ProductTable: React.FC<ProductTableProps> = ({
       align: "left",
     },
     {
+      field: "precio_venta",
+      headerName: "Precio Venta (USD)",
+      flex: 1,
+      minWidth: 120,
+      renderCell: (params) => {
+        const precioUSD = Number(params.value);
+
+        return (
+          <Typography variant="body2" fontWeight={600}>
+            {new Intl.NumberFormat("es-VE", {
+              style: "currency",
+              currency: "USD",
+              minimumFractionDigits: 2,
+            }).format(precioUSD)}
+          </Typography>
+        );
+      },
+      headerAlign: "right",
+      align: "right",
+    },
+    {
       field: "acciones",
       headerName: "Acciones",
       flex: 1.5,
@@ -306,41 +329,6 @@ const ProductTable: React.FC<ProductTableProps> = ({
               <DeleteIcon />
             </ActionButton>
           </Tooltip>
-          {/* 
-          <Tooltip title="Modificar Stock">
-            <ActionButton
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => onModifyStock(params.row.id)}
-              sx={{
-                bgcolor: alpha(theme.palette.info.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.info.main,
-                },
-              }}
-            >
-              <Inventory2OutlinedIcon />{" "}
-            </ActionButton>
-          </Tooltip>
-
-          <Tooltip title="Modificar Precio">
-            <ActionButton
-              variant="contained"
-              color="success"
-              size="small"
-              onClick={() => onModifyPrice(params.row.id)}
-              sx={{
-                bgcolor: alpha(theme.palette.success.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.success.main,
-                },
-              }}
-            >
-              <AttachMoneyOutlinedIcon />{" "}
-            </ActionButton>
-          </Tooltip>
-          */}
         </Box>
       ),
     },

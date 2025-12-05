@@ -144,25 +144,15 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
         const basicFieldsMatch =
           safeSearch(row.nombre, searchTerm) ||
           safeSearch(row.descripcion, searchTerm) ||
-          safeSearch(row.precio_estandar_usd, searchTerm) ||
-          safeSearch(row.monto_bs, searchTerm);
-
-        const tecnicosMatch =
-          Array.isArray(row.tecnicosCalificados) &&
-          row.tecnicosCalificados.some(
-            (tecnico) =>
-              tecnico &&
-              (safeSearch(tecnico.nombre, searchTerm) ||
-                safeSearch(tecnico.apellido, searchTerm))
-          );
-
+          safeSearch(row.precio_estandar_usd, searchTerm)
+          
         const materialesMatch =
           Array.isArray(row.materialesUsados) &&
           row.materialesUsados.some(
             (material) => material && safeSearch(material.nombre, searchTerm)
           );
 
-        return basicFieldsMatch || tecnicosMatch || materialesMatch;
+        return basicFieldsMatch || materialesMatch;
       } catch (error) {
         console.error("Error filtering row:", error, row);
         return false;
@@ -170,226 +160,201 @@ const ServiciosTable: React.FC<ServiciosTableProps> = ({
     });
   }, [rows, searchTerm]);
 
-  const columns: GridColDef[] = [
-    {
-      field: "nombre",
-      headerName: "Nombre",
-      flex: 1.5,
-      minWidth: 150,
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500}>
-          {params.value || "N/A"}
+const columns: GridColDef[] = [
+  {
+    field: "nombre",
+    headerName: "Nombre",
+    flex: 1.5,
+    minWidth: 150,
+    renderCell: (params) => (
+      <Typography variant="body2" fontWeight={500}>
+        {params.value || "N/A"}
+      </Typography>
+    ),
+    headerAlign: "left",
+    align: "left",
+  },
+  {
+    field: "descripcion",
+    headerName: "Descripción",
+    flex: 2,
+    minWidth: 200,
+    renderCell: (params) => (
+      <Tooltip title={params.value || ""}>
+        <Typography variant="body2" noWrap>
+          {params.value || "Sin descripción"}
         </Typography>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "descripcion",
-      headerName: "Descripción",
-      flex: 2,
-      minWidth: 200,
-      renderCell: (params) => (
-        <Tooltip title={params.value || ""}>
-          <Typography variant="body2" noWrap>
-            {params.value || "Sin descripción"}
-          </Typography>
-        </Tooltip>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "tecnicosCalificados",
-      headerName: "Técnicos",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: (params) => {
-        const tecnicos = params.value;
+      </Tooltip>
+    ),
+    headerAlign: "left",
+    align: "left",
+  },
 
-        if (!Array.isArray(tecnicos) || tecnicos.length === 0) {
-          return (
-            <Typography variant="body2" color="text.secondary">
-              Ninguno
-            </Typography>
-          );
-        }
+  // ✅ MATERIALES ASOCIADOS
+  {
+    field: "materialesUsados",
+    headerName: "Materiales Asociados",
+    flex: 1.5,
+    minWidth: 200,
+    renderCell: (params) => {
+      const materiales = params.value;
 
-        const displayedTecnicos = tecnicos.slice(0, 2);
-        const remainingTecnicos = tecnicos.length - displayedTecnicos.length;
-
+      if (!Array.isArray(materiales) || materiales.length === 0) {
         return (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {displayedTecnicos.map((tecnico, index) => {
-              if (!tecnico) return null;
-
-              const nombre = tecnico.nombre || `Técnico ${index + 1}`;
-              const apellido = tecnico.apellido || "";
-              const displayName = `${nombre} ${apellido}`.trim();
-
-              return (
-                <Chip
-                  key={tecnico.id || index}
-                  label={displayName}
-                  size="small"
-                  variant="outlined" // Usar chips con contorno para un diseño más limpio
-                  color="primary"
-                />
-              );
-            })}
-            {remainingTecnicos > 0 && (
-              <Chip
-                label={`+${remainingTecnicos}`}
-                size="small"
-                variant="filled"
-                color="info"
-              />
-            )}
-          </Box>
-        );
-      },
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "materialesUsados",
-      headerName: "Materiales",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: (params) => {
-        const materiales = params.value;
-
-        if (!Array.isArray(materiales) || materiales.length === 0) {
-          return (
-            <Typography variant="body2" color="text.secondary">
-              Ninguno
-            </Typography>
-          );
-        }
-
-        const displayedMateriales = materiales.slice(0, 2);
-        const remainingMateriales =
-          materiales.length - displayedMateriales.length;
-
-        return (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {displayedMateriales.map((material, index) => {
-              if (!material) return null;
-
-              const nombre = material.nombre || `Material ${index + 1}`;
-
-              return (
-                <Chip
-                  key={material.id || index}
-                  label={nombre}
-                  size="small"
-                  variant="outlined"
-                  color="success"
-                />
-              );
-            })}
-            {remainingMateriales > 0 && (
-              <Chip
-                label={`+${remainingMateriales}`}
-                size="small"
-                variant="filled"
-                color="info"
-              />
-            )}
-          </Box>
-        );
-      },
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "precio_estandar_usd",
-      headerName: "Precio (USD)",
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => {
-        const precioUSD = Number(params.value) || 0;
-
-        return (
-          <Typography variant="body2" fontWeight={500}>
-            {new Intl.NumberFormat("es-VE", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 2,
-            }).format(precioUSD)}{" "}
+          <Typography variant="body2" color="text.secondary">
+            Ninguno
           </Typography>
         );
-      },
-      headerAlign: "right",
-      align: "right",
-    },
-    {
-      field: "precio_estandar_bs",
-      headerName: "Precio (Bs)",
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => {
-        const precioUSD = Number(params.row.precio_estandar_usd) || 0;
-        const precioBS = precioUSD * (dollarOficial || 0);
+      }
 
-        return (
-          <Typography variant="body2" fontWeight={500}>
-            {new Intl.NumberFormat("es-VE", {
-              style: "currency",
-              currency: "VES",
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }).format(precioBS)}{" "}
-          </Typography>
-        );
-      },
-      headerAlign: "left",
-      align: "left",
-    },
-    {
-      field: "acciones",
-      headerName: "Acciones",
-      flex: 0.8,
-      minWidth: 150,
-      headerAlign: "center",
-      align: "center",
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Box display="flex" gap={1} justifyContent="center" alignItems="center">
-          <Tooltip title="Editar servicio">
-            <ActionButton
-              variant="contained"
-              onClick={() => onModify(params.row)}
-              sx={{
-                bgcolor: alpha(theme.palette.primary.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.primary.main,
-                },
-              }}
-            >
-              <EditIcon />
-            </ActionButton>
-          </Tooltip>
-          <Tooltip title="Eliminar servicio">
-            <ActionButton
-              variant="contained"
-              color="error"
-              onClick={() => onDelete(params.row)}
-              sx={{
-                bgcolor: alpha(theme.palette.error.main, 0.9),
-                "&:hover": {
-                  bgcolor: theme.palette.error.main,
-                },
-              }}
-            >
-              <DeleteIcon />
-            </ActionButton>
-          </Tooltip>
+      const displayed = materiales.slice(0, 2);
+      const remaining = materiales.length - displayed.length;
+
+      return (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          {displayed.map((m, index) => (
+            <Chip
+              key={m.id || index}
+              label={m.nombre}
+              size="small"
+              variant="outlined"
+              color="success"
+            />
+          ))}
+          {remaining > 0 && (
+            <Chip label={`+${remaining}`} size="small" color="info" />
+          )}
         </Box>
-      ),
+      );
     },
-  ];
+  },
+
+  // ✅ PRODUCTOS ASOCIADOS
+  {
+    field: "productosAsociados",
+    headerName: "Productos Asociados",
+    flex: 1.5,
+    minWidth: 200,
+    renderCell: (params) => {
+      const productos = params.value;
+
+      if (!Array.isArray(productos) || productos.length === 0) {
+        return (
+          <Typography variant="body2" color="text.secondary">
+            Ninguno
+          </Typography>
+        );
+      }
+
+      const displayed = productos.slice(0, 2);
+      const remaining = productos.length - displayed.length;
+
+      return (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          {displayed.map((p, index) => (
+            <Chip
+              key={p.id || index}
+              label={p.nombre}
+              size="small"
+              variant="outlined"
+              color="primary"
+            />
+          ))}
+          {remaining > 0 && (
+            <Chip label={`+${remaining}`} size="small" color="info" />
+          )}
+        </Box>
+      );
+    },
+  },
+
+  {
+    field: "precio_estandar_usd",
+    headerName: "Precio (USD)",
+    flex: 1,
+    minWidth: 120,
+    renderCell: (params) => {
+      const precioUSD = Number(params.value) || 0;
+
+      return (
+        <Typography variant="body2" fontWeight={500}>
+          {new Intl.NumberFormat("es-VE", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2,
+          }).format(precioUSD)}
+        </Typography>
+      );
+    },
+    headerAlign: "right",
+    align: "right",
+  },
+
+  {
+    field: "precio_estandar_bs",
+    headerName: "Precio (Bs)",
+    flex: 1,
+    minWidth: 150,
+    renderCell: (params) => {
+      const precioUSD = Number(params.row.precio_estandar_usd) || 0;
+      const precioBS = precioUSD * (dollarOficial || 0);
+
+      return (
+        <Typography variant="body2" fontWeight={500}>
+          {new Intl.NumberFormat("es-VE", {
+            style: "currency",
+            currency: "VES",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(precioBS)}
+        </Typography>
+      );
+    },
+    headerAlign: "left",
+    align: "left",
+  },
+
+  {
+    field: "acciones",
+    headerName: "Acciones",
+    flex: 0.8,
+    minWidth: 150,
+    headerAlign: "center",
+    align: "center",
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => (
+      <Box display="flex" gap={1} justifyContent="center" alignItems="center">
+        <Tooltip title="Editar servicio">
+          <ActionButton
+            variant="contained"
+            onClick={() => onModify(params.row)}
+            sx={{
+              bgcolor: alpha(theme.palette.primary.main, 0.9),
+              "&:hover": { bgcolor: theme.palette.primary.main },
+            }}
+          >
+            <EditIcon />
+          </ActionButton>
+        </Tooltip>
+
+        <Tooltip title="Eliminar servicio">
+          <ActionButton
+            variant="contained"
+            color="error"
+            onClick={() => onDelete(params.row)}
+            sx={{
+              bgcolor: alpha(theme.palette.error.main, 0.9),
+              "&:hover": { bgcolor: theme.palette.error.main },
+            }}
+          >
+            <DeleteIcon />
+          </ActionButton>
+        </Tooltip>
+      </Box>
+    ),
+  },
+];
 
   return (
     <Paper

@@ -32,7 +32,7 @@ const HeaderProveedor: React.FC<HeaderProveedorProps> = ({ Proveedores }) => {
         }}
       >
         <BusinessIcon sx={{ mr: 1 }} /> {/* Changed icon to EngineeringIcon */}
-        Gestión de Proveedores
+        Listado de Proveedores
       </Typography>
       <Chip
         label={`${Proveedores.length} Proveedores`}

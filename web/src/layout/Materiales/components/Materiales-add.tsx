@@ -23,6 +23,7 @@ export function MaterialAdd({
 }: MaterialAddProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [marca, setMarca] = useState("");
   const [stock, setStock] = useState<number | "">("");
   const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export function MaterialAdd({
     nombre: "",
     descripcion: "",
     stock: "",
+    marca: "",
     precioUnitario: "",
   });
 
@@ -46,6 +48,7 @@ export function MaterialAdd({
       descripcion: "",
       stock: "",
       precioUnitario: "",
+      marca: "",
     });
   };
 
@@ -59,6 +62,7 @@ export function MaterialAdd({
       descripcion: !descripcion.trim() ? "Campo obligatorio" : "",
       stock: stock === "" ? "Campo obligatorio" : "",
       precioUnitario: precioUnitario === "" ? "Campo obligatorio" : "",
+      marca: marca === "" ? "Campo obligatorio" : "",
     };
     setErrors(newErrors);
     return Object.values(newErrors).every((e) => e === "");
@@ -76,6 +80,7 @@ export function MaterialAdd({
       nombre: nombre.trim(),
       descripcion: descripcion.trim(),
       stock: Number(stock),
+      marca: marca.trim(),
       precio_unitario_usd: Number(precioUnitario),
     };
 
@@ -128,6 +133,15 @@ export function MaterialAdd({
           startIcon={<FileText />}
           disabled={loading}
           errorMessage={errors.descripcion}
+        />
+
+        <InputField
+          label="Marca del Material"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
+          startIcon={<FileText />}
+          disabled={loading}
+          errorMessage={errors.marca}
         />
 
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>

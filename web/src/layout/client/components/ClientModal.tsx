@@ -68,46 +68,60 @@ const ClientModal: React.FC<ClientModalProps> = ({
   const { showSnackbar } = useSnackbar();
 
   // ✅ CARGA DE CLIENTE AL EDITAR
-  useEffect(() => {
-    if (currentClient) {
-      const rifParts = currentClient.rif.split("-");
-      setRifType(rifParts[0] || "V");
-      setRifNumber(rifParts[1] || "");
+ useEffect(() => {
+  if (currentClient) {
+    const rifParts = currentClient.rif.split("-");
+    setRifType(rifParts[0] || "V");
+    setRifNumber(rifParts[1] || "");
 
-      setNombre(currentClient.nombre);
-      setApellido(currentClient.apellido || "");
-      setDireccion(currentClient.direccion);
+    setNombre(currentClient.nombre);
+    
+    const company = ["G", "J", "R"].includes(rifParts[0] || "");
+    setApellido(company ? "N/A" : currentClient.apellido || "");
+    
+    setDireccion(currentClient.direccion);
 
-      // === CARGA TELEFONO DESGLOSADO ===
-      if (currentClient.telefono.includes("-")) {
-        const [code, number] = currentClient.telefono.split("-");
-        setPhoneCode(code || "0412");
-        setPhoneNumber(number || "");
-      } else {
-        setPhoneCode("0412");
-        setPhoneNumber(currentClient.telefono);
-      }
+    // === CARGA TELEFONO DESGLOSADO ===
+    if (currentClient.telefono.includes("-")) {
+      const [code, number] = currentClient.telefono.split("-");
+      setPhoneCode(code || "0412");
+      setPhoneNumber(number || "");
     } else {
-      setRifType("V");
-      setRifNumber("");
-      setNombre("");
-      setApellido("");
-      setDireccion("");
-
       setPhoneCode("0412");
-      setPhoneNumber("");
+      setPhoneNumber(currentClient.telefono);
     }
+  } else {
+    setRifType("V");
+    setRifNumber("");
+    setNombre("");
+    setApellido("");
+    setDireccion("");
+    setPhoneCode("0412");
+    setPhoneNumber("");
+  }
 
-    setErrors({
-      rifNumber: "",
-      nombre: "",
-      apellido: "",
-      direccion: "",
-      telefono: "",
-    });
-  }, [currentClient, open]);
+  setErrors({
+    rifNumber: "",
+    nombre: "",
+    apellido: "",
+    direccion: "",
+    telefono: "",
+  });
+}, [currentClient, open]);
 
-  const isCompany = rifType === "G" || rifType === "J";
+// ✅ CONTROL DEL CAMPO APELLIDO
+const isCompany = rifType === "G" || rifType === "J" || rifType === "R";
+
+// Cuando cambie el tipo de RIF, actualizar apellido a N/A si es compañía
+useEffect(() => {
+  if (isCompany) {
+    setApellido("N/A");
+  } else if (currentClient) {
+    setApellido(currentClient.apellido || "");
+  } else {
+    setApellido("");
+  }
+}, [rifType, currentClient]);
 
   // ✅ VALIDACIÓN AJUSTADA
   const validateForm = (): boolean => {

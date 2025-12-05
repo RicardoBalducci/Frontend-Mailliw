@@ -34,17 +34,6 @@ class ComprasServices {
       if (!compraData.proveedor_id) {
         throw new Error("El proveedor es requerido.");
       }
-      if (!compraData.materiales || compraData.materiales.length === 0) {
-        throw new Error("Debe añadir al menos un material a la compra.");
-      }
-      compraData.materiales.forEach((item) => {
-        if (!item.material_id || item.cantidad <= 0) {
-          throw new Error(
-            "Cada material debe tener un ID válido y una cantidad mayor a 0."
-          );
-        }
-      });
-
       const response = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {

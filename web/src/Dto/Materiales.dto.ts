@@ -16,6 +16,7 @@ export interface UpdateMaterialesDto {
 export interface CreateMaterialesDto {
   nombre: string;
   descripcion: string;
+  marca: string;
   stock: number;
   precio_unitario_usd: number;
 }

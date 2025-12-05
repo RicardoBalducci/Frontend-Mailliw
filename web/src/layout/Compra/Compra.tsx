@@ -1,6 +1,4 @@
- "use client";
-
-import React from "react";
+/* "use client"
 import {
   Box,
   Container,
@@ -10,659 +8,595 @@ import {
   Autocomplete,
   CircularProgress,
   Snackbar,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import DeleteIcon from "@mui/icons-material/Delete";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import InventoryIcon from "@mui/icons-material/Inventory";
+  Alert,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
+  Divider,
+  Badge,
+  TextField,
+} from "@mui/material"
+import AddIcon from "@mui/icons-material/Add"
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import InventoryIcon from "@mui/icons-material/Inventory"
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react"
 
 // Components
-import HeaderCompra from "./components/compra-header";
-import { MaterialAdd } from "../Materiales/components/Materiales-add";
-import { MaterialSelectModal } from "./components/compra-material-select";
+import { MaterialSelectModal } from "./components/material-select-modal"
+import { ProductSelectModal } from "./components/product-select-modal"
+import { PurchaseSummary } from "./components/purchase-summary"
+import { PurchaseItemList } from "./components/purchase-item-list"
 
-// Services
-import ProveedorServices from "../../api/ProveedorServices";
-import MaterialServices from "../../api/MaterialesServices";
-import ComprasServices from "../../api/ComprasServices";
+import ProveedorServices from "../../api/ProveedorServices"
+import ComprasServices from "../../api/ComprasServices"
 
-// DTOs
-import type { ProveedorDto } from "../../Dto/Proveedor.dto";
-import type { MaterialesDto } from "../../Dto/Materiales.dto";
-import type { CreateCompraDto } from "../../Dto/Compra-request.dto";
+import type { ProveedorDto } from "../../Dto/Proveedor.dto"
+import type { MaterialesDto } from "../../Dto/Materiales.dto"
+import { ProductoDTO } from "../../Dto/Productos.dto"
 
-// Styled Components
-import {
-  StyledPaper,
-  StyledButton,
-  StyledTextField,
-  StyledAlert,
-} from "./components/styled-components";
-import { ProveedorAdd } from "../Proveedor/components/Proveedor-add";
-
-// Define la estructura de un item en la lista de compra
-interface PurchaseItem {
-  material: MaterialesDto;
-  cantidad: number;
+interface PurchaseItemMaterial {
+  type: "material"
+  material: MaterialesDto
+  cantidad: number
 }
 
-export function Compra() {
+interface PurchaseItemProduct {
+  type: "product"
+  product: ProductoDTO
+  cantidad: number
+}
+
+type PurchaseItem = PurchaseItemMaterial | PurchaseItemProduct
+
+function TabPanel(props: any) {
+  const { children, value, index, ...other } = props
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} {...other}>
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  )
+}
+
+export default function Compra() {
   // Modal states
-  const [openMaterialAddModal, setOpenMaterialAddModal] = useState(false);
-  const [openProveedorModal, setOpenProveedorModal] = useState(false);
-  const [openMaterialSelectModal, setOpenMaterialSelectModal] = useState(false);
+  const [openMaterialSelectModal, setOpenMaterialSelectModal] = useState(false)
+  const [openProductSelectModal, setOpenProductSelectModal] = useState(false)
+  const [tabValue, setTabValue] = useState(0)
 
   // Data states
-  const [proveedores, setProveedores] = useState<ProveedorDto[]>([]);
-  const [selectedProveedor, setSelectedProveedor] =
-    useState<ProveedorDto | null>(null);
-  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
+  const [proveedores, setProveedores] = useState<ProveedorDto[]>([])
+  const [selectedProveedor, setSelectedProveedor] = useState<ProveedorDto | null>(null)
+  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([])
 
   // Loading & Error states
-  const [loadingProveedores, setLoadingProveedores] = useState(false);
-  const [proveedoresError, setProveedoresError] = useState<string | null>(null);
-  const [, setLoadingMaterials] = useState(false);
-  const [, setMaterialsError] = useState<string | null>(null);
-  const [savingPurchase, setSavingPurchase] = useState(false);
-  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [loadingProveedores, setLoadingProveedores] = useState(false)
+  const [proveedoresError, setProveedoresError] = useState<string | null>(null)
+  const [savingPurchase, setSavingPurchase] = useState(false)
+  const [purchaseError, setPurchaseError] = useState<string | null>(null)
 
   // Snackbar for notifications
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<
-    "success" | "error" | "info"
-  >("success");
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState("")
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">("success")
 
-  const [dollarOficial, setDollarOficial] = useState<number | null>(null);
+  const [dollarOficial, setDollarOficial] = useState<number>(1)
 
   useEffect(() => {
-    const storedDollar = localStorage.getItem("dollar_oficial");
-
-    if (storedDollar) setDollarOficial(Number(storedDollar));
-  }, []);
+    const storedDollar = localStorage.getItem("dollar_oficial")
+    if (storedDollar) setDollarOficial(Number(storedDollar))
+  }, [])
 
   // Fetch initial data
   const fetchProveedores = async () => {
-    setLoadingProveedores(true);
-    setProveedoresError(null);
+    setLoadingProveedores(true)
+    setProveedoresError(null)
     try {
-      const response = await ProveedorServices.findAll(1, 100);
-      setProveedores(response.data);
+      const response = await ProveedorServices.findAll(1, 100)
+      setProveedores(response.data)
     } catch (error: unknown) {
-      setProveedoresError(
-        (error as Error).message || "Error al cargar proveedores."
-      );
-      console.error("Error fetching suppliers:", error);
-      showSnackbar(
-        (error as Error).message || "Error al cargar proveedores.",
-        "error"
-      );
+      setProveedoresError((error as Error).message || "Error al cargar proveedores.")
+      console.error("Error fetching suppliers:", error)
+      showSnackbar((error as Error).message || "Error al cargar proveedores.", "error")
     } finally {
-      setLoadingProveedores(false);
+      setLoadingProveedores(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchProveedores();
-  }, []);
-
-  const fetchMaterials = async () => {
-    setLoadingMaterials(true);
-    setMaterialsError(null);
-    try {
-      await MaterialServices.findAll(1, 100);
-    } catch (error: unknown) {
-      setMaterialsError(
-        (error as Error).message || "Error al cargar materiales."
-      );
-      console.error("Error fetching materials:", error);
-      showSnackbar(
-        (error as Error).message || "Error al cargar materiales.",
-        "error"
-      );
-    } finally {
-      setLoadingMaterials(false);
-    }
-  };
-
-  const handleOpenMaterialAddModal = () => setOpenMaterialAddModal(true);
-  const handleCloseMaterialAddModal = () => setOpenMaterialAddModal(false);
-  const handleOpenProveedorModal = () => setOpenProveedorModal(true);
-  const handleCloseProveedorModal = () => setOpenProveedorModal(false);
-  const handleOpenMaterialSelectModal = () => {
-    fetchMaterials();
-    setOpenMaterialSelectModal(true);
-  };
-  const handleCloseMaterialSelectModal = () =>
-    setOpenMaterialSelectModal(false);
-
-  const handleMaterialAdded = () => {
-    showSnackbar("Material añadido exitosamente!", "success");
-  };
-
+    fetchProveedores()
+  }, [])
 
   const handleMaterialSelected = (material: MaterialesDto) => {
     setPurchaseItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex(
-        (item) => item.material.id === material.id
-      );
-      if (existingItemIndex > -1) {
-        const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].cantidad += 1;
-        return updatedItems;
-      } else {
-        return [...prevItems, { material, cantidad: 1 }];
-      }
-    });
-    handleCloseMaterialSelectModal();
-    showSnackbar(`Material '${material.nombre}' añadido a la compra.`, "info");
-  };
-
-  const handleQuantityChange = (materialId: number, newQuantity: number) => {
-    setPurchaseItems((prevItems) =>
-      prevItems.map((item) =>
-        item.material.id === materialId
-          ? { ...item, cantidad: Math.max(1, newQuantity) }
-          : item
+        (item) => item.type === "material" && item.material.id === material.id,
       )
-    );
-  };
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems]
+        ;(updatedItems[existingItemIndex] as PurchaseItemMaterial).cantidad += 1
+        return updatedItems
+      } else {
+        return [...prevItems, { type: "material", material, cantidad: 1 } as PurchaseItemMaterial]
+      }
+    })
+    setOpenMaterialSelectModal(false)
+    showSnackbar(`Material '${material.nombre}' añadido a la compra.`, "success")
+  }
 
-  const handleRemoveItem = (materialId: number) => {
+  const handleProductSelected = (product: ProductoDto) => {
+    setPurchaseItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex((item) => item.type === "product" && item.product.id === product.id)
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems]
+        ;(updatedItems[existingItemIndex] as PurchaseItemProduct).cantidad += 1
+        return updatedItems
+      } else {
+        return [...prevItems, { type: "product", product, cantidad: 1 } as PurchaseItemProduct]
+      }
+    })
+    setOpenProductSelectModal(false)
+    showSnackbar(`Producto '${product.nombre}' añadido a la compra.`, "success")
+  }
+
+  const handleQuantityChange = (itemId: number, itemType: "material" | "product", newQuantity: number) => {
     setPurchaseItems((prevItems) =>
-      prevItems.filter((item) => item.material.id !== materialId)
-    );
-    showSnackbar("Material eliminado de la compra.", "info");
-  };
+      prevItems.map((item) => {
+        if (item.type === itemType) {
+          const id = item.type === "material" ? item.material.id : item.product.id
+          if (id === itemId) {
+            return { ...item, cantidad: Math.max(1, newQuantity) }
+          }
+        }
+        return item
+      }),
+    )
+  }
+
+  const handleRemoveItem = (itemId: number, itemType: "material" | "product") => {
+    setPurchaseItems((prevItems) =>
+      prevItems.filter((item) => {
+        if (item.type === itemType) {
+          const id = item.type === "material" ? item.material.id : item.product.id
+          return id !== itemId
+        }
+        return true
+      }),
+    )
+    showSnackbar("Artículo eliminado de la compra.", "info")
+  }
 
   const handleSaveCompra = async () => {
     if (!selectedProveedor) {
-      setPurchaseError("Por favor, selecciona un proveedor.");
-      showSnackbar("Por favor, selecciona un proveedor.", "error");
-      return;
+      setPurchaseError("Por favor, selecciona un proveedor.")
+      showSnackbar("Por favor, selecciona un proveedor.", "error")
+      return
     }
     if (purchaseItems.length === 0) {
-      setPurchaseError("Por favor, añade al menos un material a la compra.");
-      showSnackbar(
-        "Por favor, añade al menos un material a la compra.",
-        "error"
-      );
-      return;
+      setPurchaseError("Por favor, añade al menos un material o producto a la compra.")
+      showSnackbar("Por favor, añade al menos un material o producto a la compra.", "error")
+      return
     }
 
-    setSavingPurchase(true);
-    setPurchaseError(null);
+    setSavingPurchase(true)
+    setPurchaseError(null)
 
-    interface CreateCompraMaterialDto {
-      material_id: number;
-      cantidad: number;
-      precio_unitario_bs: number;
-      precio_unitario_usd?: number;
-    }
+    const materiales = purchaseItems
+      .filter((item) => item.type === "material")
+      .map((item) => {
+        const material = (item as PurchaseItemMaterial).material
+        const cantidad = item.cantidad
+        const precio_unitario_usd = material.precio_unitario_usd || 0
+        const precio_unitario_bs = precio_unitario_usd * dollarOficial
 
-    const materiales: CreateCompraMaterialDto[] = purchaseItems.map((item) => {
-      const { material, cantidad } = item;
-      const { id, precio_unitario_usd } = material;
+        return {
+          material_id: material.id,
+          cantidad,
+          precio_unitario_bs,
+          precio_unitario_usd,
+        }
+      })
 
-      if (id === null || id === undefined) {
-        throw new Error("El ID del material no puede ser nulo o indefinido.");
-      }
+    const productos = purchaseItems
+      .filter((item) => item.type === "product")
+      .map((item) => {
+        const product = (item as PurchaseItemProduct).product
+        const cantidad = item.cantidad
+        const precio_unitario_usd = product.precio_unitario_usd || 0
+        const precio_unitario_bs = precio_unitario_usd * dollarOficial
 
-      const numericCantidad = Number(cantidad);
-      const numericPrecioUsd =
-        precio_unitario_usd !== undefined ? Number(precio_unitario_usd) : 0;
+        return {
+          producto_id: product.id,
+          cantidad,
+          precio_unitario_bs,
+          precio_unitario_usd,
+        }
+      })
 
-      if (isNaN(numericCantidad) || isNaN(numericPrecioUsd)) {
-        throw new Error(
-          `Error en la conversión para el material '${material.nombre}'. Asegúrate de que los valores sean numéricos.`
-        );
-      }
-
-      // Calcula el precio en Bs usando dollarOficial
-      const numericPrecioBs = Number(
-        (numericPrecioUsd * (dollarOficial || 0)).toFixed(3)
-      );
-
-      return {
-        material_id: id,
-        cantidad: numericCantidad,
-        precio_unitario_bs: numericPrecioBs,
-        precio_unitario_usd: numericPrecioUsd,
-      };
-    });
-
-    const newCompraData: CreateCompraDto = {
+    const newCompraData = {
       proveedor_id: selectedProveedor.id,
       materiales,
-    };
+      productos,
+    }
 
     try {
-      await ComprasServices.createCompra(newCompraData);
-      showSnackbar("¡Compra registrada exitosamente!", "success");
-      setSelectedProveedor(null);
-      setPurchaseItems([]);
+      await ComprasServices.createCompra(newCompraData)
+      showSnackbar("¡Compra registrada exitosamente!", "success")
+      setSelectedProveedor(null)
+      setPurchaseItems([])
+      setTabValue(0)
     } catch (error: unknown) {
-      let errorMessage = "Error al registrar la compra.";
+      let errorMessage = "Error al registrar la compra."
       if (error instanceof Error) {
-        errorMessage = error.message;
+        errorMessage = error.message
       }
-      setPurchaseError(errorMessage);
-      showSnackbar(errorMessage, "error");
-      console.error("Error saving purchase:", error);
+      setPurchaseError(errorMessage)
+      showSnackbar(errorMessage, "error")
+      console.error("Error saving purchase:", error)
     } finally {
-      setSavingPurchase(false);
+      setSavingPurchase(false)
     }
-  };
+  }
 
   const handleCancelCompra = () => {
-    setSelectedProveedor(null);
-    setPurchaseItems([]);
-    setPurchaseError(null);
-    showSnackbar("Compra cancelada.", "info");
-  };
+    setSelectedProveedor(null)
+    setPurchaseItems([])
+    setPurchaseError(null)
+    setTabValue(0)
+    showSnackbar("Compra cancelada.", "info")
+  }
 
-  const showSnackbar = (
-    message: string,
-    severity: "success" | "error" | "info"
-  ) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
-  const handleSnackbarClose = (
-    _?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
+  const showSnackbar = (message: string, severity: "success" | "error" | "info") => {
+    setSnackbarMessage(message)
+    setSnackbarSeverity(severity)
+    setSnackbarOpen(true)
+  }
 
   // Calculate totals
-  const totalUSD = useMemo(() => {
-    return purchaseItems.reduce(
-      (sum, item) =>
-        sum + (item.material.precio_unitario_usd || 0) * item.cantidad,
-      0
-    );
-  }, [purchaseItems]);
+  const totals = useMemo(() => {
+    let totalUSD = 0
+    let totalBS = 0
 
-  const totalBS = useMemo(() => {
-    return purchaseItems.reduce(
-      (sum, item) =>
-        sum +
-        (item.material.precio_unitario_usd || 0) *
-          (dollarOficial || 0) *
-          item.cantidad,
-      0
-    );
-  }, [purchaseItems, dollarOficial]);
+    purchaseItems.forEach((item) => {
+      if (item.type === "material") {
+        const precio = item.material.precio_unitario_usd || 0
+        totalUSD += precio * item.cantidad
+      } else {
+        const precio = item.product.precio_unitario_usd || 0
+        totalUSD += precio * item.cantidad
+      }
+    })
+
+    totalBS = totalUSD * dollarOficial
+
+    return { totalUSD, totalBS }
+  }, [purchaseItems, dollarOficial])
+
+  const materialItems = purchaseItems.filter((item) => item.type === "material")
+  const productItems = purchaseItems.filter((item) => item.type === "product")
 
   return (
     <>
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Fade in={true} timeout={800}>
           <Box>
-            <HeaderCompra />
-            <StyledPaper sx={{ p: 4, mb: 3 }}>
+            <Box sx={{ mb: 4 }}>
               <Typography
-                variant="h5"
-                component="h2"
-                fontWeight={600}
-                gutterBottom
-                sx={{ mb: 4 }}
+                variant="h4"
+                component="h1"
+                fontWeight={700}
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}
               >
-                <ShoppingCartIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                <ShoppingCartIcon sx={{ fontSize: 32 }} />
                 Nueva Orden de Compra
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Gestiona tus compras de materiales y productos de forma eficiente
+              </Typography>
+            </Box>
 
-              <Box sx={{ mb: 4, pb: 3, borderBottom: "1px dashed #eee" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <LocalShippingIcon fontSize="small" />
-                  Seleccionar Proveedor
-                </Typography>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  alignItems={{ xs: "stretch", sm: "center" }}
-                >
+            <Card sx={{ boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                    <LocalShippingIcon fontSize="small" />
+                    Seleccionar Proveedor
+                  </Typography>
                   <Autocomplete
                     options={proveedores}
                     getOptionLabel={(option) => option.nombre}
                     value={selectedProveedor}
                     onChange={(_, newValue) => {
-                      setSelectedProveedor(newValue);
+                      setSelectedProveedor(newValue)
                     }}
                     loading={loadingProveedores}
                     renderInput={(params) => (
-                      <StyledTextField
-                        {...params}
-                        label="Buscar o Seleccionar Proveedor"
-                        variant="outlined"
-                        fullWidth
-                        error={!!proveedoresError}
-                        helperText={proveedoresError}
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {loadingProveedores ? (
-                                <CircularProgress color="inherit" size={20} />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
+                      <TextField {...params} placeholder="Buscar o seleccionar proveedor..." size="small" />
                     )}
                     loadingText="Cargando proveedores..."
                     noOptionsText="No se encontraron proveedores"
-                    sx={{ flexGrow: 1 }}
                   />
-                  <StyledButton
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleOpenProveedorModal}
-                    startIcon={<AddIcon />}
-                    size="large"
-                  >
-                    Añadir Proveedor
-                  </StyledButton>
-                </Stack>
-              </Box>
+                  {proveedoresError && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {proveedoresError}
+                    </Alert>
+                  )}
+                </Box>
 
-              <Box sx={{ mb: 4, pb: 3, borderBottom: "1px dashed #eee" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <InventoryIcon fontSize="small" />
-                  Materiales a Comprar
-                </Typography>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  alignItems={{ xs: "stretch", sm: "center" }}
-                  mb={3}
-                >
-                  <StyledButton
-                    variant="outlined"
-                    color="info"
-                    onClick={handleOpenMaterialSelectModal}
-                    startIcon={<AddIcon />}
-                    size="large"
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Seleccionar Material Existente
-                  </StyledButton>
-                  <StyledButton
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenMaterialAddModal}
-                    startIcon={<AddIcon />}
-                    size="large"
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Añadir Nuevo Material
-                  </StyledButton>
-                </Stack>
+                <Divider sx={{ my: 3 }} />
 
-                {purchaseItems.length === 0 ? (
-                  <Box
-                    minHeight={150}
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{
-                      border: "2px dashed #e0e0e0",
-                      borderRadius: 2,
-                      p: 3,
-                      color: "#999",
-                      bgcolor: "#fdfdfd",
-                    }}
-                  >
-                    <InventoryIcon
-                      sx={{ fontSize: 40, mb: 1, color: "#ccc" }}
+                <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+                  <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
+                    <Tab
+                      label={
+                        <Badge badgeContent={materialItems.length} color="primary" sx={{ mr: 1 }}>
+                          <InventoryIcon sx={{ mr: 1 }} />
+                          Materiales
+                        </Badge>
+                      }
+                      id="tab-0"
                     />
-                    <Typography variant="body1" textAlign="center">
-                      Aún no has añadido materiales a esta compra.
-                      <br />
-                      Usa los botones de arriba para empezar.
-                    </Typography>
-                  </Box>
-                ) : (
-                  <Stack spacing={2}>
-                    {purchaseItems.map((item) => (
-                      <Box
-                        key={item.material.id}
-                        sx={{
+                    <Tab
+                      label={
+                        <Badge badgeContent={productItems.length} color="primary" sx={{ mr: 1 }}>
+                          <ShoppingCartIcon sx={{ mr: 1 }} />
+                          Productos
+                        </Badge>
+                      }
+                      id="tab-1"
+                    />
+                  </Tabs>
+                </Box>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Stack spacing={2} sx={{ mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        flexDirection: { xs: "column", sm: "row" },
+                      }}
+                    >
+                      <button
+                        onClick={() => setOpenMaterialSelectModal(true)}
+                        style={{
+                          flex: 1,
+                          padding: "12px 16px",
+                          backgroundColor: "#1976d2",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontWeight: 600,
                           display: "flex",
                           alignItems: "center",
-                          gap: 2,
-                          p: 2,
-                          border: "1px solid #eee",
-                          borderRadius: 2,
-                          bgcolor: "#f9f9f9",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                          justifyContent: "center",
+                          gap: "8px",
+                          fontSize: "16px",
+                          transition: "background-color 0.3s",
+                        }}
+                        onMouseEnter={(e) => {
+                          ;(e.target as HTMLButtonElement).style.backgroundColor = "#1565c0"
+                        }}
+                        onMouseLeave={(e) => {
+                          ;(e.target as HTMLButtonElement).style.backgroundColor = "#1976d2"
                         }}
                       >
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            {item.material.nombre}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Stock actual: {item.material.stock}
-                          </Typography>
-                        </Box>
-                        <StyledTextField
-                          label="Cantidad"
-                          type="number"
-                          value={item.cantidad}
-                          onChange={(e) => {
-                            // Add a check to ensure the material ID is a valid number
-                            if (item.material.id !== null) {
-                              handleQuantityChange(
-                                item.material.id,
-                                Number.parseInt(e.target.value)
-                              );
-                            } else {
-                              // Optionally, handle the error case here, for example, by showing a snackbar
-                              showSnackbar(
-                                "Error: ID de material no válido.",
-                                "error"
-                              );
-                              console.error(
-                                "Attempted to change quantity for a material with a null ID."
-                              );
-                            }
-                          }}
-                          inputProps={{ min: 1 }}
-                          sx={{ width: 120 }}
-                          size="small"
-                        />
-                        <Box sx={{ minWidth: 150, textAlign: "right" }}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            $
-                            {(
-                              (item.material.precio_unitario_usd || 0) *
-                              item.cantidad
-                            ).toFixed(2)}{" "}
-                            USD
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Bs
-                            {(
-                              (item.material.precio_unitario_usd || 0) *
-                              (dollarOficial || 0) *
-                              item.cantidad
-                            ).toFixed(2)}
-                          </Typography>
-                        </Box>
-                        <StyledButton
-                          variant="outlined"
-                          color="error"
-                          onClick={() => {
-                            if (item.material.id !== null) {
-                              handleRemoveItem(item.material.id);
-                            } else {
-                              // Optionally handle the case where the ID is null,
-                              // for example, by logging an error or showing a user alert.
-                              console.error(
-                                "Attempted to remove an item with a null ID."
-                              );
-                              // showSnackbar("No se pudo eliminar el material. ID no válido.", "error");
-                            }
-                          }}
-                          size="small"
-                          sx={{ minWidth: 40, p: 1 }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </StyledButton>
+                        <AddIcon /> Seleccionar Material
+                      </button>
+                    </Box>
+
+                    {materialItems.length === 0 ? (
+                      <Box
+                        sx={{
+                          minHeight: 150,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          border: "2px dashed #e0e0e0",
+                          borderRadius: 2,
+                          p: 3,
+                          color: "#999",
+                          bgcolor: "#fdfdfd",
+                        }}
+                      >
+                        <InventoryIcon sx={{ fontSize: 40, mb: 1, color: "#ccc" }} />
+                        <Typography variant="body1" textAlign="center">
+                          No hay materiales en esta compra.
+                          <br />
+                          Usa el botón de arriba para añadir materiales.
+                        </Typography>
                       </Box>
-                    ))}
-                  </Stack>
-                )}
-              </Box>
-
-              <Box sx={{ mt: 4, pt: 3, borderTop: "1px dashed #eee" }}>
-                <Typography variant="h6" component="h3" gutterBottom>
-                  Resumen de la Compra
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1,
-                    p: 1,
-                    bgcolor: "#f0f0f0",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body1" fontWeight={500}>
-                    Total en USD:
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    fontWeight={700}
-                    color="primary.main"
-                  >
-                    ${totalUSD.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 1,
-                    bgcolor: "#f0f0f0",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body1" fontWeight={500}>
-                    Total en Bs:
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    fontWeight={700}
-                    color="primary.main"
-                  >
-                    {totalBS.toFixed(2)} Bs
-                  </Typography>
-                </Box>
-              </Box>
-
-              {purchaseError && (
-                <StyledAlert severity="error" sx={{ mt: 3 }}>
-                  {purchaseError}
-                </StyledAlert>
-              )}
-
-              <Box
-                display="flex"
-                justifyContent="flex-end"
-                sx={{ mt: 4, pt: 3, borderTop: "1px solid #eee" }}
-              >
-                <StyledButton
-                  variant="outlined"
-                  color="error"
-                  onClick={handleCancelCompra}
-                  size="large"
-                  disabled={savingPurchase}
-                  sx={{ mr: 2 }}
-                >
-                  Cancelar
-                </StyledButton>
-                <StyledButton
-                  variant="contained"
-                  color="success"
-                  onClick={handleSaveCompra}
-                  size="large"
-                  disabled={
-                    savingPurchase ||
-                    !selectedProveedor ||
-                    purchaseItems.length === 0
-                  }
-                >
-                  {savingPurchase ? (
-                    <>
-                      <CircularProgress
-                        size={24}
-                        color="inherit"
-                        sx={{ mr: 1 }}
+                    ) : (
+                      <PurchaseItemList
+                        items={materialItems as PurchaseItemMaterial[]}
+                        itemType="material"
+                        dollarOficial={dollarOficial}
+                        onQuantityChange={handleQuantityChange}
+                        onRemoveItem={handleRemoveItem}
                       />
-                      Guardando...
-                    </>
-                  ) : (
-                    "Guardar Compra"
-                  )}
-                </StyledButton>
-              </Box>
-            </StyledPaper>
+                    )}
+                  </Stack>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  <Stack spacing={2} sx={{ mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        flexDirection: { xs: "column", sm: "row" },
+                      }}
+                    >
+                      <button
+                        onClick={() => setOpenProductSelectModal(true)}
+                        style={{
+                          flex: 1,
+                          padding: "12px 16px",
+                          backgroundColor: "#2e7d32",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontWeight: 600,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          fontSize: "16px",
+                          transition: "background-color 0.3s",
+                        }}
+                        onMouseEnter={(e) => {
+                          ;(e.target as HTMLButtonElement).style.backgroundColor = "#1b5e20"
+                        }}
+                        onMouseLeave={(e) => {
+                          ;(e.target as HTMLButtonElement).style.backgroundColor = "#2e7d32"
+                        }}
+                      >
+                        <AddIcon /> Seleccionar Producto
+                      </button>
+                    </Box>
+
+                    {productItems.length === 0 ? (
+                      <Box
+                        sx={{
+                          minHeight: 150,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          border: "2px dashed #e0e0e0",
+                          borderRadius: 2,
+                          p: 3,
+                          color: "#999",
+                          bgcolor: "#fdfdfd",
+                        }}
+                      >
+                        <ShoppingCartIcon sx={{ fontSize: 40, mb: 1, color: "#ccc" }} />
+                        <Typography variant="body1" textAlign="center">
+                          No hay productos en esta compra.
+                          <br />
+                          Usa el botón de arriba para añadir productos.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <PurchaseItemList
+                        items={productItems as PurchaseItemProduct[]}
+                        itemType="product"
+                        dollarOficial={dollarOficial}
+                        onQuantityChange={handleQuantityChange}
+                        onRemoveItem={handleRemoveItem}
+                      />
+                    )}
+                  </Stack>
+                </TabPanel>
+
+                <Divider sx={{ my: 3 }} />
+
+                <PurchaseSummary totals={totals} />
+
+                {purchaseError && (
+                  <Alert severity="error" sx={{ mt: 2 }}>
+                    {purchaseError}
+                  </Alert>
+                )}
+
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4, justifyContent: "flex-end" }}>
+                  <button
+                    onClick={handleCancelCompra}
+                    style={{
+                      padding: "12px 24px",
+                      backgroundColor: "#f44336",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseEnter={(e) => {
+                      ;(e.target as HTMLButtonElement).style.backgroundColor = "#d32f2f"
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.target as HTMLButtonElement).style.backgroundColor = "#f44336"
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSaveCompra}
+                    disabled={savingPurchase}
+                    style={{
+                      padding: "12px 32px",
+                      backgroundColor: savingPurchase ? "#cccccc" : "#4caf50",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: savingPurchase ? "not-allowed" : "pointer",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      transition: "background-color 0.3s",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!savingPurchase) {
+                        ;(e.target as HTMLButtonElement).style.backgroundColor = "#388e3c"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!savingPurchase) {
+                        ;(e.target as HTMLButtonElement).style.backgroundColor = "#4caf50"
+                      }
+                    }}
+                  >
+                    {savingPurchase ? (
+                      <>
+                        <CircularProgress size={20} color="inherit" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircleIcon /> Guardar Compra
+                      </>
+                    )}
+                  </button>
+                </Stack>
+              </CardContent>
+            </Card>
           </Box>
         </Fade>
       </Container>
 
-      <MaterialAdd
-        open={openMaterialAddModal}
-        onClose={handleCloseMaterialAddModal}
-        onMaterialAdded={handleMaterialAdded}
-      />
-      <ProveedorAdd
-        open={openProveedorModal}
-        onClose={handleCloseProveedorModal}
-      />
       <MaterialSelectModal
         open={openMaterialSelectModal}
-        onClose={handleCloseMaterialSelectModal}
+        onClose={() => setOpenMaterialSelectModal(false)}
         onMaterialSelected={handleMaterialSelected}
       />
+      <ProductSelectModal
+        open={openProductSelectModal}
+        onClose={() => setOpenProductSelectModal(false)}
+        onProductSelected={handleProductSelected}
+      />
+
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <StyledAlert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity}>
           {snackbarMessage}
-        </StyledAlert>
+        </Alert>
       </Snackbar>
     </>
-  );
+  )
 }
+ */

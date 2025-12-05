@@ -1,21 +1,19 @@
-// Define la estructura de los datos para crear un nuevo servicio
+// DTO para crear un nuevo servicio
 export interface CreateServicioDto {
   nombre: string;
   descripcion: string;
   precio_estandar_usd: number;
-  //monto_bs: number;
-  // Opcionalmente, si la API espera IDs de las relaciones en el DTO
+
   materiales_utilizados?: number[];
-  tecnicos_calificados?: number[];
+  productos_asociados?: number[];
 }
 
-// Define la estructura de los datos para actualizar un servicio
-// Todas las propiedades son opcionales, ya que solo se envían los campos que cambian
+// DTO para actualizar servicio
 export interface UpdateServicioDto {
   nombre?: string;
   descripcion?: string;
   precio_estandar_usd?: number;
-  monto_bs?: number;
-  materialesUsadosIds?: number[];
-  tecnicosCalificadosIds?: number[];
+
+  materiales_utilizados?: number[];
+  productos_asociados?: number[];
 }
