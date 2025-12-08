@@ -12,15 +12,16 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  useTheme,
   Divider,
   Chip,
+  useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationMenu from "./NotificationMenu";
+import { motion } from "framer-motion";
 
 interface AppBarProps {
   toggleSidebar: () => void;
-  isOpen?: boolean;
 }
 
 export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
@@ -28,132 +29,130 @@ export const ModernAppBar: React.FC<AppBarProps> = ({ toggleSidebar }) => {
   const [role, setRole] = useState("");
   const [dollarOficial, setDollarOficial] = useState<number | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const theme = useTheme();
 
   useEffect(() => {
-    const storedNombre = localStorage.getItem("nombre");
-    const storedRole = localStorage.getItem("role");
-    const storedDollar = localStorage.getItem("dollar_oficial");
-
-    if (storedNombre) setNombre(storedNombre);
-    if (storedRole) setRole(storedRole);
-    if (storedDollar) setDollarOficial(Number(storedDollar));
+    setNombre(localStorage.getItem("nombre") || "");
+    setRole(localStorage.getItem("role") || "");
+    const dollar = localStorage.getItem("dollar_oficial");
+    if (dollar) setDollarOficial(Number(dollar));
   }, []);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const isMenuOpen = Boolean(anchorEl);
+  const handleMenuClose = () => setAnchorEl(null);
 
   return (
     <>
+      {/* =====================================================
+          🔮 MODERN APP BAR (GLASS + MORADO + SOMBRAS SUAVES)
+      ====================================================== */}
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          backdropFilter: "blur(10px)",
+          background: "rgba(255,255,255,0.65)",
+          borderBottom: "1px solid rgba(124,58,237,0.15)",
+          boxShadow: "0px 4px 20px rgba(124, 58, 237, 0.15)",
           color: theme.palette.text.primary,
-          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
         <Toolbar
           sx={{
             justifyContent: "space-between",
-            minHeight: "56px",
+            px: { xs: 1, md: 2 },
           }}
         >
+          {/* ---------------- LEFT PART ---------------- */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleSidebar}
-              sx={{ mr: 1 }}
-            >
-              <MenuIcon />
-            </IconButton>
+            <motion.div whileTap={{ scale: 0.85 }}>
+              <IconButton
+                color="primary"
+                sx={{
+                  bgcolor: "rgba(124,58,237,0.1)",
+                  "&:hover": { bgcolor: "rgba(124,58,237,0.2)" },
+                }}
+                onClick={toggleSidebar}
+              >
+                <MenuIcon sx={{ color: "#7c3aed" }} />
+              </IconButton>
+            </motion.div>
+
             <Typography
-              variant="h6"
-              noWrap
-              component="div"
+              variant="h5"
               sx={{
-                display: { xs: "none", sm: "block" },
-                fontWeight: 600,
-                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`,
+                background: "#1a73e8 ",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
+                display: { xs: "none", sm: "block" },
               }}
             >
-              Cerrajeria W
+              BlueLock
             </Typography>
-
-            {/* Chip con el dólar oficial */}
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          {/* ---------------- RIGHT PART ---------------- */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* 💵 CHIP DEL DÓLAR */}
             {dollarOficial && (
               <Chip
-                label={`Tasa BCV del día ${dollarOficial.toFixed(2)}`}
-                color="success"
+                label={`BCV: ${dollarOficial.toFixed(2)}`}
                 size="small"
+                sx={{
+                  fontWeight: 700,
+                  color: "#4c1d95",
+                  bgcolor: "#ede9fe",
+                  border: "1px solid #c4b5fd",
+                  boxShadow: "0 2px 6px rgba(124,58,237,0.2)",
+                }}
               />
             )}
-            <Tooltip title={`${nombre} - ${role}`}>
-              <IconButton
-                edge="end"
-                aria-label="account of current user"
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-                sx={{ ml: 0.5 }}
-              >
-                <Avatar
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    bgcolor: theme.palette.primary.main,
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  {nombre ? nombre.charAt(0).toUpperCase() : "U"}
-                </Avatar>
-              </IconButton>
+
+            {/* 🔔 COMPONENTE DE NOTIFICACIONES */}
+            <NotificationMenu />
+
+            {/* 👤 PERFIL */}
+            <Tooltip title={`${nombre} • ${role}`} arrow>
+              <motion.div whileTap={{ scale: 0.9 }}>
+                <IconButton onClick={handleProfileMenuOpen}>
+                  <Avatar
+                    sx={{
+                      bgcolor: "#7c3aed",
+                      boxShadow: "0px 4px 12px rgba(124,58,237,0.4)",
+                      border: "2px solid #c4b5fd",
+                    }}
+                  >
+                    {nombre ? nombre[0].toUpperCase() : "U"}
+                  </Avatar>
+                </IconButton>
+              </motion.div>
             </Tooltip>
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Menu
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        keepMounted
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        open={isMenuOpen}
-        onClose={handleMenuClose}
-      >
-        <Box sx={{ px: 2, py: 1 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
+      {/* ---------------- PROFILE MENU ---------------- */}
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography fontWeight={700} color="primary">
             {nombre}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {role}
           </Typography>
         </Box>
+
         <Divider />
+
         <MenuItem onClick={handleMenuClose}>Mi perfil</MenuItem>
         <Divider />
-        <MenuItem onClick={handleMenuClose}>Cerrar sesión</MenuItem>
+        <MenuItem onClick={handleMenuClose} sx={{ color: "error.main" }}>
+          Cerrar sesión
+        </MenuItem>
       </Menu>
     </>
   );

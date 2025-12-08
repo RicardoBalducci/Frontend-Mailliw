@@ -151,7 +151,21 @@ export function Product() {
                 }}
                 sx={{ maxWidth: 500, bgcolor: "white" }}
               />
-
+              {/* <Box
+                              display="flex"
+                              flexDirection={{ xs: "column", sm: "row" }} // 📱 botones uno debajo del otro
+                              justifyContent={{ xs: "center", sm: "flex-start" }}
+                              alignItems={{ xs: "stretch", sm: "center" }}
+                              gap={1.5}
+                              width={{ xs: "100%", sm: "auto" }} // 📱 ocupa todo el ancho en móvil
+                            >
+                              <RefreshButton onRefresh={fetchProducts} />
+                              <SaveButton
+                                onClick={handleOpenAddEditModal}
+                                startIcon={<AddIcon />}
+                                texto="Añadir Cliente"
+                              />
+                            </Box> */}
               <Box>
                 <Tooltip title="Actualizar tabla">
                   <IconButton

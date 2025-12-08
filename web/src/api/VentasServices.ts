@@ -74,23 +74,38 @@ class VentaServices {
     }
   }
 
-    async getVentas(): Promise<VentasResponse> {
-    try {
-      const response = await fetch(API_BASE_URL, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+async getVentas(params?: {
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  tipo_venta?: string;
+  rif?: string;
+  nombre?: string;
+}): Promise<VentasResponse> {
+  try {
+    const query = new URLSearchParams();
 
-      return await this.handleResponse<VentasResponse>(response);
-    } catch (error) {
-      console.error("Error en getVentas:", error);
-      throw new Error(
-        error instanceof Error ? error.message : "Error al obtener las ventas."
-      );
-    }
+    if (params?.fecha_inicio) query.append("fecha_inicio", params.fecha_inicio);
+    if (params?.fecha_fin) query.append("fecha_fin", params.fecha_fin);
+    if (params?.tipo_venta) query.append("tipo_venta", params.tipo_venta);
+    if (params?.rif) query.append("rif", params.rif);
+
+    const url = `${API_BASE_URL}?${query.toString()}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await this.handleResponse<VentasResponse>(response);
+  } catch (error) {
+    console.error("Error en getVentas:", error);
+    throw new Error(
+      error instanceof Error ? error.message : "Error al obtener las ventas."
+    );
   }
+}
 }
 
 export default new VentaServices();

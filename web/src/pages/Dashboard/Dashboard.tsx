@@ -194,7 +194,7 @@ export const Dashboard: React.FC = () => {
           flexDirection: "column", // Stacks AppBar and main content vertically
         }}
       >
-        <ModernAppBar toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
+        <ModernAppBar toggleSidebar={toggleSidebar}/>
         <Box
           component="main"
           sx={{

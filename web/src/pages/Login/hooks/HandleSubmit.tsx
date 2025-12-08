@@ -28,6 +28,7 @@ export const handleSubmit = async (
 
     localStorage.setItem("access_token", response.data.access_token);
     localStorage.setItem("nombre", response.data.user.nombre);
+    localStorage.setItem("apellido", response.data.user.apellido);
     localStorage.setItem("role", response.data.user.role);
 
     // 👇 Llamada al método estático
