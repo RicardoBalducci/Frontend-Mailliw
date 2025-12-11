@@ -27,6 +27,7 @@ export function ProductsEdit({
   const [descripcion, setDescripcion] = useState("");
   const [stock, setStock] = useState<number | "">("");
   const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
+  const [precioVenta, setPrecioVenta] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
 
@@ -36,6 +37,7 @@ export function ProductsEdit({
       setDescripcion(product.descripcion || "");
       setStock(product.stock || "");
       setPrecioUnitario(product.precio_unitario || "");
+      setPrecioVenta(product.precio_venta || product.precio_unitario || "");
     }
   }, [open, product]);
 
@@ -49,7 +51,8 @@ export function ProductsEdit({
       !nombre.trim() ||
       !descripcion.trim() ||
       stock === "" ||
-      precioUnitario === ""
+      precioUnitario === "" ||
+      precioVenta === ""
     ) {
       return;
     }
@@ -59,6 +62,7 @@ export function ProductsEdit({
       descripcion: descripcion.trim(),
       stock: Number(stock),
       precio_unitario: Number(precioUnitario),
+      precio_venta: Number(precioVenta),
     };
 
     if (!product) {
@@ -70,7 +74,7 @@ export function ProductsEdit({
       setLoading(true);
 
       const response = await ProductServices.updateProduct(
-        product.id, // ✅ ahora typescript sabe que no es null
+        product.id,
         updatedProduct
       );
 
@@ -81,6 +85,7 @@ export function ProductsEdit({
       }
     } catch (err) {
       console.error("Error al actualizar el producto:", err);
+      showSnackbar("Error al actualizar el producto", "error");
     } finally {
       setLoading(false);
     }
@@ -128,14 +133,23 @@ export function ProductsEdit({
         <InputField
           label="Precio Unitario (USD)"
           value={precioUnitario}
-          onChange={(e) =>
-            setPrecioUnitario(handleNumericInput(e.target.value))
-          }
+          onChange={(e) => setPrecioUnitario(handleNumericInput(e.target.value))}
           startIcon={<Hash />}
           sx={{ flex: 1, minWidth: 150 }}
           onlyNumbers
           disabled={loading}
           errorMessage={precioUnitario === "" ? "Campo obligatorio" : undefined}
+        />
+
+        <InputField
+          label="Precio de Venta (USD)"
+          value={precioVenta}
+          onChange={(e) => setPrecioVenta(handleNumericInput(e.target.value))}
+          startIcon={<Hash />}
+          sx={{ flex: 1, minWidth: 150 }}
+          onlyNumbers
+          disabled={loading}
+          errorMessage={precioVenta === "" ? "Campo obligatorio" : undefined}
         />
       </Box>
     </BaseModal>

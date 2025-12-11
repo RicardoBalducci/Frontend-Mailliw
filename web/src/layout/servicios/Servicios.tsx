@@ -241,7 +241,6 @@ export function Servicios() {
               />
             </StyledPaper>
 
-            {/* ➕ Modal de agregar servicio */}
             <ServicioAdd
               open={openAddModal}
               onClose={handleCloseAddModal}

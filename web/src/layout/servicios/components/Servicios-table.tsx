@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 
 import type { ReactElement } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+/* import EditIcon from "@mui/icons-material/Edit";
+ */import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -120,7 +120,7 @@ const ActionButton = styled(Button)(({ theme }) => ({
 const ServiciosTable: React.FC<ServiciosTableProps> = ({
   rows,
   searchTerm,
-  onModify,
+/*   onModify, */
   onDelete,
 }): ReactElement => {
   const theme = useTheme();
@@ -325,7 +325,7 @@ const columns: GridColDef[] = [
     filterable: false,
     renderCell: (params) => (
       <Box display="flex" gap={1} justifyContent="center" alignItems="center">
-        <Tooltip title="Editar servicio">
+       {/*  <Tooltip title="Editar servicio">
           <ActionButton
             variant="contained"
             onClick={() => onModify(params.row)}
@@ -336,7 +336,7 @@ const columns: GridColDef[] = [
           >
             <EditIcon />
           </ActionButton>
-        </Tooltip>
+        </Tooltip> */}
 
         <Tooltip title="Eliminar servicio">
           <ActionButton

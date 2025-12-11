@@ -21,6 +21,7 @@ import { GastoDetailsDialog } from "./Components/GastoDetailsDialog";
 import { NewGastoDialog } from "./Components/AddGasto";
 import HeaderSection from "../../components/global/Header/header";
 import { ArrowDownUp } from "lucide-react";
+import GastosCard from "./Components/Card";
 
 export function Gastos() {
   const [gastos, setGastos] = useState<Gasto[]>([]);
@@ -28,10 +29,21 @@ export function Gastos() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGastos, setSelectedGastos] = useState<Gasto[]>([]);
   const [openDetailsDialog, setOpenDetailsDialog] = useState<boolean>(false);
-
+  const [selectedDateInfo, setSelectedDateInfo] = useState<{
+    totalUsd: number;
+    totalBs: number;
+    count: number;
+  } | null>(null);
   const [openNewGastoDialog, setOpenNewGastoDialog] = useState<boolean>(false);
   const [dateForNewGasto, setDateForNewGasto] = useState<Date | null>(null);
 
+
+  const [dollarOficial, setDollarOficial] = useState<number>(1);
+
+  useEffect(() => {
+    const storedDollar = localStorage.getItem("dollar_oficial");
+    if (storedDollar) setDollarOficial(Number(storedDollar));
+  }, []);
   const fetchGastosData = async () => {
     try {
       setLoading(true);
@@ -122,18 +134,39 @@ export function Gastos() {
     return grouped;
   }, [gastos]);
 
-  const handleDateClick = (date: Date) => {
-    const dateKey = format(date, "yyyy-MM-dd");
-    const dailyGastos = gastosByDate[dateKey];
+const handleDateClick = (date: Date) => {
+  const dateKey = format(date, "yyyy-MM-dd");
+  const dailyGastos = gastosByDate[dateKey];
 
-    if (dailyGastos && dailyGastos.length > 0) {
-      setSelectedGastos(dailyGastos);
-      setOpenDetailsDialog(true);
-    } else {
-      setDateForNewGasto(date);
-      setOpenNewGastoDialog(true);
-    }
-  };
+  if (dailyGastos && dailyGastos.length > 0) {
+    const totalUsd = dailyGastos.reduce(
+      (sum, g) => sum + parseFloat(g.monto_gastado),
+      0
+    );
+
+    const totalBs = totalUsd * dollarOficial;
+
+    setSelectedDateInfo({
+      totalUsd,
+      totalBs,
+      count: dailyGastos.length,
+    });
+
+    setSelectedGastos(dailyGastos);
+    setOpenDetailsDialog(true);
+  } else {
+    // No hay gastos → mostrar 0
+    setSelectedDateInfo({
+      totalUsd: 0,
+      totalBs: 0,
+      count: 0,
+    });
+
+    setDateForNewGasto(date);
+    setOpenNewGastoDialog(true);
+  }
+};
+
 
   const handleCloseDetailsDialog = () => {
     setOpenDetailsDialog(false);
@@ -231,7 +264,13 @@ export function Gastos() {
             )}
 
             {!loading && !error && (
+              
               <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+                <GastosCard
+                count={selectedDateInfo?.count ?? 0}
+                totalBs={selectedDateInfo?.totalBs ?? 0}
+                totalUsd={selectedDateInfo?.totalUsd ?? 0}
+              />
                 <Calendar
                   onClickDay={handleDateClick}
                   value={null}

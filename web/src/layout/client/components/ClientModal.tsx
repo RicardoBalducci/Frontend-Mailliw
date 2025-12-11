@@ -207,7 +207,7 @@ useEffect(() => {
       <Box display="flex" gap={2} flexWrap="wrap">
         <StyledTextField
           select
-          label="Tipo de RIF / Cédula"
+          label="Tipo de D.I."
           value={rifType}
           onChange={(e) => setRifType(e.target.value)}
           fullWidth
@@ -222,7 +222,7 @@ useEffect(() => {
         </StyledTextField>
 
         <InputField
-          label="Número de RIF"
+          label="Número de D.I."
           value={rifNumber}
           onChange={(e) => setRifNumber(e.target.value)}
           startIcon={<Hash />}

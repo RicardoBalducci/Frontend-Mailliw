@@ -43,6 +43,7 @@ import HomeContent from "../../layout/home/home";
 import Compra from "../../layout/Compras";
 import Ventas from "../../layout/ventas";
 import { HistorialVentas } from "../../layout/ventas/historial";
+import HistorialCompras from "../../layout/Compras/historial";
 const DRAWER_WIDTH = 0; // Changed from 0 to 240
 
 const sidebarItems: SidebarItem[] = [
@@ -70,7 +71,7 @@ const sidebarItems: SidebarItem[] = [
     icon: <ArrowDownUp size={20} />,
     content: <Gastos />,
   },
-   {
+  {
     id: "ventas",
     text: "Ventas",
     icon: <Percent size={20} />, // Icono principal de ventas
@@ -90,6 +91,25 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
+    id: "compras",
+    text: "Compras",
+    icon: <ShoppingCart size={20} />, // Icono principal de ventas
+    subItems: [
+      {
+        id: "compras-historial",
+        text: "Historial",
+        icon: <Clock size={20} />, // Icono subitem listado
+        content: <HistorialCompras />, // Componente real de listado de ventas
+      },
+      {
+        id: "compras-crear",
+        text: "Creación",
+        icon: <PlusCircle size={20} />, // Icono subitem crear
+        content: <Compra />, // Componente real de creación de ventas
+      },
+    ],
+  },
+  {
     id: "tecnicos",
     text: "Tecnicos",
     icon: <Wrench size={20} />,
@@ -101,12 +121,7 @@ const sidebarItems: SidebarItem[] = [
     icon: <Anvil size={20} />,
     content: <Servicios />,
   },
-  {
-    id: "compra",
-    text: "Compra",
-    icon: <ShoppingCart size={20} />, // Icono subitem crear
-    content: <Compra />, 
-  },
+  
   {
     id: "materiales",
     text: "Materiales",

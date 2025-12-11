@@ -50,6 +50,36 @@ class ComprasServices {
       );
     }
   }
+
+    async getCompras(
+    proveedor?: string,
+    fecha_inicio?: string,
+    fecha_fin?: string
+  ): Promise<CompraDTO[]> {
+    try {
+      const params = new URLSearchParams();
+
+      if (proveedor) params.append("proveedor", proveedor);
+      if (fecha_inicio) params.append("fecha_inicio", fecha_inicio);
+      if (fecha_fin) params.append("fecha_fin", fecha_fin);
+
+      const url = `${API_BASE_URL}?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      return await this.handleResponse<CompraDTO[]>(response);
+    } catch (error) {
+      console.error("Error en getCompras:", error);
+      throw new Error(
+        error instanceof Error ? error.message : "Error al obtener compras."
+      );
+    }
+  }
 }
 
 export default new ComprasServices();

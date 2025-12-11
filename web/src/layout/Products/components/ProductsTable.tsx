@@ -35,6 +35,7 @@ interface ProductTableProps {
     marca:string;
     stock: number;
     precio_unitario: number;
+    precio_venta: number;
     precio_usd: number;
   }) => void;
   onDelete: (id: number) => void;

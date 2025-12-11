@@ -1,3 +1,7 @@
+// ---------------------------------------------
+// MINI CHAT AMPLIADO CON TODAS LAS SECCIONES
+// ---------------------------------------------
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
@@ -9,9 +13,9 @@ import {
   ListItem,
   Divider,
   Fab,
-  Button, // Import Button for options
+  Button,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles"; // Import useTheme for palette access
+import { useTheme } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -23,357 +27,344 @@ interface MiniChatProps {
 
 interface ChatMessage {
   id: number;
-  sender: "user" | "gemini";
+  sender: "user" | "assistant";
   text: string;
-  options?: { label: string; value: string }[]; // Optional options for Gemini messages
+  options?: { label: string; value: string }[];
 }
 
 const MiniChat: React.FC<MiniChatProps> = ({ open, onClose }) => {
-  const theme = useTheme(); // Access theme for colors
+  const theme = useTheme();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [conversationStage, setConversationStage] = useState(0); // 0: initial, 1: products, 2: technicians, 3: expenses
+  const [stage, setStage] = useState("initial");
 
-  // Scroll to the latest message
+  // Auto scroll
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current)
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
   }, [messages]);
 
-  // Initialize chat with a welcome message and options when it opens
+  // Welcome message
   useEffect(() => {
     if (open && messages.length === 0) {
       setTimeout(() => {
-        setMessages([
-          {
-            id: 1,
-            sender: "gemini",
-            text: "¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?",
-            options: [
-              { label: "Información de productos", value: "productos" },
-              { label: "Ayuda con un técnico", value: "tecnicos" },
-              { label: "Pregunta sobre gastos", value: "gastos" },
-              { label: "Contactar a soporte", value: "soporte" },
-            ],
-          },
-        ]);
-        setConversationStage(0); // Reset stage when chat is opened for the first time
-      }, 500);
+        sendAssistantMessage(
+          "¡Hola! Soy el asistente virtual del sistema. ¿Sobre qué módulo deseas consultar?",
+          [
+            { label: "Ventas", value: "ventas" },
+            { label: "Compras", value: "compras" },
+            { label: "Productos", value: "productos" },
+            { label: "Servicios", value: "servicios" },
+            { label: "Materiales", value: "materiales" },
+            { label: "Proveedores", value: "proveedores" },
+            { label: "Clientes", value: "clientes" },
+            { label: "Personal", value: "personal" },
+            { label: "Historial de Ventas", value: "historial_ventas" },
+            { label: "Historial de Compras", value: "historial_compras" },
+          ]
+        );
+        setStage("initial");
+      }, 700);
     }
-  }, [open, messages.length]);
+  }, [open]);
 
-  // Function to handle sending a message (user or option click)
-  const sendMessage = (messageText: string, isOption: boolean = false) => {
-    if (!isOption && messageText.trim() === "") return;
+  // ---------------------------------------------
+  //           ENVÍO DE MENSAJES
+  // ---------------------------------------------
 
-    const newMessage: ChatMessage = {
+  const sendUserMessage = (text: string) => {
+    const msg: ChatMessage = {
       id: Date.now(),
       sender: "user",
-      text: messageText.trim(),
+      text,
     };
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
+    setMessages((prev) => [...prev, msg]);
+  };
+
+  const sendAssistantMessage = (
+    text: string,
+    options?: { label: string; value: string }[]
+  ) => {
     setIsTyping(true);
-
-    // Simulate Gemini response based on predefined logic
-    let geminiResponseText =
-      "No estoy seguro de cómo responder a eso. ¿Puedes ser más específico o elegir una de las opciones?";
-    let nextOptions: { label: string; value: string }[] | undefined;
-    let nextStage = conversationStage;
-
-    if (isOption) {
-      switch (messageText) {
-        case "productos":
-          geminiResponseText =
-            "Claro, ¿qué tipo de información necesitas sobre nuestros productos? Por ejemplo, puedes preguntar sobre 'precio', 'stock' o 'descripción'.";
-          nextOptions = [
-            { label: "Precio de productos", value: "precio_productos" },
-            { label: "Stock de productos", value: "stock_productos" },
-            {
-              label: "Descripción de productos",
-              value: "descripcion_productos",
-            },
-            { label: "Volver al inicio", value: "inicio" },
-          ];
-          nextStage = 1;
-          break;
-        case "tecnicos":
-          geminiResponseText =
-            "Entendido. ¿Necesitas 'agendar una cita', 'consultar un técnico' o 'reportar un problema'?";
-          nextOptions = [
-            { label: "Agendar cita", value: "agendar_cita" },
-            { label: "Consultar técnico", value: "consultar_tecnico" },
-            { label: "Reportar problema", value: "reportar_problema" },
-            { label: "Volver al inicio", value: "inicio" },
-          ];
-          nextStage = 2;
-          break;
-        case "gastos":
-          geminiResponseText =
-            "Para ayudarte con los gastos, ¿quieres 'registrar un gasto', 'ver historial' o 'generar un informe'?";
-          nextOptions = [
-            { label: "Registrar gasto", value: "registrar_gasto" },
-            { label: "Ver historial de gastos", value: "historial_gastos" },
-            { label: "Generar informe de gastos", value: "informe_gastos" },
-            { label: "Volver al inicio", value: "inicio" },
-          ];
-          nextStage = 3;
-          break;
-        case "soporte":
-          geminiResponseText =
-            "Para contactar a soporte, puedes llamarnos al +1 (689) 686-4045 o enviar un correo a kppabonduque18@gmail.com";
-          nextOptions = [{ label: "Volver al inicio", value: "inicio" }];
-          nextStage = 0; // Back to initial stage after providing contact info
-          break;
-        case "inicio":
-          geminiResponseText =
-            "De acuerdo, volvamos al inicio. ¿En qué más puedo ayudarte?";
-          nextOptions = [
-            { label: "Información de productos", value: "productos" },
-            { label: "Ayuda con un técnico", value: "tecnicos" },
-            { label: "Pregunta sobre gastos", value: "gastos" },
-            { label: "Contactar a soporte", value: "soporte" },
-          ];
-          nextStage = 0;
-          break;
-        // Add more nested cases for specific product/technician/expense queries if desired
-        default:
-          geminiResponseText =
-            "Recibido. Dime en qué más puedo asistirte dentro de esta sección.";
-          nextOptions = [{ label: "Volver al inicio", value: "inicio" }];
-          // For now, keep the stage to allow more specific questions within the same topic
-          break;
-      }
-    } else {
-      // Basic free-text response simulation (can be expanded)
-      if (
-        messageText.toLowerCase().includes("hola") ||
-        messageText.toLowerCase().includes("qué tal")
-      ) {
-        geminiResponseText =
-          "¡Hola! ¿Cómo te encuentras? Recuerda que puedes elegir una de las opciones para guiar la conversación.";
-        nextOptions = [
-          { label: "Información de productos", value: "productos" },
-          { label: "Ayuda con un técnico", value: "tecnicos" },
-          { label: "Pregunta sobre gastos", value: "gastos" },
-          { label: "Contactar a soporte", value: "soporte" },
-        ];
-        nextStage = 0;
-      } else if (
-        conversationStage === 1 &&
-        messageText.toLowerCase().includes("precio")
-      ) {
-        geminiResponseText =
-          "Para consultar el precio de un producto, por favor, indícame el nombre o código del producto.";
-      } else if (
-        conversationStage === 1 &&
-        messageText.toLowerCase().includes("stock")
-      ) {
-        geminiResponseText =
-          "Para consultar el stock, ¿me puedes dar el nombre o código del producto?";
-      } else if (
-        conversationStage === 1 &&
-        messageText.toLowerCase().includes("descripción")
-      ) {
-        geminiResponseText =
-          "Para darte la descripción, ¿qué producto te interesa?";
-      }
-      // Add more specific free-text response logic for other stages here
-    }
-
     setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: "gemini",
-          text: geminiResponseText,
-          options: nextOptions,
-        },
-      ]);
-      setConversationStage(nextStage);
+      const msg: ChatMessage = {
+        id: Date.now() + 1,
+        sender: "assistant",
+        text,
+        options,
+      };
+      setMessages((prev) => [...prev, msg]);
       setIsTyping(false);
-    }, 500);
+    }, 600);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(input);
+  // ---------------------------------------------
+  //      RESPUESTAS POR SECCIÓN (INTELIGENTES)
+  // ---------------------------------------------
+
+  const sections: Record<
+    string,
+    { message: string; options: { label: string; value: string }[] }
+  > = {
+    ventas: {
+      message:
+        "Aquí puedes consultar información del módulo de *Ventas*. ¿Qué deseas hacer?",
+      options: [
+        { label: "Registrar venta", value: "registrar_venta" },
+        { label: "Ver ventas", value: "ver_ventas" },
+        { label: "Buscar venta por ID", value: "venta_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    compras: {
+      message:
+        "Aquí tienes opciones sobre el módulo de *Compras*. ¿Qué deseas saber?",
+      options: [
+        { label: "Registrar compra", value: "registrar_compra" },
+        { label: "Ver compras", value: "ver_compras" },
+        { label: "Buscar compra por ID", value: "compra_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    productos: {
+      message:
+        "Módulo de *Productos*: aquí puedes consultar la información de inventario.",
+      options: [
+        { label: "Precio de productos", value: "precio_productos" },
+        { label: "Consultar stock", value: "stock_productos" },
+        { label: "Ver productos", value: "ver_productos" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    servicios: {
+      message:
+        "En el módulo de *Servicios* puedes gestionar servicios, asignaciones o tipos.",
+      options: [
+        { label: "Tipos de servicios", value: "tipos_servicio" },
+        { label: "Servicios disponibles", value: "servicios_disponibles" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    materiales: {
+      message:
+        "El módulo de *Materiales* te permite administrar el inventario técnico.",
+      options: [
+        { label: "Ver materiales", value: "ver_materiales" },
+        { label: "Material por ID", value: "material_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    proveedores: {
+      message:
+        "En *Proveedores* puedes gestionar quién suministra tus productos o materiales.",
+      options: [
+        { label: "Lista de proveedores", value: "ver_proveedores" },
+        { label: "Buscar proveedor", value: "proveedor_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    clientes: {
+      message:
+        "Bienvenido al módulo de *Clientes*. ¿Qué deseas consultar o gestionar?",
+      options: [
+        { label: "Lista de clientes", value: "ver_clientes" },
+        { label: "Buscar cliente por ID", value: "cliente_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    personal: {
+      message:
+        "En *Personal* (usuarios / técnicos) puedes consultar información interna.",
+      options: [
+        { label: "Ver personal", value: "ver_personal" },
+        { label: "Buscar técnico", value: "tecnico_id" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    historial_ventas: {
+      message: "Historial completo de ventas disponibles para análisis.",
+      options: [
+        { label: "Ver historial de ventas", value: "ver_historial_ventas" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+    historial_compras: {
+      message: "Historial completo de compras registradas.",
+      options: [
+        { label: "Ver historial de compras", value: "ver_historial_compras" },
+        { label: "Volver al inicio", value: "inicio" },
+      ],
+    },
+  };
+
+  // ---------------------------------------------
+  //              MANEJO DE OPCIONES
+  // ---------------------------------------------
+
+  const onOptionClick = (value: string) => {
+    sendUserMessage(value);
+
+    if (value === "inicio") {
+      setStage("initial");
+      sendAssistantMessage(
+        "Perfecto, volvamos al inicio. ¿Qué módulo deseas consultar?",
+        Object.keys(sections).map((k) => ({
+          label: k.replace("_", " ").toUpperCase(),
+          value: k,
+        }))
+      );
+      return;
     }
+
+    // Si es una de las secciones principales
+    if (sections[value]) {
+      setStage(value);
+      sendAssistantMessage(sections[value].message, sections[value].options);
+      return;
+    }
+
+    // Sub-opciones: puedes expandirlas con lógica real
+    sendAssistantMessage(
+      `Has seleccionado la opción: "${value}".  
+      Puedes pedirme más detalles si deseas.`,
+      [{ label: "Volver al inicio", value: "inicio" }]
+    );
   };
 
-  const handleOptionClick = (value: string) => {
-    sendMessage(value, true); // Send the option value as a message
+  // ---------------------------------------------
+  //            ENVÍO DE TEXTO LIBRE
+  // ---------------------------------------------
+
+  const onSend = () => {
+    if (!input.trim()) return;
+
+    sendUserMessage(input);
+
+    // Respuestas inteligentes dependiendo del stage
+    if (stage === "productos" && input.toLowerCase().includes("precio")) {
+      sendAssistantMessage(
+        "Para consultar el precio del producto, dime su nombre o código.",
+        [{ label: "Volver al inicio", value: "inicio" }]
+      );
+    } else {
+      sendAssistantMessage(
+        "He recibido tu mensaje. ¿Deseas consultar otra cosa?",
+        [{ label: "Volver al inicio", value: "inicio" }]
+      );
+    }
+
+    setInput("");
   };
 
-  if (!open) {
-    return null;
-  }
+  // ---------------------------------------------
+  //                  UI
+  // ---------------------------------------------
+
+  if (!open) return null;
 
   return (
     <Paper
-      elevation={5}
+      elevation={4}
       sx={{
         position: "fixed",
         bottom: 20,
         right: 20,
-        width: { xs: "90%", sm: 350, md: 400 },
-        height: { xs: "70vh", sm: 500, md: 550 },
+        width: { xs: "90%", sm: 360 },
+        height: { xs: "70vh", sm: 520 },
         borderRadius: 3,
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        zIndex: 1500,
-        overflow: "hidden",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-        backgroundColor: (theme) => theme.palette.background.default,
       }}
     >
+      {/* HEADER */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           p: 2,
           bgcolor: theme.palette.primary.main,
           color: "white",
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
+          display: "flex",
+          justifyContent: "space-between",
         }}
       >
         <Typography variant="h6">
-          <ChatBubbleOutlineIcon sx={{ verticalAlign: "middle", mr: 1 }} />
+          <ChatBubbleOutlineIcon sx={{ mr: 1 }} />
           Asistente Virtual
         </Typography>
-        <IconButton size="small" onClick={onClose} sx={{ color: "white" }}>
+        <IconButton onClick={onClose} sx={{ color: "white" }}>
           <CloseIcon />
         </IconButton>
       </Box>
+
+      {/* MENSAJES */}
       <List sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
-        {messages.map((msg) => (
+        {messages.map((m) => (
           <ListItem
-            key={msg.id}
+            key={m.id}
             sx={{
-              justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
-              p: 0.5,
-              flexDirection: "column", // Stack text and options vertically
-              alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
+              justifyContent: m.sender === "user" ? "flex-end" : "flex-start",
+              flexDirection: "column",
+              alignItems: m.sender === "user" ? "flex-end" : "flex-start",
             }}
           >
             <Box
               sx={{
                 maxWidth: "80%",
                 bgcolor:
-                  msg.sender === "user"
+                  m.sender === "user"
                     ? theme.palette.primary.light
                     : theme.palette.grey[300],
-                color:
-                  msg.sender === "user" ? "white" : theme.palette.text.primary,
+                color: m.sender === "user" ? "white" : "#000",
                 p: 1.2,
                 borderRadius: 2,
-                borderBottomLeftRadius: msg.sender === "user" ? 12 : 2,
-                borderBottomRightRadius: msg.sender === "user" ? 2 : 12,
-                wordBreak: "break-word",
                 boxShadow: 1,
               }}
             >
-              <Typography variant="body2">{msg.text}</Typography>
+              {m.text}
             </Box>
-            {msg.options && msg.sender === "gemini" && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 1,
-                  mt: 1,
-                  justifyContent: "flex-start", // Align options with message
-                  maxWidth: "80%",
-                }}
-              >
-                {msg.options.map((option) => (
+
+            {m.options && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {m.options.map((o) => (
                   <Button
-                    key={option.value}
-                    variant="outlined"
+                    key={o.value}
                     size="small"
-                    onClick={() => handleOptionClick(option.value)}
-                    sx={{
-                      borderRadius: 2,
-                      borderColor: theme.palette.primary.main,
-                      color: theme.palette.primary.main,
-                      "&:hover": {
-                        bgcolor: alpha(theme.palette.primary.main, 0.05),
-                        borderColor: theme.palette.primary.dark,
-                      },
-                    }}
+                    variant="outlined"
+                    onClick={() => onOptionClick(o.value)}
                   >
-                    {option.label}
+                    {o.label}
                   </Button>
                 ))}
               </Box>
             )}
           </ListItem>
         ))}
+
         {isTyping && (
-          <ListItem sx={{ justifyContent: "flex-start", p: 0.5 }}>
-            <Box
-              sx={{
-                maxWidth: "80%",
-                bgcolor: theme.palette.grey[300],
-                color: theme.palette.text.primary,
-                p: 1.2,
-                borderRadius: 2,
-                borderBottomLeftRadius: 2,
-                borderBottomRightRadius: 12,
-                boxShadow: 1,
-              }}
-            >
-              <Typography variant="body2" sx={{ fontStyle: "italic" }}>
-                El asistente está escribiendo...
-              </Typography>
-            </Box>
+          <ListItem>
+            <Typography fontStyle="italic">
+              El asistente está escribiendo...
+            </Typography>
           </ListItem>
         )}
+
         <div ref={messagesEndRef} />
       </List>
+
+      {/* INPUT */}
       <Divider />
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          alignItems: "center",
-          bgcolor: (theme) => alpha(theme.palette.grey[100], 0.8),
-        }}
-      >
+      <Box sx={{ p: 2, display: "flex", gap: 1 }}>
         <TextField
           fullWidth
-          variant="outlined"
           size="small"
-          placeholder="Escribe tu mensaje..."
+          placeholder="Escribe un mensaje..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          sx={{ mr: 1 }}
-          InputProps={{
-            sx: { borderRadius: 2 },
-          }}
+          onKeyDown={(e) => e.key === "Enter" && onSend()}
         />
-        <Fab
-          size="small"
-          color="primary"
-          onClick={() => sendMessage(input)}
-          disabled={input.trim() === ""}
-          sx={{
-            minWidth: "40px",
-            width: "40px",
-            height: "40px",
-            "& .MuiSvgIcon-root": {
-              fontSize: "1.2rem",
-            },
-          }}
-        >
+        <Fab size="small" color="primary" onClick={onSend}>
           <SendIcon />
         </Fab>
       </Box>

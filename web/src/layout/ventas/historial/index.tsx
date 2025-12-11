@@ -188,7 +188,6 @@ export function HistorialVentas() {
                     gap={1.5}
                     width={{ xs: "100%", sm: "auto" }}
                   >
-                    {/* 🔽 BOTÓN FILTROS */}
                     <Button
                       variant="outlined"
                       startIcon={<Funnel size={18} />}

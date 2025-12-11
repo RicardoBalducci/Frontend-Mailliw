@@ -243,7 +243,7 @@ export function Client() {
               gap={2}
             >
               <SearchTextField
-                placeholder="Buscar por nombre, RIF, dirección..."
+                placeholder="Buscar por nombre, D.I., dirección..."
                 variant="outlined"
                 fullWidth
                 value={searchTerm}

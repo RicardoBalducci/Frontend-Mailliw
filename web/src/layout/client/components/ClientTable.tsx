@@ -132,7 +132,7 @@ const ClientTable: React.FC<ClientTableProps> = ({
   const columns: GridColDef[] = [
     {
       field: "rif",
-      headerName: "RIF",
+      headerName: "D.I.",
       flex: 0.8,
       minWidth: 100,
       renderCell: (params) => (

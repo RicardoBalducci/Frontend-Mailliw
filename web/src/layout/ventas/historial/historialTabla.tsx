@@ -106,7 +106,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ rows, searchTerm }) => {
     },
     {
       field: "rif",
-      headerName: "RIF",
+      headerName: "D.I.",
       flex: 0.8,
       minWidth: 120,
       renderCell: (params) => (
