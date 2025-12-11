@@ -9,6 +9,7 @@ import CartSummary from "./card/CartSummary";
 import PagoSelect from "../../componentes/PagoSelect";
 import { CreateVentaDto } from "../../../../Dto/Ventas-create.dto";
 import VentasServices from "../../../../api/VentasServices";
+import { useSnackbar } from "../../../../components/context/SnackbarContext";
 
 export default function PanelVenta({ cliente }: { cliente: { id: number } }) {
   const [activePanel, setActivePanel] = useState<"servicios" | "productos" | null>(null);
@@ -46,7 +47,8 @@ export default function PanelVenta({ cliente }: { cliente: { id: number } }) {
   const totalServicios = cart.filter(i => i.tipo === "servicio").reduce((sum, i) => sum + i.cantidad, 0);
   const totalUSD = cart.reduce((sum, i) => sum + i.precio_unitario * i.cantidad, 0);
   const totalBS = totalUSD * dollarOficial;
-
+      const { showSnackbar } = useSnackbar();
+  
   const handleRealizarVenta = async () => {
     if (cart.length === 0) return;
 
@@ -76,7 +78,10 @@ export default function PanelVenta({ cliente }: { cliente: { id: number } }) {
       setCart([]);
       setNota("");
       setTipoPago("Pago móvil");
-      alert("Venta realizada con éxito!");
+      showSnackbar(
+      `Venta Realizada exitosamente`,
+      "success"
+    );
     } catch (error) {
       console.error("Error al registrar la venta:", error);
       alert("Ocurrió un error al registrar la venta.");
