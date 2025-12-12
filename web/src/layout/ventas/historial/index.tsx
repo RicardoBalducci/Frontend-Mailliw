@@ -76,7 +76,16 @@ export function HistorialVentas() {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+const [debouncedPersona, setDebouncedPersona] = useState(persona);
 
+
+useEffect(() => {
+  const handler = setTimeout(() => {
+    setDebouncedPersona(persona); // Actualiza solo después de 5 segundos
+  }, 3000); // 5000 ms = 5 segundos
+
+  return () => clearTimeout(handler); // Limpiar timeout si el usuario sigue escribiendo
+}, [persona]);
   // 🔹 Debounce para nombre
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -106,10 +115,9 @@ export function HistorialVentas() {
     }
   };
 
-  // 🔹 Ejecuta fetch cuando cambian filtros
-  useEffect(() => {
-    fetchVentas();
-  }, [debouncedNombre, persona, tipoDocumento, tipoVenta, fechaInicio, fechaFin]);
+useEffect(() => {
+  fetchVentas();
+}, [debouncedNombre, debouncedPersona, tipoDocumento, tipoVenta, fechaInicio, fechaFin]);
 
   // 🔹 Transformación de datos para la tabla
   const rowsEjemplo = ventas.map((venta) => {
@@ -248,7 +256,6 @@ export function HistorialVentas() {
                       gap: 2,
                     }}
                   >
-                    {/* Título */}
                     <Box display="flex" alignItems="center" gap={1}>
                       <Funnel size={20} color="#1e4fa8" />
                       <Typography

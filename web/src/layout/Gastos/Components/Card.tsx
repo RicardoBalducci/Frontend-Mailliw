@@ -1,5 +1,6 @@
 import { Paper, Typography, Stack } from "@mui/material";
 import { AttachMoney, Paid, ReceiptLong } from "@mui/icons-material";
+import { formatNumber } from "../../../utils/format";
 
 interface GastosCardProps {
   count: number;
@@ -46,7 +47,7 @@ export default function GastosCard({ count, totalBs, totalUsd }: GastosCardProps
           Total en Bs
         </Typography>
         <Typography variant="h4" sx={{ fontWeight: 700, mt: 1 }}>
-          Bs {totalBs.toFixed(2)}
+          Bs {formatNumber(totalBs)}
         </Typography>
       </Paper>
 
@@ -63,10 +64,10 @@ export default function GastosCard({ count, totalBs, totalUsd }: GastosCardProps
       >
         <AttachMoney fontSize="large" />
         <Typography variant="subtitle1" sx={{ fontFamily: "Montserrat", fontWeight: 600 }}>
-          Total en USD
+          Total en $
         </Typography>
         <Typography variant="h4" sx={{ fontWeight: 700, mt: 1 }}>
-          $ {totalUsd.toFixed(2)}
+          $ {formatNumber(totalUsd)}
         </Typography>
       </Paper>
     </Stack>
