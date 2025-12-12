@@ -10,8 +10,11 @@ import PagoSelect from "../../componentes/PagoSelect";
 import { CreateVentaDto } from "../../../../Dto/Ventas-create.dto";
 import VentasServices from "../../../../api/VentasServices";
 import { useSnackbar } from "../../../../components/context/SnackbarContext";
+import { useNotifications } from "../../../../pages/Dashboard/components/NotificationsContext";
 
 export default function PanelVenta({ cliente }: { cliente: { id: number } }) {
+  const { refrescarNotificaciones } = useNotifications();
+  
   const [activePanel, setActivePanel] = useState<"servicios" | "productos" | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [dollarOficial, setDollarOficial] = useState<number>(1);
@@ -78,6 +81,8 @@ export default function PanelVenta({ cliente }: { cliente: { id: number } }) {
       setCart([]);
       setNota("");
       setTipoPago("Pago móvil");
+      
+      await refrescarNotificaciones()
       showSnackbar(
       `Venta Realizada exitosamente`,
       "success"

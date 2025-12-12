@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, Typography, Box, Divider } from "@mui/material";
+import { formatNumber } from "../../../../../utils/format";
 
 interface CartSummaryProps {
   totalProductos: number;
@@ -8,6 +9,8 @@ interface CartSummaryProps {
   totalUSD: number;
   totalBS: number;
 }
+
+
 
 export default function CartSummary({
   totalProductos,
@@ -113,10 +116,10 @@ export default function CartSummary({
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1565c0" }}>
-                Total USD
+                Total $
               </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, color: "#1565c0", mt: 1 }}>
-                ${totalUSD.toFixed(2)}
+                ${formatNumber(totalUSD)}
               </Typography>
             </Box>
 
@@ -135,7 +138,7 @@ export default function CartSummary({
                 Total BS
               </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, color: "#d84315", mt: 1 }}>
-                Bs {totalBS.toFixed(2)}
+                Bs. {formatNumber(totalBS)}
               </Typography>
             </Box>
           </Box>

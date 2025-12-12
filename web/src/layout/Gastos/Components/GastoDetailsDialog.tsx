@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -29,6 +29,7 @@ import { format } from "date-fns/format";
 import { NewGastoDialog } from "./AddGasto";
 import { DeleteGastoDialog } from "./DeleteGastoDialog";
 import { UpdateGastoDialog } from "./UpdateGastoDialog"; // Import the new dialog
+import { formatNumber } from "../../../utils/format";
 
 interface GastoDetailsDialogProps {
   open: boolean;
@@ -49,7 +50,12 @@ export const GastoDetailsDialog: React.FC<GastoDetailsDialogProps> = ({
   const theme = useTheme();
   const [isNewGastoDialogOpen, setIsNewGastoDialogOpen] = useState(false);
   const [dateForNewGasto, setDateForNewGasto] = useState<Date | null>(null);
+const [dollarOficial, setDollarOficial] = useState<number>(1)
 
+  useEffect(() => {
+    const storedDollar = localStorage.getItem("dollar_oficial")
+    if (storedDollar) setDollarOficial(Number(storedDollar))
+  }, [])
   // States for delete functionality
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [gastoToDeleteId, setGastoToDeleteId] = useState<number | null>(null);
@@ -176,32 +182,63 @@ export const GastoDetailsDialog: React.FC<GastoDetailsDialogProps> = ({
 
           {gastos.length > 0 ? (
             <>
-              <Box
-                sx={{
-                  mb: 3,
-                  p: 2,
-                  bgcolor: theme.palette.primary.light,
-                  color: theme.palette.primary.contrastText,
-                  borderRadius: 2,
-                  textAlign: "center",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                  boxShadow: theme.shadows[2],
-                }}
-              >
-                <Typography variant="h6" color="inherit" fontWeight="bold">
-                  Total gastado:
-                </Typography>
-                <Typography
-                  variant="h5"
-                  color={theme.palette.primary.dark}
-                  fontWeight="bold"
-                >
-                  ${totalGastosAmount.toFixed(2)}
-                </Typography>
-              </Box>
+             <Box
+  sx={{
+    mb: 3,
+    display: "flex",
+    gap: 2,
+    justifyContent: "center",
+  }}
+>
+  {/* Caja en dólares */}
+  <Box
+    sx={{
+      p: 2,
+      bgcolor: theme.palette.primary.light,
+      color: theme.palette.primary.contrastText,
+      borderRadius: 2,
+      textAlign: "center",
+      flex: 1,
+      boxShadow: theme.shadows[2],
+    }}
+  >
+    <Typography variant="h6" fontWeight="bold">
+      Total gastado ($):
+    </Typography>
+    <Typography
+      variant="h5"
+      color={theme.palette.primary.dark}
+      fontWeight="bold"
+    >
+      ${formatNumber(totalGastosAmount)}
+    </Typography>
+  </Box>
+
+  {/* Caja en bolívares */}
+  <Box
+    sx={{
+      p: 2,
+      bgcolor: theme.palette.primary.dark,
+      color: theme.palette.secondary.contrastText,
+      borderRadius: 2,
+      textAlign: "center",
+      flex: 1,
+      boxShadow: theme.shadows[2],
+    }}
+  >
+    <Typography variant="h6" fontWeight="bold">
+      Total gastado (Bs):
+    </Typography>
+    <Typography
+      variant="h5"
+      color={theme.palette.secondary.light}
+      fontWeight="bold"
+    >
+      Bs. {formatNumber(totalGastosAmount * dollarOficial)}
+    </Typography>
+  </Box>
+</Box>
+
 
               <Grid container spacing={2}>
                 {gastos.map((gasto) => (

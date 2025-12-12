@@ -71,7 +71,7 @@ export const ModernSidebar: React.FC<SidebarProps> = ({
     window.location.href = "/";
   };
 
-  const drawerWidth = 240;
+  const drawerWidth = 230;
 
   // 🔹 Filtrar items según el rol
   const filteredItems = items.filter((item) => {

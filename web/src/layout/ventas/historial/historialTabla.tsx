@@ -4,6 +4,7 @@ import React from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import {  Tooltip, Typography, Paper,  alpha } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { formatNumber } from "../../../utils/format";
 
 // === Props ===
 interface SalesTableProps {
@@ -97,7 +98,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ rows, searchTerm }) => {
       field: "cliente",
       headerName: "Cliente",
       flex: 1,
-      minWidth: 150,
+      minWidth: 300,
       renderCell: (params) => (
         <Typography variant="body2" fontWeight={600}>
           {params.value}
@@ -115,55 +116,12 @@ const SalesTable: React.FC<SalesTableProps> = ({ rows, searchTerm }) => {
         </Typography>
       ),
     },
-{
-  field: "totalBs",
-  headerName: "Total Bs",
-  flex: 0.8,
-  minWidth: 120,
-  renderCell: (params) => {
-    const formatterBs = new Intl.NumberFormat("es-VE", {
-      style: "currency",
-      currency: "VES",
-      minimumFractionDigits: 2,
-    });
-    return (
-      <Typography
-        variant="body2"
-        fontWeight={600}
-        sx={{ color: "primary.main" }}
-      >
-        {formatterBs.format(params.value)}
-      </Typography>
-    );
-  },
-},
-{
-  field: "totalUsd",
-  headerName: "Total USD",
-  flex: 0.8,
-  minWidth: 120,
-  renderCell: (params) => {
-    const formatterUsd = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    });
-    return (
-      <Typography
-        variant="body2"
-        fontWeight={600}
-        sx={{ color: "success.main" }}
-      >
-        {formatterUsd.format(params.value)}
-      </Typography>
-    );
-  },
-},
+
     {
       field: "cantProductos",
       headerName: "Cant. Productos",
       flex: 0.8,
-      minWidth: 120,
+      minWidth: 190,
       renderCell: (params) => (
         <Typography variant="body2">{params.value}</Typography>
       ),
@@ -172,11 +130,46 @@ const SalesTable: React.FC<SalesTableProps> = ({ rows, searchTerm }) => {
       field: "cantServicios",
       headerName: "Cant. Servicios",
       flex: 0.8,
-      minWidth: 120,
+      minWidth: 170,
       renderCell: (params) => (
         <Typography variant="body2">{params.value}</Typography>
       ),
     },
+
+        {
+  field: "totalUsd",
+  headerName: "Total USD",
+  flex: 0.8,
+  minWidth: 120,
+  renderCell: (params) => {
+   
+    return (
+      <Typography
+        variant="body2"
+        fontWeight={600}
+      >
+        ${formatNumber(params.value)}
+      </Typography>
+    );
+  },
+},
+    {
+  field: "totalBs",
+  headerName: "Total Bs",
+  flex: 0.8,
+  minWidth: 120,
+  renderCell: (params) => {
+    
+    return (
+      <Typography
+        variant="body2"
+        fontWeight={600}
+      >
+        Bs. {formatNumber(params.value)}
+      </Typography>
+    );
+  },
+},
     {
       field: "fecha",
       headerName: "Fecha",
@@ -199,7 +192,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ rows, searchTerm }) => {
       field: "nota",
       headerName: "Nota",
       flex: 1.2,
-      minWidth: 180,
+      minWidth: 100,
       renderCell: (params) => (
         <Tooltip title={params.value} placement="top-start">
           <Typography

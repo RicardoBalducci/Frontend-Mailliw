@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { formatNumber } from "../../../../utils/format";
 
 export type CartItem = {
   id: number;
@@ -72,10 +73,10 @@ export default function CartTable({ cart, onRemove }: CartTableProps) {
               Cantidad
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white" }}>
-              Precio USD
+              Precio $
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white" }}>
-              Subtotal USD
+              Subtotal $
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white" }}>
               Precio BS
@@ -124,18 +125,18 @@ export default function CartTable({ cart, onRemove }: CartTableProps) {
                 {item.cantidad}
               </TableCell>
 
-              <TableCell align="right">${item.precio_unitario.toFixed(2)}</TableCell>
+              <TableCell align="right">${formatNumber(item.precio_unitario)}</TableCell>
 
               <TableCell align="right" sx={{ fontWeight: "bold", color: "#1a73e8" }}>
-                ${(item.precio_unitario * item.cantidad).toFixed(2)}
+                $ {formatNumber(item.precio_unitario * item.cantidad)}
               </TableCell>
 
               <TableCell align="right">
-                Bs {(item.precio_unitario * dollarOficial).toFixed(2)}
+                Bs. {formatNumber(item.precio_unitario * dollarOficial)}
               </TableCell>
 
               <TableCell align="right" sx={{ fontWeight: "bold", color: "#1a73e8" }}>
-                Bs {(item.precio_unitario * item.cantidad * dollarOficial).toFixed(2)}
+                Bs. {formatNumber(item.precio_unitario * item.cantidad * dollarOficial)}
               </TableCell>
 
               <TableCell align="center">

@@ -3,6 +3,7 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Typography, Paper, alpha } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Compra } from "../../../types/compras";
+import { formatNumber } from "../../../utils/format";
 
 interface PurchasesTableProps {
   rows: Compra[];
@@ -107,8 +108,8 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({ rows, searchTerm }) => 
            renderCell: (params: GridRenderCellParams<Compra, unknown, unknown>) =>{
         const totalUsd = params.row.totalUsd ?? 0;
         return (
-          <Typography variant="body2" fontWeight={700} color="primary">
-            {totalUsd.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+          <Typography variant="body2" fontWeight={700} >
+            ${formatNumber(totalUsd)}
           </Typography>
         );
       },
@@ -122,12 +123,8 @@ const PurchasesTable: React.FC<PurchasesTableProps> = ({ rows, searchTerm }) => 
         const totalUsd = params.row.totalUsd ?? 0;
         const totalBs = totalUsd * dollarOficial;
         return (
-          <Typography variant="body2" fontWeight={700} color="secondary">
-            {totalBs.toLocaleString("es-VE", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            Bs
+          <Typography variant="body2" fontWeight={700} >
+            Bs. {formatNumber(totalBs)}
           </Typography>
         );
       },

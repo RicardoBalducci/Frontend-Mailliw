@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ServicioDTO } from "../../../Dto/Servicio.dto";
+import { formatNumber } from "../../../utils/format";
 
 interface ServiciosTableProps {
   rows: ServicioDTO[];
@@ -270,7 +271,7 @@ const columns: GridColDef[] = [
 
   {
     field: "precio_estandar_usd",
-    headerName: "Precio (USD)",
+    headerName: "Precio ($)",
     flex: 1,
     minWidth: 120,
     renderCell: (params) => {
@@ -278,11 +279,7 @@ const columns: GridColDef[] = [
 
       return (
         <Typography variant="body2" fontWeight={500}>
-          {new Intl.NumberFormat("es-VE", {
-            style: "currency",
-            currency: "USD",
-            minimumFractionDigits: 2,
-          }).format(precioUSD)}
+          ${formatNumber(precioUSD)}
         </Typography>
       );
     },
@@ -301,12 +298,7 @@ const columns: GridColDef[] = [
 
       return (
         <Typography variant="body2" fontWeight={500}>
-          {new Intl.NumberFormat("es-VE", {
-            style: "currency",
-            currency: "VES",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(precioBS)}
+          Bs. {formatNumber(precioBS)}
         </Typography>
       );
     },

@@ -3,17 +3,35 @@
 import { useState, useEffect } from "react";
 import BaseModal from "../../../components/global/modal/modal";
 import InputField from "../../../components/global/TextField/InputField";
+import { Mail, Phone, User } from "lucide-react";
+
+import { TextField, MenuItem, Box } from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
+
 import { UserDto } from "../interface/user.dto";
 import UserServices from "../../../api/UserSevices";
-import { Mail, Phone, User } from "lucide-react";
 import { useSnackbar } from "../../../components/context/SnackbarContext";
 
 interface TecnicoUpdateProps {
   open: boolean;
   onClose: () => void;
   selectedTecnico: UserDto | null;
-  onTecnicoUpdated?: () => void; // callback para refrescar datos
+  onTecnicoUpdated?: () => void;
 }
+
+// 🌟 StyledTextField igual al de TecnicoAdd
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: theme.shape.borderRadius as number,
+    transition: "all 0.3s",
+    "&:hover": {
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
+    },
+    "&.Mui-focused": {
+      boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.25)}`,
+    },
+  },
+}));
 
 export function TecnicoUpdate({
   open,
@@ -24,43 +42,46 @@ export function TecnicoUpdate({
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  // Nueva estructura del teléfono
+  const [phoneCode, setPhoneCode] = useState("0412");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const { showSnackbar } = useSnackbar();
-  // Cargar los datos del técnico cuando se abre el modal
+  const [loading, setLoading] = useState(false);
+
+  // 📌 Cargar datos cuando se abre el modal
   useEffect(() => {
     if (open && selectedTecnico) {
       setNombre(selectedTecnico.nombre || "");
       setApellido(selectedTecnico.apellido || "");
       setEmail(selectedTecnico.email || "");
-      setTelefono(selectedTecnico.phone || "");
+
+      // ✔ Extraer código y número: Ejemplo => "0412-1234567"
+      if (selectedTecnico.phone?.includes("-")) {
+        const [code, num] = selectedTecnico.phone.split("-");
+        setPhoneCode(code);
+        setPhoneNumber(num);
+      } else {
+        setPhoneNumber(selectedTecnico.phone || "");
+      }
     }
   }, [open, selectedTecnico]);
 
-  // ✅ Actualizar técnico
+  // Guardar técnico actualizado
   const handleUpdateTecnico = async () => {
-    if (
-      !nombre.trim() ||
-      !apellido.trim() ||
-      !email.trim() ||
-      !telefono.trim()
-    ) {
+    if (!nombre || !apellido || !email || !phoneNumber) {
       showSnackbar("Todos los campos son obligatorios.", "error");
-
       return;
     }
 
-    if (!selectedTecnico?.id) {
-      console.error("❌ No hay técnico seleccionado para actualizar.");
-      return;
-    }
+    if (!selectedTecnico?.id) return;
 
     const updatedData: Partial<UserDto> = {
       nombre: nombre.trim(),
       apellido: apellido.trim(),
       email: email.trim(),
-      phone: telefono.trim(),
+      phone: `${phoneCode}-${phoneNumber}`,
     };
 
     try {
@@ -72,28 +93,17 @@ export function TecnicoUpdate({
 
       if (response && response.id) {
         showSnackbar("Técnico actualizado correctamente", "success");
-
-        if (onTecnicoUpdated) onTecnicoUpdated();
-
+        onTecnicoUpdated?.();
         onClose();
       } else {
-        console.error(
-          "❌ Error: No se recibió un objeto válido al actualizar."
-        );
-        alert("Error: No se pudo actualizar el técnico correctamente.");
+        showSnackbar("Error al actualizar el técnico", "error");
       }
     } catch (err) {
-      console.error("💥 Error al actualizar el técnico:", err);
-      showSnackbar("Error al actualizar el técnico", "success");
+      console.error("Error al actualizar técnico:", err);
+      showSnackbar("Ocurrió un error al actualizar.", "error");
     } finally {
       setLoading(false);
     }
-  };
-
-  // Permitir solo caracteres válidos en el campo teléfono
-  const handlePhoneChange = (value: string) => {
-    const valid = value.replace(/[^0-9+\-\s()]/g, "");
-    setTelefono(valid);
   };
 
   return (
@@ -131,14 +141,37 @@ export function TecnicoUpdate({
         errorMessage={!email ? "Campo obligatorio" : undefined}
       />
 
-      <InputField
-        label="Teléfono"
-        value={telefono}
-        onChange={(e) => handlePhoneChange(e.target.value)}
-        startIcon={<Phone />}
-        disabled={loading}
-        errorMessage={!telefono ? "Campo obligatorio" : undefined}
-      />
+      {/* ⭐ Teléfono con Select de Código + Número */}
+      <Box display="flex" gap={2}>
+        <StyledTextField
+          select
+          label="Código"
+          value={phoneCode}
+          onChange={(e) => setPhoneCode(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{ flex: 1, minWidth: 120 }}
+          disabled={loading}
+        >
+          <MenuItem value="0412">0412</MenuItem>
+          <MenuItem value="0414">0414</MenuItem>
+          <MenuItem value="0416">0416</MenuItem>
+          <MenuItem value="0424">0424</MenuItem>
+          <MenuItem value="0426">0426</MenuItem>
+        </StyledTextField>
+
+        <InputField
+          label="Teléfono"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          startIcon={<Phone />}
+          onlyNumbers
+          maxLength={7}
+          disabled={loading}
+          errorMessage={!phoneNumber ? "Campo obligatorio" : undefined}
+          sx={{ flex: 2 }}
+        />
+      </Box>
     </BaseModal>
   );
 }

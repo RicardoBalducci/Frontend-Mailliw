@@ -17,6 +17,7 @@ import {
 import { Trash2 } from "lucide-react"
 import type { CarritoItem } from "./carrito-compra"
 import { useEffect, useState } from "react"
+import { formatNumber } from "../../utils/format"
 
 interface TablaCarritoItemsProps {
   items: CarritoItem[]
@@ -59,16 +60,16 @@ export const TablaCarritoItems: React.FC<TablaCarritoItemsProps> = ({ items, onE
               Cantidad
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white", fontSize: "0.95rem" }}>
-              Precio USD
+              Precio $
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white", fontSize: "0.95rem" }}>
-              Subtotal USD
+              Subtotal $
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white", fontSize: "0.95rem" }}>
-              Precio BS
+              Precio Bs.
             </TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold", color: "white", fontSize: "0.95rem" }}>
-              Subtotal BS
+              Subtotal Bs.
             </TableCell>
             <TableCell align="center" sx={{ fontWeight: "bold", color: "white", fontSize: "0.95rem" }}>
               Acción
@@ -108,14 +109,14 @@ export const TablaCarritoItems: React.FC<TablaCarritoItemsProps> = ({ items, onE
               <TableCell align="right" sx={{ fontWeight: 600 }}>
                 {item.cantidad}
               </TableCell>
-              <TableCell align="right">${item.precio_unitario_usd.toFixed(2)}</TableCell>
+              <TableCell align="right">${formatNumber(item.precio_unitario_usd)}</TableCell>
               <TableCell align="right" sx={{ fontWeight: "bold", color: "#1a73e8" }}>
-                ${(item.cantidad * item.precio_unitario_usd).toFixed(2)}
+                ${formatNumber(item.cantidad * item.precio_unitario_usd)}
               </TableCell>
             <TableCell align="right">
-                Bs {(item.precio_unitario_usd * dollarOficial).toFixed(2)}
+                Bs. {formatNumber(item.precio_unitario_usd * dollarOficial)}
                 </TableCell>              <TableCell align="right">
-                Bs {(item.precio_unitario_usd * dollarOficial).toFixed(2)}
+                Bs. {formatNumber(item.precio_unitario_usd * dollarOficial)}
                 </TableCell>
 
               <TableCell align="center">

@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
+import { formatNumber } from "../../../utils/format";
 
 interface ProductTableProps {
   rows: Array<{
@@ -176,28 +177,41 @@ const ProductTable: React.FC<ProductTableProps> = ({
       align: "left",
     },
     {
-      field: "descripcion",
-      headerName: "Descripción",
-      flex: 2,
-      minWidth: 100,
-      renderCell: (params) => (
-        <Tooltip title={params.value} placement="top-start">
-          <Typography
-            variant="body2"
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              width: "100%", // Asegura que ocupe el 100% del ancho disponible para que el ellipsis funcione
-            }}
-          >
-            {params.value}
-          </Typography>
-        </Tooltip>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
+    field: "marca", // <-- Nueva columna
+    headerName: "Marca",
+    flex: 0.8,
+    minWidth: 120,
+    renderCell: (params) => (
+      <Typography variant="body2" fontWeight={500}>
+        {params.value || "-"}
+      </Typography>
+    ),
+    headerAlign: "left",
+    align: "left",
+  },
+    {
+  field: "descripcion",
+  headerName: "Descripción",
+  flex: 1.2, // 🔥 antes estaba en 2
+  minWidth: 180, // un poco más ancho mínimo para que no se corte demasiado
+  renderCell: (params) => (
+    <Tooltip title={params.value} placement="top-start">
+      <Typography
+        variant="body2"
+        sx={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          width: "100%",
+        }}
+      >
+        {params.value}
+      </Typography>
+    </Tooltip>
+  ),
+  headerAlign: "left",
+  align: "left",
+},
     {
       field: "stock",
       headerName: "Stock",
@@ -225,19 +239,16 @@ const ProductTable: React.FC<ProductTableProps> = ({
     },
     {
       field: "precio_unitario",
-      headerName: "Precio (USD)",
+      headerName: "Precio Unitario ($)",
       flex: 1,
-      minWidth: 120,
+      minWidth: 230,
       renderCell: (params) => {
         const precioUSD = Number(params.value);
 
         return (
           <Typography variant="body2" fontWeight={500}>
-            {new Intl.NumberFormat("es-VE", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 2,
-            }).format(precioUSD)}{" "}
+            
+            ${formatNumber(precioUSD)}
           </Typography>
         );
       },
@@ -255,10 +266,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
         return (
           <Typography variant="body2" fontWeight={500}>
             {"Bs. " +
-              new Intl.NumberFormat("es-VE", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }).format(precioBS)}
+              formatNumber(precioBS)}
           </Typography>
         );
       },
@@ -267,19 +275,15 @@ const ProductTable: React.FC<ProductTableProps> = ({
     },
     {
       field: "precio_venta",
-      headerName: "Precio Venta (USD)",
+      headerName: "Precio Venta ($)",
       flex: 1,
       minWidth: 120,
       renderCell: (params) => {
         const precioUSD = Number(params.value);
 
         return (
-          <Typography variant="body2" fontWeight={600}>
-            {new Intl.NumberFormat("es-VE", {
-              style: "currency",
-              currency: "USD",
-              minimumFractionDigits: 2,
-            }).format(precioUSD)}
+          <Typography variant="body2" >
+            ${formatNumber(precioUSD)}
           </Typography>
         );
       },

@@ -111,6 +111,7 @@ export function Ventas() {
                 setCurrentClient(null); 
                 setOpenModal(true);
               }}
+               onAddCliente={() => setOpenModal(true)}
             />
             
             {cliente && <>

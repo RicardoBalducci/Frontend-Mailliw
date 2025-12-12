@@ -44,7 +44,7 @@ import Compra from "../../layout/Compras";
 import Ventas from "../../layout/ventas";
 import { HistorialVentas } from "../../layout/ventas/historial";
 import HistorialCompras from "../../layout/Compras/historial";
-const DRAWER_WIDTH = 0; // Changed from 0 to 240
+const DRAWER_WIDTH = 230; // Changed from 0 to 240
 
 const sidebarItems: SidebarItem[] = [
   {
@@ -175,13 +175,7 @@ export const Dashboard: React.FC = () => {
       }}
     >
       <CssBaseline />
-      <ModernSidebar
-        items={sidebarItems}
-        onContentChange={handleContentChange}
-        isOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-        isMobile={isMobile}
-      />
+
 
       <Box
         sx={{
@@ -209,6 +203,13 @@ export const Dashboard: React.FC = () => {
           flexDirection: "column", // Stacks AppBar and main content vertically
         }}
       >
+              <ModernSidebar
+        items={sidebarItems}
+        onContentChange={handleContentChange}
+        isOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+        isMobile={isMobile}
+      />
         <ModernAppBar toggleSidebar={toggleSidebar}/>
         <Box
           component="main"

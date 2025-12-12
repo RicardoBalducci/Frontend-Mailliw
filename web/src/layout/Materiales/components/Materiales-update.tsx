@@ -28,6 +28,7 @@ export function MaterialUpdate({
 }: MaterialUpdateProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [marca, setMarca] = useState("");
   const [stock, setStock] = useState<number | "">("");
   const [precioUnitario, setPrecioUnitario] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export function MaterialUpdate({
   const [errors, setErrors] = useState({
     nombre: "",
     descripcion: "",
+    marca: "",
     stock: "",
     precioUnitario: "",
   });
@@ -46,15 +48,17 @@ export function MaterialUpdate({
     if (open && materialToEdit) {
       setNombre(materialToEdit.nombre || "");
       setDescripcion(materialToEdit.descripcion || "");
+      setMarca(materialToEdit.marca || "");
       setStock(materialToEdit.stock || "");
       setPrecioUnitario(materialToEdit.precio_unitario_usd || "");
-      setErrors({ nombre: "", descripcion: "", stock: "", precioUnitario: "" });
+      setErrors({ nombre: "", descripcion: "", marca: "", stock: "", precioUnitario: "" });
     } else if (!open) {
       setNombre("");
       setDescripcion("");
+      setMarca("");
       setStock("");
       setPrecioUnitario("");
-      setErrors({ nombre: "", descripcion: "", stock: "", precioUnitario: "" });
+      setErrors({ nombre: "", descripcion: "", marca: "", stock: "", precioUnitario: "" });
     }
   }, [open, materialToEdit]);
 
@@ -62,6 +66,7 @@ export function MaterialUpdate({
     const newErrors = {
       nombre: !nombre.trim() ? "Campo obligatorio" : "",
       descripcion: !descripcion.trim() ? "Campo obligatorio" : "",
+      marca: !marca.trim() ? "Campo obligatorio" : "",
       stock: stock === "" ? "Campo obligatorio" : "",
       precioUnitario: precioUnitario === "" ? "Campo obligatorio" : "",
     };
@@ -81,6 +86,7 @@ export function MaterialUpdate({
     const updatedMaterial: UpdateMaterialesDto = {
       nombre: nombre.trim(),
       descripcion: descripcion.trim(),
+      marca: marca.trim(),
       stock: Number(stock),
       precio_unitario_usd: Number(precioUnitario),
     };
@@ -88,7 +94,7 @@ export function MaterialUpdate({
       setLoading(true);
       await MaterialesServices.update(materialToEdit.id, updatedMaterial);
       showSnackbar("Material modificado exitosamente", "success");
-      if (onUpdateSuccess) onUpdateSuccess(); // <- se ejecutará fetchMateriales
+      if (onUpdateSuccess) onUpdateSuccess();
       setTimeout(() => onClose(), 300);
     } catch (err) {
       console.error("Error actualizando material:", err);
@@ -130,6 +136,15 @@ export function MaterialUpdate({
           startIcon={<FileText />}
           disabled={loading}
           errorMessage={errors.descripcion}
+        />
+
+        <InputField
+          label="Marca del Material"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
+          startIcon={<FileText />}
+          disabled={loading}
+          errorMessage={errors.marca}
         />
 
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>

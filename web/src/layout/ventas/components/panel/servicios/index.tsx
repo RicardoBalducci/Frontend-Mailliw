@@ -79,7 +79,7 @@ export default function PanelServicios({ onAddToCart }: PanelServiciosProps) {
         p: 2,
         borderRadius: 3,
         boxShadow: 4,
-        background: "linear-gradient(135deg, #fdfdfd, #fbd0f5ff)",
+        background: "linear-gradient(135deg, #fdfdfd, #e3f2fd)",
       }}
     >
       <CardHeader

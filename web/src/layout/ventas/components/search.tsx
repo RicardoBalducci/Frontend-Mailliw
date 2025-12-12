@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { RespuestaClienteDTO } from "../../../Dto/Cliente.dto";
 import ClientServices from "../../../api/ClientServices";
 
-// Importa componentes de MUI
 import {
   Box,
   Select,
@@ -21,7 +20,8 @@ interface Props {
   setError: (error: string) => void;
   setLoading: (loading: boolean) => void;
   loading: boolean;
-  onNotFound?: () => void; // callback opcional para manejar "no encontrado"
+  onNotFound?: () => void;
+  onAddCliente?: () => void; // ← NUEVO callback opcional
 }
 
 const TIPO_DOCUMENTO = ["R", "J", "V", "G"];
@@ -32,6 +32,7 @@ export default function BuscarCliente({
   setLoading,
   loading,
   onNotFound,
+  onAddCliente,
 }: Props) {
   const [tipo, setTipo] = useState("J");
   const [numero, setNumero] = useState("");
@@ -55,7 +56,7 @@ export default function BuscarCliente({
         setCliente(res.data[0]);
       } else {
         setError("Cliente no encontrado");
-        if (onNotFound) onNotFound(); // dispara acción en Ventas
+        if (onNotFound) onNotFound();
       }
     } catch (err) {
       console.error(err);
@@ -67,7 +68,6 @@ export default function BuscarCliente({
 
   return (
     <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-      {/* Select Tipo Documento */}
       <FormControl sx={{ minWidth: 120 }}>
         <InputLabel id="tipo-label">Tipo</InputLabel>
         <Select
@@ -83,7 +83,6 @@ export default function BuscarCliente({
         </Select>
       </FormControl>
 
-      {/* Input Número */}
       <TextField
         label="Número de documento"
         value={numero}
@@ -92,7 +91,6 @@ export default function BuscarCliente({
         fullWidth
       />
 
-      {/* Botón Buscar */}
       <Button
         onClick={handleBuscarCliente}
         disabled={loading}
@@ -109,6 +107,24 @@ export default function BuscarCliente({
           "Buscar"
         )}
       </Button>
+
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<UserPlus size={18} />}
+        sx={{
+          minWidth: 170,
+          fontWeight: 700,
+          textTransform: "none",
+          "&:hover": {
+            boxShadow: 4,
+          },
+        }}
+        onClick={() => onAddCliente && onAddCliente()}
+      >
+        Añadir Cliente
+      </Button>
+
     </Box>
   );
 }

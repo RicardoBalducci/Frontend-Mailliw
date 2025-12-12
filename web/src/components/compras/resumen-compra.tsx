@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { Card, CardContent, Typography, Box, Divider } from "@mui/material"
 import type { CarritoItem } from "./carrito-compra"
+import { formatNumber } from "../../utils/format"
 
 interface ResumenCompraProps {
   items: CarritoItem[]
@@ -136,11 +137,11 @@ export const ResumenCompra: React.FC<ResumenCompraProps> = ({ items }) => {
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1565c0" }}>
-                Total USD
+                Total $
               </Typography>
 
               <Typography variant="h4" sx={{ fontWeight: 800, color: "#1565c0", mt: 1 }}>
-                ${totalUSD.toFixed(2)}
+                ${formatNumber(totalUSD)}
               </Typography>
             </Box>
 
@@ -160,7 +161,7 @@ export const ResumenCompra: React.FC<ResumenCompraProps> = ({ items }) => {
               </Typography>
 
               <Typography variant="h4" sx={{ fontWeight: 800, color: "#d84315", mt: 1 }}>
-                Bs {totalBS.toFixed(2)}
+                Bs. {formatNumber(totalBS)}
               </Typography>
             </Box>
           </Box>

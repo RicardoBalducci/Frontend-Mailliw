@@ -11,9 +11,11 @@ import {
   alpha,
   Typography,
   TablePagination,
+  Chip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MaterialesDto } from "../../../Dto/Materiales.dto";
+import { formatNumber } from "../../../utils/format";
 
 interface MaterialTableProps {
   rows: MaterialesDto[];
@@ -154,7 +156,19 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
       ),
       headerAlign: "left",
       align: "left",
-    },
+    },{
+    field: "marca", // <-- Nueva columna
+    headerName: "Marca",
+    flex: 0.8,
+    minWidth: 120,
+    renderCell: (params) => (
+      <Typography variant="body2" fontWeight={500}>
+        {params.value || "-"}
+      </Typography>
+    ),
+    headerAlign: "left",
+    align: "left",
+  },
     {
       field: "descripcion",
       headerName: "Descripción",
@@ -168,29 +182,49 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
       headerAlign: "left",
       align: "left",
     },
+{
+  field: "stock",
+  headerName: "Stock",
+  type: "number",
+  flex: 0.8,
+  minWidth: 90,
+  renderCell: (params) => (
+    <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <Chip
+        label={params.value}
+        color={
+          params.value > 10
+            ? "success"
+            : params.value > 0
+            ? "warning"
+            : "error"
+        }
+        size="small"
+        sx={{ fontWeight: 600 }}
+      />
+    </Box>
+  ),
+  headerAlign: "center",
+  align: "center", // Alineación centrada
+},
     {
       field: "precio_unitario_usd",
-      headerName: "Precio (USD)",
+      headerName: "Precio ($)",
       flex: 1,
       minWidth: 120,
       renderCell: (params) => {
         const precioUSD = Number(params.value);
-        const formatted = new Intl.NumberFormat("es-VE", {
-          style: "currency",
-          currency: "USD",
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(precioUSD);
 
         return (
           <Typography variant="body2" fontWeight={500}>
-            {formatted} {/* Ej: $1.234,56 */}
+            ${formatNumber(precioUSD)} {/* Ej: $1.234,56 */}
           </Typography>
         );
       },
       headerAlign: "left",
       align: "left",
     },
+    
     {
       field: "precio_unitario_bs",
       headerName: "Precio (Bs)",
@@ -200,16 +234,10 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
         const precioUSD = Number(params.row.precio_unitario_usd);
         const precioBS = precioUSD * (dollarOficial || 0);
 
-        const formatted = new Intl.NumberFormat("es-VE", {
-          style: "currency",
-          currency: "VES", // Bolívar Soberano
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(precioBS);
 
         return (
           <Typography variant="body2" fontWeight={500}>
-            {formatted} {/* Ej: Bs. 1.000.000,00 */}
+            Bs. {formatNumber(precioBS)} {/* Ej: Bs. 1.000.000,00 */}
           </Typography>
         );
       },
@@ -217,19 +245,7 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
       align: "left",
     },
 
-    {
-      field: "stock",
-      headerName: "Cantidad",
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500}>
-          {params.value}
-        </Typography>
-      ),
-      headerAlign: "left",
-      align: "left",
-    },
+   
     {
       field: "acciones",
       headerName: "Acciones",
